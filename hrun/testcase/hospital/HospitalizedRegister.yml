@@ -1,7 +1,0 @@
-config:
-    name: "单接口测试testsuites"
-testcases:
-    create1:
-        testcase: testcase/hospital/queryHospitalizedRegister.yml
-        parameters:
-            masterPatientIndex-inhospitalPatientId-patientRegisterId: ${get_cancelHospitalizedRegister()}
