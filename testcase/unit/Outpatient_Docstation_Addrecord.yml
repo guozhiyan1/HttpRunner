@@ -1,0 +1,348 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: testcase description
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(out_k2)}
+            orgId: ${ENV(orgId)}
+            treatType: 13
+            reportEndDate: ${getdateandtime()}
+            reportStartDate: ${getdateandtime(3)}
+            pageCount: 20
+            pageNum: 1
+            needExamMed: 1
+            needMedRec: 1
+            orderCategory: "3"
+            orderedPlaceSign: 1
+            currentBlockId: 99897834154
+            costSign: 1
+            encounterType: 1
+            frequencyId: "1745"
+            frequencyName: "hxy-copy"
+            frequencyRatio: 3
+            frequencyUseScope: "FH0032.01"
+
+-   test:
+        name: 通过条件查询患者列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                cardType: ''
+                encounterType: $encounterType
+                keyName: searchText
+                patientList: [$userinfo]
+                searchText: $cardContentOri
+                userDetailInfo: $userinfo
+            method: POST
+            url: /app-station-manage/doctorstation/list/patient
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+        - patientId: content.body.0.id
+        - cardNumber: content.body.0.cardNumber
+
+-   test:
+        name: 查询就诊类型列表与院区列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-station-manage/outpatient/referral/regTypeAndHospitalArea
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 查询门诊患者规定病种
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                masterPatientIndex: $masterPatientIndex
+                patientId: $patientId
+            method: POST
+            url: /app-station-manage/doctorstation/listSpecialDisease
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 确认健康状态
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                idCard: $cardNumber
+            method: POST
+            url: /app-station-manage/healthcode/queryCode
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取优惠信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                costTypeCode: $costTypeCode
+                enable: 1
+                outpatientEnable: true
+            method: POST
+            url: /app-billing/discount/rule/list
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - headers.Content-Type
+            - application/json;charset=UTF-8
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 新增就诊记录（门诊）
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                masterPatientIndex: $masterPatientIndex
+                patientId: $patientId
+                specialDiseaseFlag: 0
+            method: POST
+            url: /app-station-manage/doctorstation/outpatient/insertEncounterRecord
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          - patientId: content.body.data
+
+-   test:
+        name: 通过条件查询患者列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                encounterType: $encounterType
+                listQuery: 1
+                patientId: $patientId
+            method: POST
+            url: /app-station-manage/doctorstation/list/patient
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 取护士站最新评估
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                masterPatientIndex: $masterPatientIndex
+                patientRegisterId: $patientRegisterId
+            method: POST
+            url: /app-station-manage/outEvaluation/getNurseTriageRecord
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 查询病人病历最近一条标记为50的内容
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                patientId: $patientId
+            method: POST
+            url: /app-station-manage/medicalrecordwrite/select50ByRegId
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+
+-   test:
+        name: 查询历史医嘱记录
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                hospitalDistrictId: ''
+                masterPatientIndex: $masterPatientIndex
+                patientRegisterId: $patientId
+                treatType: $treatType
+            method: POST
+            url: /app-station-manage/historyOrder/query/listPatientHistoryOrder
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 查询病理报告列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                abnormal: ''
+                order:  "desc"
+                patientRegisterId: $patientRegisterId
+                patientType: $costTypeCode
+                reportEndDate: $reportEndDate
+                reportStartDate: $reportStartDate
+                reportStatus: ''
+            method: POST
+            url: /app-medical-technology/inspect/pathologyReport/list
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 确认重复次数
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                masterPatientIndex: $masterPatientIndex
+                patientId: $patientId
+            method: POST
+            url: /app-station-manage/orderQuery/checkNonDiagnosisCanModify
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 小病人列表查询
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                encounterType: $encounterType
+                hospitalizedAreaId: null
+                patientDivision: 1
+                statusData: 1
+            method: POST
+            url: /app-station-manage/doctorstation/list/patientList
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 门诊病人详细列表查询
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                dtiagnosisFlag: ''
+                encounterStatus: $costTypeCode
+                hospitalDistrictId: $k2
+                orderKey: ''
+                orderType: ''
+                pageCount: $pageCount
+                pageNum: $pageNum
+                patientDivision: 1
+                queryStr: ''
+                signStatus: ''
+                statusData: 1
+            method: POST
+            url: /app-station-manage/doctorstation/list/outPatientListDetail
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success

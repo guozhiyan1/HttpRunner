@@ -1,0 +1,23 @@
+name: 查询sshkey
+base_url: ${ENV(openapi_url)}
+variables:
+    KeyPairName: "3333"
+
+request:
+    url: ""
+    verify: false
+    params:
+        Version: '2017-11-10'
+        Action: 'DescribeKeyPairs'
+        KeyPairName: "$KeyPairName"
+
+    method: GET
+    headers:
+        host: ${ENV(openapi_host)}
+setup_hooks:
+    -  ${setup_request_openapi($request)}
+
+validate:
+    -  eq: ["status_code", 200]
+exteact:
+    - content

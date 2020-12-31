@@ -1,0 +1,175 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 读卡
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(out_k2)}
+            orgId: ${ENV(orgId)}
+            cardContentOri: 001testxjjj
+            cardTypeCode: FH0121.01
+            medicalCertificateNo: 001TESTXJJJ
+
+
+-   test:
+        name: 通过条件查询在住院患者信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                hospitalizedArea: null
+                keyName: queryParam
+                queryParam: $cardNo
+            method: POST
+            url: /app-hospitalized-register/hospitalizedCancel/get/inHospitalizedRegister
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          - inhospitalPatientId: content.body.0.inhospitalPatientId
+
+-   test:
+        name: 查询出住院登记详细信息[组件调用]
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                inhospitalPatientId: $inhospitalPatientId
+            method: POST
+            url: /app-hospitalized-register/hospitalizedRegister/query/hospitalizedRegisterInfo
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 通过条件查询在住院患者信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                hospitalizedArea: null
+                queryParam: $medicalRecordNo
+            method: POST
+            url: /app-hospitalized-register/hospitalizedCancel/get/inHospitalizedRegister
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 根据住院id查询住院病人[组件调用]
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                inhospitalPatientId: $inhospitalPatientId
+                masterPatientIndex: $masterPatientIndex
+                settleState: 0
+            method: POST
+            url: /app-hospitalized-register/hospitalizedRegister/query/patientAccoutFeeInfo
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询验证取消入院的条件
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                id: $inhospitalPatientId
+            method: POST
+            url: /app-hospitalized-register/hospitalizedCancel/query/checkHospitalizedCancel
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询出住院登记详细信息[组件调用]
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                inhospitalPatientId: $inhospitalPatientId
+            method: POST
+            url: /app-hospitalized-register/hospitalizedRegister/query/hospitalizedRegisterInfo
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 根据住院id查询住院病人[组件调用]
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                inhospitalPatientId: $inhospitalPatientId
+                masterPatientIndex: $masterPatientIndex
+                settleState: 0
+            method: POST
+            url: /app-hospitalized-register/hospitalizedRegister/query/patientAccoutFeeInfo
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 验证取消入院
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                id: $inhospitalPatientId
+                isMedicare: 0
+            method: POST
+            url: /app-hospitalized-register/hospitalizedCancel/save/hospitalizedCancel
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success

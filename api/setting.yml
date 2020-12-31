@@ -1,0 +1,9 @@
+name: 设置
+base_url: ${ENV(host)}
+request:
+    url: "/app-portal/get/default/setting"
+    method: POST
+    headers:
+        authorization: ${get_token($token)}
+validate:
+    - eq: ["status_code", 200]

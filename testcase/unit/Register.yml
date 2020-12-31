@@ -1,0 +1,437 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 自费患者挂号
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(out_k2)}
+            orgId: ${ENV(orgId)}
+            cardContentOri: 1Zdhtest
+            cardTypeCode: FH0121.01
+            mainCode: FH0121
+            medicalCertificateNo: 1ZDHTEST
+            shiftManageId: 2129
+            medicalType: 11
+            costCategory: 1
+            payAmount: 100
+            payType: "FH0085.01"
+            masterPatientIndexVersion: mpi_version_2
+            serviceDate: ${getdate()}
+            operationType: 4
+            invoiceType: FH0062.04
+            invoiceStates: ["FH0232.02"]
+
+
+#-   test:
+#        name: 获取计费信息
+#        request:
+#            headers:
+#                Authorization: ${get_token($token)}
+#                Content-Type: application/json; charset=UTF-8
+#                k1: $k1
+#                k2: $k2
+#            json:
+#                masterPatientIndex: $masterPatientIndex
+#                medicalCertificateNo: $medicalCertificateNo
+#            method: POST
+#            url: /app-billing/discount/rule/getDiscountType
+#        validate:
+#        -   eq:
+#            - content.code
+#            - 2000
+#        -   eq:
+#            - content.message
+#            - success
+
+-   test:
+        name: 查询患者是否存在挂号信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                cardNumber: null
+                masterPatientIndex: $masterPatientIndex
+                paging: false
+            method: POST
+            url: /app-schedule-manage/tradition/register/getTraditionPatientReservationToRegister
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+
+-   test:
+        name: 号源列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                doctorId: ""
+                ordinarySign: $orgId
+                registerMainTypeCode: ""
+                serviceDate: $serviceDate
+                workDeptId:
+            method: POST
+            url: /app-schedule-manage/tradition/register/queryScheduleInfo
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          - resourceId: content.body.0.id
+          - registerNumberTypeId: content.body.0.registerNumberTypeId
+          - doctorId: content.body.0.doctorId
+          - workDeptId: content.body.0.workDeptId
+
+
+
+-   test:
+        name: 查询号源
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                resourceId: $resourceId
+                shiftManageId: $shiftManageId
+            method: POST
+            url: /app-schedule-manage/tradition/register/queryNumberResourceInfo
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          - resourceDetailId: content.body.0.resourceDetailId
+
+
+-   test:
+        name: 确认挂号排班信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                cardNumber: $cardContentOri
+                masterPatientIndex: $masterPatientIndex
+                reservationNumberResourceId: $resourceId
+            method: POST
+            url: /app-schedule-manage/tradition/register/checkDeptRepeatReservationWithShiftAndDept
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+
+
+-   test:
+        name: 挂号资源锁定
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                masterPatientIndex: $masterPatientIndex
+                reservationNumberResourceId: $resourceId
+                reservationNumberResourceSublistId: ''
+            method: POST
+            url: /app-schedule-manage/tradition/register/lockNumberResource
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+        - reservationNumberResourceSublistId: content.body
+
+
+-   test:
+        name: 获取挂号数量
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                cardNo: $cardNo
+                cardType: $cardType
+                costCategory: $costCategory
+                departmentName: ""
+                deptCode: $k2
+                discountRuleRequest: {}
+                expenseCompanyId: null
+                masterPatientIndex: $masterPatientIndex
+                masterPatientIndexVersion: $masterPatientIndexVersion
+                medicalCardStatus: 0
+                medicalRecordBookStatus: 0
+                medicalType: $cardTypeCode
+                medicareFlag: $medicareFlag
+                patientRegisterId: $patientRegisterId
+                registerNumberTypeId: $registerNumberTypeId
+            method: POST
+            url: /app-schedule-manage/tradition/register/queryRegisterAmount
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          - selfAmount: content.body.selfAmount
+          - traditionRegisterNumberFeeDetail: content.body.traditionRegisterNumberFeeDetail
+          - totalAmount: content.body.totalAmount
+          - registerAmount: content.body.registerAmount
+
+
+-   test:
+        name: 结算
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                costCategoryCode: $costCategory
+                masterPatientIndex: $masterPatientIndex
+                patientName: $patientName
+                payAmount: $payAmount
+                payType: $payType
+                refundStatus: 0
+                totalAmount: 0
+                transactionCardNumber: $medicalCertificateNo
+            method: POST
+            url: /app-schedule-manage/tradition/register/initSettle
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          - settleCenterSerialNumber: content.body.settleCenterSerialNumber
+          - subsequenceNumber: content.body.subsequenceNumber
+-   test:
+        name: 发票信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                invoiceStates: $invoiceStates
+                invoiceType: $invoiceType
+                paging: false
+            method: POST
+            url: /app-invoice/invoiceGiveOut/listPersonalInvoiceGiveOutByParameters
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          - currentNumber: content.body.data.0.currentNumber
+          - versionNo: content.body.data.0.versionNo
+
+
+-   test:
+        name: 插入用户挂号信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                actualAmount: 100
+                alreadyPrint: 0
+                alreadyReservation: 0
+                autoAllocation: 0
+                autoChangeOwnExpense: 0
+                bankCardNumber: ''
+                cancelDTO: null
+                cardTypeCode: $cardTypeCode
+                chequeNumber: ''
+                currentNumber: $currentNumber
+                discountAmount: 0
+                discountId: ''
+                discountName: ''
+                doctorId: $doctorId
+                expenseCompanyId: null
+                flowNumber: ''
+                inProvince: 0
+                invoiceGiveId: '12345'
+                invoiceNo: ''
+                lockDetailFlag: 1
+                masterPatientIndex: $masterPatientIndex
+                masterPatientIndexVersion: $masterPatientIndexVersion
+                medicalCardStatus: 0
+                medicalCertificateCode: $cardTypeCode
+                medicalCertificateNo: $medicalCertificateNo
+                medicalRecordBookStatus: 0
+                needAmount: $selfAmount
+                ordinarySign: 0
+                patientName: $patientName
+                payType: $payType
+                posType: 2
+                recordAmount: 0
+                registerAmount: $registerAmount
+                registerNumberTypeId: $registerNumberTypeId
+                reservationId: null
+                reservationNumber: null
+                reservationNumberResourceId: $resourceId
+                reservationNumberResourceSublistId: $reservationNumberResourceSublistId
+                selfAmount: $selfAmount
+                serviceDate: $serviceDate
+                settleCenterSerialNumber: $settleCenterSerialNumber
+                specialDiseaseFlag: FH0065.02
+                subsequenceNumber: $subsequenceNumber
+                totalAmount: $totalAmount
+                tradeIdentifyCode: ''
+                traditionRegisterNumberFeeDetail: $traditionRegisterNumberFeeDetail
+                transactionSortNo: 1
+                versionNo: $versionNo
+                workDeptId: $workDeptId
+            method: POST
+            url: /app-schedule-manage/tradition/register/insertRegisterMsg
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+        - registerId: content.body.id
+        - settleId: content.body.settleId
+
+-   test:
+        name: 查询发票模板
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                bussType: ["FH0142.01","FH0142.04","FH0142.350","FH0142.181"]
+                macAddress: null
+            method: POST
+            url: /app-sys-manage/print/template/customer/queryPrintResultTemplateList
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+
+-   test:
+        name: 提交发票信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                operationType: 4
+                registerId: $registerId
+            method: POST
+            url: /app-schedule-manage/tradition/register/supplementInvoice
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 发票信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                invoiceStates: $invoiceStates
+                invoiceType: $invoiceType
+                paging: false
+            method: POST
+            url: /app-invoice/invoiceGiveOut/listPersonalInvoiceGiveOutByParameters
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success

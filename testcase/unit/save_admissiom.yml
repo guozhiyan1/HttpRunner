@@ -1,0 +1,567 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 读卡
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(out_k2)}
+            orgId: ${ENV(orgId)}
+            cardContentOri: 001testxjjj
+            cardTypeCode: FH0121.01
+            medicalCertificateNo: 001TESTXJJJ
+
+
+-   test:
+        name: 查询入院申请单初始数据
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-station-manage/admission/initialData
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 校验是否已存在申请单(老系统)(新开、审核、预约、入院)
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                idCard: $cardNo
+                patientRegisterId: $patientRegisterId
+            method: POST
+            url: /app-station-manage/admission/hasAdmissionOld
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - null
+-   test:
+        name: 校验该病人是否可以开入院申请单
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                masterPatientIndex: $masterPatientIndex
+                patientRegisterId: $patientRegisterId
+            method: POST
+            url: /app-station-manage/admission/validPatientCouldApplyAdmission
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - true
+-   test:
+        name: 查询病人诊断内容
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                patientId: $patientId
+            method: POST
+            url: /app-station-manage/medicalrecordwrite/selectByPatients
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 按条件查询入院申请单列表-分页
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                enableState: 1
+                patientRegisterId: $patientRegisterId
+            method: POST
+            url: /app-station-manage/admission/page/queryAdmissionPageData
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 查询入院申请单系统参数
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-station-manage/admission/initSysparam
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询通用字典
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                dictType:
+                  - FH0044.112
+                queryKey: ''
+            method: POST
+            url: /app-sys-manage/common/listDictCommon
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取床位价格区间类型
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-station-manage/admission/getBedPriceTypeData
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询打印类型list
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-sys-manage/print/template/queryPrintTypeList
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 根据科室查询医生组
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                applyHospitalDistrictId: ''
+                queryKey: ''
+            method: POST
+            url: /app-station-manage/admission/queryAdmissionGroupListByDept
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: getUserInfo
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-portal/user/info
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询入院申请单初始数据
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-station-manage/admission/initialData
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 根据院区ID查询次分类列表 院前
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                districtId: $districtId
+                encounterType: $encounterType
+            method: POST
+            url: /app-station-manage/orderInspectConfig/queryExistItemInspectCategoryByDistrictId
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          - configId: content.body.0.id
+-   test:
+        name: 根据科室查询医生组
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                applyHospitalDistrictId: $districtId
+                queryKey: ''
+            method: POST
+            url: /app-station-manage/admission/queryAdmissionGroupListByDept
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 根据检查配置ID获取检查部位列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                configId: $configId
+            method: POST
+            url: /app-station-manage/orderInspect/queryExistItemInspectPartsByConfigId
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: (入院准备中心)根据部位配置ID获取检查项目列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                configId: $configId
+                encounterSubType: 1
+                specialDiseaseFlag: 0
+            method: POST
+            url: /app-station-manage/orderInspect/queryInspectItemOutInpByConfigId
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+#-   test:
+#        name: /app-notify-ws/ws
+#        request:
+#            headers:
+#                Sec-WebSocket-Extensions: permessage-deflate; client_max_window_bits
+#                Sec-WebSocket-Key: BOTLcILvcqGaUim82qhh+g==
+#                Sec-WebSocket-Version: '13'
+#                Upgrade: websocket
+#            method: GET
+#            url: /app-notify-ws/ws
+#        validate: []
+-   test:
+        name: 查询入院诊断下拉列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                searchText: '咨询'
+            method: POST
+            url: /app-station-manage/admission/list/queryDiagnosisComboBox
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+           - diagnosisId: content.body.0.diagnosisId
+           - diagnosisName: content.body.0.diagnosisName
+           - diagnosisId: content.body.0.diagnosisName
+           - icdCode: content.body.0.icdCode
+
+-   test:
+        name: 查询科室下拉列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                applyHospitalDistrictId: $districtId
+                queryKey: ''
+            method: POST
+            url: /app-station-manage/admission/list/dept
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询诊疗项目列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                districtId: $districtId
+                locationId: ${ENV(in_k2)}
+            method: POST
+            url: /app-station-manage/admissionorder/queryTreatmentList
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 页面字典公用查询
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                dictDTOList:
+                    - FH0219
+            method: POST
+            url: /app-station-manage/orderCommon/listDict
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询病区下拉列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                applyHospitalDistrictId: $districtId
+                deptId: ${ENV(in_k2)}
+                queryKey: ''
+            method: POST
+            url: /app-station-manage/admission/list/area
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 保存入院申请单数据
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                acrossDept: 0
+                advancePayment: 0
+                allowAcrossDept: 0
+                alternativeDeptName: ''
+                alternativeDepttId: ''
+                alternativeDistrictId: ''
+                alternativeDistrictName: ''
+                applyAdmissionAreaId: ${ENV(in_k3)}
+                applyAdmissionAreaName: 城站消化血液科自动化病区
+                applyAdmissionDeptId: ${ENV(in_k2)}
+                applyAdmissionDeptName: 城站自动化消化血液科
+                applyDeptId: ${ENV(out_k2)}
+                applyDeptName: 城站自动化测试门诊
+                applyHospitalDistrictId: $districtId
+                applyHospitalDistrictName: 城站院区
+                applyHospitalizedDate: ${getTZdate()}
+                applySpareHospitalDistrictId: ''
+                applySpareHospitalDistrictName: ''
+                bedPriceRangeCode: 0-150
+                bedPriceRangeName: 普通
+                bizAdmissionOrderConfigDTOList:
+                    - __table_key__: 12855717
+                      detailId: null
+                      dictVersion: FH0263.01
+                      genderCodeLimit: ''
+                      id: 12855717
+                      itemClassify: FH0049.01
+                      itemCode: '25975'
+                      itemDescription: 项目说明RNA
+                      itemId: 12855717
+                      itemName: 2019新型冠状病毒RNA测定(咽拭子)
+                      masterPatientIndex: b6ce02986ef642a594340cc4451c49c0
+                      orderCategory: FH0049.01
+                      orderName: 2019新型冠状病毒RNA测定(咽拭子)
+                      orderRemark: null
+                      orderSetDetailId: null
+                      orderSetId: null
+                      outpatientId: 17677
+                      pathologyApplyIs: 0
+                      pathologyApplyName: null
+                      pathologyApplyNameFrom: null
+                      pathologyApplyType: null
+                      patientRegisterId: 20427
+                      pinyin: 2019XXGZBDRNACD(YSZ)
+                      price: 0
+                      secondaryClassify: ''
+                      treatmentOrderRspList: null
+                    - __table_key__: 12855716
+                      detailId: null
+                      dictVersion: FH0263.01
+                      genderCodeLimit: ''
+                      id: 12855716
+                      itemClassify: FH0049.01
+                      itemCode: '25978'
+                      itemDescription: ''
+                      itemId: 12855716
+                      itemName: 新型冠状病毒IgG、IgM 抗体检测
+                      masterPatientIndex: b6ce02986ef642a594340cc4451c49c0
+                      orderCategory: FH0049.01
+                      orderName: 新型冠状病毒IgG、IgM 抗体检测
+                      orderRemark: null
+                      orderSetDetailId: null
+                      orderSetId: null
+                      outpatientId: 17677
+                      pathologyApplyIs: 0
+                      pathologyApplyName: null
+                      pathologyApplyNameFrom: null
+                      pathologyApplyType: null
+                      patientRegisterId: 20427
+                      pinyin: XXGZBDIGG、IGM KTJC
+                      price: 0
+                      secondaryClassify: ''
+                      treatmentOrderRspList: null
+                costPropertyCode: '0'
+                costPropertyName: 自费
+                costTypeCode: '1'
+                costTypeName: 现金
+                diagnosisList:
+                  - sortNumber: 1
+                    diagnosisContent: 咨询
+                    diagnosisId: 8887
+                    diagnosisName: 咨询
+                    icdCode: ZX1001
+                emergencyDegree: '1'
+                expectedDays: 22
+                groupId: -1
+                groupName: ''
+                hospitalizedIsolation: 0
+                hospitalizedPurposesId: 1822
+                hospitalizedPurposesName: 预防性
+                hospitalizedTypeCode: FH0329.01
+                hospitalizedTypeName: 手术
+                hospitalizedWayCode: FH0129.01
+                hospitalizedWayName: 普通门诊
+                idCard: 99zdhhz
+                isPreAdmitted: 1
+                masterPatientIndex: b6ce02986ef642a594340cc4451c49c0
+                medicalRecordNo: '2000421353'
+                outpatientId: 17677
+                patientRegisterId: 20427
+                useAnticoagulant: 0
+            method: POST
+            url: /app-station-manage/admission/save/admission
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          - admissionId: content.body.id

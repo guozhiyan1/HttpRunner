@@ -1,0 +1,175 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 读卡
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(out_k2)}
+            orgId: ${ENV(orgId)}
+            cardContentOri: 001testxjjj
+            cardTypeCode: FH0121.01
+            medicalCertificateNo: 001TESTXJJJ
+
+-   config:
+        base_url: ${ENV(host)}
+        name: testcase description
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(out_k2)}
+            orgId: ${ENV(orgId)}
+
+-   test:
+        name: 查询领用人为当前登录人并且在使用中的票据信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-hospitalized-register/patientPrepayments/getInuseInvoiceGiveOutByUser
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询预交金管理相关字典
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-hospitalized-register/patientPrepayments/initialData
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 查询出住院登记详细信息[组件调用]
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                inhospitalPatientId: $inhospitalPatientId
+            method: POST
+            url: /app-hospitalized-register/hospitalizedRegister/query/hospitalizedRegisterInfo
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 获取改病人暂存金
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                masterPatientIndex: $masterPatientIndex
+                patientRegisterId: $patientRegisterId
+            method: POST
+            url: /app-hospitalized-register/patientPrepayments/get/inHospitalTemporary
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - null
+
+-   test:
+        name: 根据id，病人入院id，登记id，交款时间等查询预交款信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                inhospitalPatientId: $inhospitalPatientId
+                payDateEnd: null
+                payDateStart: null
+                searchNum: ''
+            method: POST
+            url: /app-hospitalized-register/patientPrepayments/listPrepayments
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          - id: content.body.0.id
+
+-   test:
+        name: 作废病人预交款
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                id: $id
+                inhospitalPatientId: $inhospitalPatientId
+                patientRegisterId: $patientRegisterId
+            method: POST
+            url: /app-hospitalized-register/patientPrepayments/cancelPrepayments
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - true
+
+
+
+-   test:
+        name: 获取改病人暂存金
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                masterPatientIndex: $masterPatientIndex
+                patientRegisterId: $patientRegisterId
+            method: POST
+            url: /app-hospitalized-register/patientPrepayments/get/inHospitalTemporary
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - null
