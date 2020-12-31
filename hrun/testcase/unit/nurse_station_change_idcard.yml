@@ -1,0 +1,180 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 读卡
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(out_k2)}
+            orgId: ${ENV(orgId)}
+            cardContentOri: 001testxjjj
+            cardTypeCode: FH0121.01
+            medicalCertificateNo: 001TESTXJJJ
+
+
+-   test:
+        name: 模糊查询出入院登记分页信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                endDate: ''
+                hospitalizedArea: ${ENV(in_k3)}
+                hosptalizedStatusList: []
+                noIdcardFalg: 0
+                orderKey: inBedNumber
+                orderType: asc
+                pageCount: 20
+                pageNum: 1
+                queryParam: $patientName
+                startDate: ''
+            method: POST
+            url: /app-hospitalized-register/hospitalizedRegister/listPage/hospitalizedRegister
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          inhospitalPatientId: content.body.data.0.id
+-   test:
+        name: 字典下拉
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                felog: new-read-card
+                mainCode: FH0121
+            method: POST
+            url: /app-medicare-platform-manage/medicare/invoke/getSelectList
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 读卡解析
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                cardContentOri: $cardNo2
+                cardTypeCode: FH0121.01
+                felog: new-read-card
+                medicareRecordsFlag: false
+            method: POST
+            url: /app-medicare-platform-manage/parser
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+
+-   test:
+        name: 根据 就诊凭据类型, 就诊凭据号, 查询患者信息[注:当就诊凭据类型为空时, 则查询 就诊凭据号,病历号和身份证号 精确查询,当有就诊凭据信息时,则关联返回对应就诊凭据信息,否则仅返回患者信息]
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                cardNo: $cardNo
+                cardType: $cardType
+                orgId: $orgId
+                updateOrgPatientFlag: true
+            method: POST
+            url: /app-patient-manage/register/queryForCommonByVoucherNo
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 根据费用类别编码 查询是否医保类别
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                code: 1
+            method: POST
+            url: /app-sys-manage/cost/nature/isMedicareByCode
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - false
+-   test:
+        name: 根据费用类别编码 查询是否现金类别
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                code: 1
+            method: POST
+            url: /app-sys-manage/cost/nature/isCashByCode
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - true
+-   test:
+        name: 就诊凭据更换
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                cardNo: $cardNo
+                cardType: $cardType
+                changeMedicareOk: false
+                costPropertyCode: 0
+                costPropertyName: 自费
+                costTypeCode: 1
+                costTypeName: 自费
+                inhospitalPatientId: $inhospitalPatientId
+                masterPatientIndex: $masterPatientIndex
+                patientRegisterId: $patientRegisterId
+            method: POST
+            url: /app-hospitalized-register/hospitalizedRegister/changeMedicalCredential
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success

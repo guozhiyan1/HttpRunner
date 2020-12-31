@@ -1,0 +1,152 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 读卡
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(out_k2)}
+            orgId: ${ENV(orgId)}
+            cardContentOri: 001testxjjj
+            cardTypeCode: FH0121.01
+            medicalCertificateNo: 001TESTXJJJ
+
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        api: api/user_info.yml
+        name: 切换登录院区部门
+#
+#-   test:
+#        name: 查询登记患者
+#        request:
+#            headers:
+#                Authorization: ${get_token($token)}
+#                Content-Type: application/json; charset=UTF-8
+#                k1: $k1
+#                k2: $k2
+#            json:
+#                deviceNo: ${ENV(deviceNo)}
+#                masterPatientIndex: b6ce02986ef642a594340cc4451c49c0
+#                patientRegisterId: 20427
+#                inhospitalPatientId:
+#            method: POST
+#            url: /app-self-machine/inpatient/queryHospitalizedRegister
+#
+#-   test:
+#        name: 取消住院
+#        request:
+#            headers:
+#                Authorization: ${get_token($token)}
+#                Content-Type: application/json; charset=UTF-8
+#                k1: $k1
+#                k2: $k2
+#            json:
+#                deviceNo: ${ENV(deviceNo)}
+#                masterPatientIndex: 95c41bd6ffd94073948d426659213265
+#                patientRegisterId: 8605
+#                inhospitalPatientId: 196532
+#            method: POST
+#            url: /app-self-machine/inpatient/checkCancelHospitalizedRegister
+#
+#
+
+#
+#-   test:
+#        name: 入院登记
+#        request:
+#            headers:
+#                Authorization: ${get_token($token)}
+#                Content-Type: application/json; charset=UTF-8
+#                k1: $k1
+#                k2: $k2
+#            json:
+#                deviceNo: ${ENV(deviceNo)}
+#                masterPatientIndex: ba8721b072614ea6840933039b485e5e
+#                patientRegisterId: 13343
+##                inhospitalPatientId: 196466
+#            method: POST
+#            url: /app-self-machine/inpatient/admissionHospitalizedRegister
+
+#
+#
+#-   test:
+#        name: 检查是否可取消
+#        request:
+#            headers:
+#                Authorization: ${get_token($token)}
+#                Content-Type: application/json; charset=UTF-8
+#                k1: $k1
+#                k2: $k2
+#            json:
+#                deviceNo: ${ENV(deviceNo)}
+#                masterPatientIndex: ba8721b072614ea6840933039b485e5e
+#                patientRegisterId: 13343
+#                cardNo: Z8801185586
+#                cardType: FH0121.03
+#                costTypeCode: 57
+#                costTypeName: 杭州医保
+##                costPropertyCode: HZYB28
+##                costPropertyCode: HZYB28
+##                costPropertyName: 退休公务员
+##                inhospitalPatientId: 5000265
+#            method: POST
+#            url: /app-self-machine/inpatient/getMedicareRegisterInfo
+##
+-   test:
+        name: 入院登记
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                deviceNo: ${ENV(deviceNo)}
+                masterPatientIndex: 3d167ede37ba4d57a76d2ebec0aa87fc
+                patientRegisterId: 11578
+#                inhospitalPatientId: 196532
+            method: POST
+            url: /app-self-machine/inpatient/admissionHospitalizedRegister
+
+
+
+#
+#-   test:
+#        name: 检查是否能取消住院
+#        request:
+#            headers:
+#                Authorization: ${get_token($token)}
+#                Content-Type: application/json; charset=UTF-8
+#                k1: $k1
+#                k2: $k2
+#            json:
+#                deviceNo: ${ENV(deviceNo)}
+#                masterPatientIndex: 95c41bd6ffd94073948d426659213265
+#                patientRegisterId: 8605
+#                inhospitalPatientId: 196532
+#            method: POST
+#            url: /app-self-machine/inpatient/cancelHospitalizedRegister
+
+
+#
+#-   test:
+#        name: 查询登记患者
+#        request:
+#            headers:
+#                Authorization: ${get_token($token)}
+#                Content-Type: application/json; charset=UTF-8
+#                k1: $k1
+#                k2: $k2
+#            json:
+#                deviceNo: ${ENV(deviceNo)}
+#                masterPatientIndex: b6ce02986ef642a594340cc4451c49c0
+#                patientRegisterId: 20427
+#                inhospitalPatientId:
+#            method: POST
+#            url: /app-self-machine/inpatient/queryHospitalizedRegister
+#
