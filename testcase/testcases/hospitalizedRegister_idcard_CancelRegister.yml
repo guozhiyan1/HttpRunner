@@ -1,0 +1,52 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 在院患者切卡
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(out_k2)}
+            orgId: ${ENV(orgId)}
+            cardContentOri: 1Zdhtest
+            cardNo2: 1222zdhtest
+            cardTypeCode: FH0121.01
+            mainCode: FH0121
+            medicalCertificateNo: 1ZDHTEST
+            shiftManageId: 2129
+            medicalType: 11
+            costCategory: 1
+            payAmount: 100
+            payType: "FH0085.01"
+            masterPatientIndexVersion: mpi_version_2
+            serviceDate: ${getdate()}
+            operationType: 4
+            invoiceType: FH0062.04
+            invoiceStates: ["FH0232.02"]
+
+-   test:
+        testcase: testcase/unit/ReadCard.yml
+        name: 读卡
+        extract:
+          - token
+          - masterPatientIndex
+          - cardNo
+          - cardType
+          - medicareFlag
+          - patientRegisterId
+          - patientName
+          - costTypeCode
+          - settleId
+          - userinfo
+          - medicalRecordNo
+
+-   test:
+        testcase: testcase/unit/hospitalizedregister.yml
+        name: 入院登记
+
+
+-   test:
+        testcase: testcase/unit/nurse_station_change_idcard.yml
+        name: 切卡
+
+
+-   test:
+        testcase: testcase/unit/cancel_hospitalizedregister.yml
+        name: 取消入院

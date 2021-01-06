@@ -1,0 +1,15 @@
+name: 实例查询
+base_url: ${ENV(innerapi_host)}
+variables:
+    instance_id: ${instance_list()}
+request:
+    url: "/v3/instance"
+    params:
+        ak: ${ENV(innerapi_ak)}
+        instance_id: "$instance_id"
+    method: GET
+setup_hooks:
+        -   ${setup_request_innerapi($request)}
+validate:
+    - eq: ["status_code", 200]
+    - eq: [content.code, 0]
