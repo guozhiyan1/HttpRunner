@@ -8,7 +8,7 @@ if __name__ == '__main__':
 
     # result = runner.run("testcase/hospital/HospitalizedRegister.yml", dot_env_path="test.env")
     # result = runner.run("testcase/hospital/queryHospitalizedRegister.yml", dot_env_path="test.env")
-    result = runner.run("testcase/testcases/NewPatient.yml", dot_env_path=".env")
+    result = runner.run("api/token.yml", dot_env_path=".env")
 
 
     # 生成报告
