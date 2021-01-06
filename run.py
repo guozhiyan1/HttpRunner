@@ -1,5 +1,6 @@
 from httprunner.api import HttpRunner
 from httprunner.report.html import (gen_html_report)
+from tools import DingTalk
 
 if __name__ == '__main__':
     # runner = HttpRunner(failfast=False, log_level="debug")
@@ -13,4 +14,6 @@ if __name__ == '__main__':
 
     # 生成报告
     gen_html_report(result)
+
+    DingTalk.DingTalkSend()
 
