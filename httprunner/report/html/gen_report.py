@@ -9,7 +9,7 @@ from httprunner.exceptions import SummaryEmpty
 from httprunner import utils
 
 
-def gen_html_report(summary, report_template=None, report_dir=None, report_file=None):
+def gen_html_report(summary, now_timestamp, report_template=None, report_dir=None, report_file=None):
     """ render html report with specified report name and template
 
     Args:
@@ -44,7 +44,7 @@ def gen_html_report(summary, report_template=None, report_dir=None, report_file=
     else:
         report_dir = report_dir or os.path.join(os.getcwd(), "reports")
         # fix #826: Windows does not support file name include ":"
-        report_file_name = datetime.now().strftime('%Y%m%d %H%M%S') + ".html"
+        report_file_name = now_timestamp + ".html"
 
 
     if not os.path.isdir(report_dir):

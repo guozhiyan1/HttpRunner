@@ -23,7 +23,7 @@ report_url = 'http://192.168.54.132/gmc-http-autotest/reports/'
 使用钉钉机器人的接口，拼接后推送text
 '''
 
-def DingTalkSend():
+def DingTalkSend(now_timestamp):
     d = {}
     # 获取项目绝对路径
     path = os.path.abspath(os.path.dirname((__file__)))
@@ -54,7 +54,7 @@ def DingTalkSend():
                           # "\n通过数量:" + status_passed +
                           # "\n失败数量:" + status_failed +
                           "\n构建地址：\n" + job_url +
-                          "\n报告地址：\n" + report_url
+                          "\n报告地址：\n" + report_url + now_timestamp + '.html'
            }
            }
     urllib3.disable_warnings()
