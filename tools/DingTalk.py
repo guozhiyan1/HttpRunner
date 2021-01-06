@@ -14,9 +14,7 @@ job_name = "job/gmc-http-autotest/" #Jenkins运行任务名称
 job_url = jenkins_url + job_name
 # 获取最后一次构建
 job_last_build_url = server.get_info(job_name)['lastBuild']['url']
-# 报告地址
-# report_url = job_last_build_url + 'HTML_20Report' #'allure'为我的Jenkins全局工具配置中allure别名
-report_url = 'http://192.168.54.132/gmc-http-autotest/reports/'
+
 '''
 钉钉推送方法：
 读取report文件中"prometheusData.txt"，循环遍历获取需要的值。
@@ -24,6 +22,9 @@ report_url = 'http://192.168.54.132/gmc-http-autotest/reports/'
 '''
 
 def DingTalkSend(now_timestamp):
+    # 报告地址
+    # report_url = job_last_build_url + 'HTML_20Report' #'allure'为我的Jenkins全局工具配置中allure别名
+    report_url = 'http://192.168.54.132/gmc-http-autotest/reports/' + now_timestamp + '.html'
     d = {}
     # 获取项目绝对路径
     path = os.path.abspath(os.path.dirname((__file__)))
@@ -54,7 +55,7 @@ def DingTalkSend(now_timestamp):
                           # "\n通过数量:" + status_passed +
                           # "\n失败数量:" + status_failed +
                           "\n构建地址：\n" + job_url +
-                          "\n报告地址：\n" + report_url + now_timestamp + '.html'
+                          "\n报告地址：\n" + report_url
            }
            }
     urllib3.disable_warnings()
