@@ -44,16 +44,17 @@ def gen_html_report(summary, report_template=None, report_dir=None, report_file=
     else:
         report_dir = report_dir or os.path.join(os.getcwd(), "reports")
         # fix #826: Windows does not support file name include ":"
-        report_file_name = "index.html"
+        report_file_name = datetime.now().strftime('%Y%m%d %H%M%S') + ".html"
 
 
     if not os.path.isdir(report_dir):
         os.makedirs(report_dir)
 
+
     report_path = os.path.join(report_dir, report_file_name)
     with io.open(report_template, "r", encoding='utf-8') as fp_r:
         template_content = fp_r.read()
-        with io.open(report_path, 'w', encoding='utf-8') as fp_w:
+        with io.open(report_path, 'w+', encoding='utf-8') as fp_w:
             rendered_content = Template(
                 template_content,
                 extensions=["jinja2.ext.loopcontrols"]
@@ -63,3 +64,5 @@ def gen_html_report(summary, report_template=None, report_dir=None, report_file=
     logger.info(f"Generated Html report: {report_path}")
 
     return report_path
+
+
