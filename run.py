@@ -13,7 +13,7 @@ if __name__ == '__main__':
     result = runner.run("api/token.yml", dot_env_path=".env")
 
 
-    now_timestamp = datetime.now().strftime('%Y%m%d %H%M%S')
+    now_timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
     # 生成报告
     gen_html_report(result, now_timestamp)
 
