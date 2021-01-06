@@ -48,7 +48,7 @@ def DingTalkSend(now_timestamp):
     url = 'https://oapi.dingtalk.com/robot/send?access_token=17e1e1995b1c76652938fa650c4fbcd708ec84d398a425b015eff2c956d32bd3'
     con = {"msgtype": "text",
            "text": {
-               "content": "Pytest_Allure_Demo自动化脚本执行完成。测试"
+               "content": "Pytest_Allure_Demo自动化脚本执行完成"
                           "\n测试概述:"
                           # "\n运行总数:" + retries_run +
                           # "\n通过数量:" + status_passed +

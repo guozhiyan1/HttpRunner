@@ -1,7 +1,7 @@
 from httprunner.api import HttpRunner
 from httprunner.report.html import (gen_html_report)
 from tools import DingTalk
-import datetime
+from datetime import datetime
 
 if __name__ == '__main__':
     # runner = HttpRunner(failfast=False, log_level="debug")
