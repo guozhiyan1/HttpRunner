@@ -24,15 +24,13 @@ job_last_build_url = server.get_info(job_name)['lastBuild']['url']
 
 
 def DingTalkSend(now_timestamp, result):
-    # 报告地址
-    # report_url = job_last_build_url + 'HTML_20Report' #'allure'为我的Jenkins全局工具配置中allure别名
     remote_ip = config.get_conf("remote", "remote_ip")
     project_name = os.path.split(sys.path[1])[1]
     visit_url = project_name + '/reports/' + now_timestamp + '.html'
     remote_report_url = 'http://' + remote_ip + visit_url
-    local_report_url = 'http://localhost:/' + config.get_conf("local",
-                                                              "html_open_port") + visit_url
-    # # 获取项目绝对路径
+    local_report_url = 'http://localhost:' + config.get_conf("local",
+                                                              "html_open_port") + '/' + visit_url
+    # 获取项目绝对路径
     # path = os.path.abspath(os.path.dirname((__file__)))
     # 钉钉推送
     url = config.get_conf("dingding", "dingtalk_url")
