@@ -64,7 +64,7 @@ def DingTalkSend(now_timestamp):
                           # "\n通过数量:" + status_passed +
                           # "\n失败数量:" + status_failed +
                           "\n构建地址：\n" + job_url +
-                          "\n报告地址：\n" + (remote_report_url if (flag == True) else local_report_url)
+                          "\n报告地址：\n" + (local_report_url if flag else remote_report_url)
            }
            }
     urllib3.disable_warnings()
