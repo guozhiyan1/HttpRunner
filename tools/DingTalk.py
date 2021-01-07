@@ -39,7 +39,7 @@ def DingTalkSend(now_timestamp, result):
     # windows和mac为本地环境
     flag = platform.system() == 'Windows' or platform.system() == 'Darwin'
 
-    con = {
+    context = {
      "msgtype": "markdown",
      "markdown": {
          "title": "[gmc-http-test]自动化测试",
