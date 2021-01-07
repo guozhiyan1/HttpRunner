@@ -10,7 +10,7 @@ if __name__ == '__main__':
     build_user_name = args[1]
     build_user_id = args[2]
     build_user_email = args[3]
-    print(build_user_name, build_user_id, build_user_email)
+    print('111111111' + build_user_name+build_user_id+build_user_email)
     # runner = HttpRunner(failfast=False, log_level="debug")
     runner = HttpRunner(failfast=False, log_level="debug")
     # result = runner.run("testcase/hospital/HospitalizedRegister.yml", dot_env_path="test.env")
