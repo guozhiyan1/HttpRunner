@@ -5,6 +5,7 @@ import json
 import urllib3
 import platform
 from config import config
+import sys
 
 # jenkins登录地址
 jenkins_url = config.get_conf("jenkins", "jenkins_url")
@@ -26,16 +27,19 @@ def DingTalkSend(now_timestamp, result):
     # 报告地址
     # report_url = job_last_build_url + 'HTML_20Report' #'allure'为我的Jenkins全局工具配置中allure别名
     remote_ip = config.get_conf("remote", "remote_ip")
-    remote_report_url = 'http://' + remote_ip + '/gmc-http-autotest/reports/' + now_timestamp + '.html'
-    local_report_url = 'http://localhost:63344/gmc-http-test/reports/' + now_timestamp + '.html'
+    project_name = os.path.split(sys.path[1])[1]
+    visit_url = project_name + '/reports/' + now_timestamp + '.html'
+    remote_report_url = 'http://' + remote_ip + visit_url
+    local_report_url = 'http://localhost:/' + config.get_conf("local",
+                                                              "html_open_port") + visit_url
     # # 获取项目绝对路径
     # path = os.path.abspath(os.path.dirname((__file__)))
     # 钉钉推送
     url = config.get_conf("dingding", "dingtalk_url")
-    # windows和mac为本地路径
+    # windows和mac为本地环境
     flag = platform.system() == 'Windows' or platform.system() == 'Darwin'
 
-    con = {
+    context = {
      "msgtype": "markdown",
      "markdown": {
          "title": "[gmc-http-test]自动化测试",
@@ -54,9 +58,7 @@ def DingTalkSend(now_timestamp, result):
     }
     urllib3.disable_warnings()
     http = urllib3.PoolManager()
-    jd = json.dumps(con)
+    jd = json.dumps(context)
     jd = bytes(jd, 'utf-8')
     print(">>>>>>>>>>>>>>>>>", url, jd)
     http.request('POST', url, body=jd, headers={'Content-Type': 'application/json'})
-
-
