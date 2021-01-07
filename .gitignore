@@ -19,3 +19,4 @@ htmlcov/
 .csv
 reports
 *.env
+config/config.conf
