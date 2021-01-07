@@ -58,7 +58,7 @@ def DingTalkSend(now_timestamp):
     flag = platform.system() == 'Windows' or platform.system() == 'Darwin'
     con = {"msgtype": "text",
            "text": {
-               "content": "Pytest_Allure_Demo自动化脚本执行完成"
+               "content": "gmc-http-test自动化测试脚本执行完成"
                           "\n测试概述:"
                           # "\n运行总数:" + retries_run +
                           # "\n通过数量:" + status_passed +
