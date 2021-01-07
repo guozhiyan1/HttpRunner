@@ -27,7 +27,7 @@ def DingTalkSend(now_timestamp, result):
     remote_ip = config.get_conf("remote", "remote_ip")
     project_name = os.path.split(sys.path[1])[1]
     visit_url = project_name + '/reports/' + now_timestamp + '.html'
-    remote_report_url = 'http://' + remote_ip + visit_url
+    remote_report_url = 'http://' + remote_ip + '/' + visit_url
     local_report_url = 'http://localhost:' + config.get_conf("local",
                                                               "html_open_port") + '/' + visit_url
     # 获取项目绝对路径
