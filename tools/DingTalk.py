@@ -38,7 +38,7 @@ def DingTalkSend(now_timestamp, result):
     con = {
      "msgtype": "markdown",
      "markdown": {
-         "title" : "[gmc-http-test]自动化测试",
+         "title": "[gmc-http-test]自动化测试",
          "text": f"### gmc-http-test自动化测试结果\n>####  [查看测试报告]({local_report_url if flag else remote_report_url}) \n>####  [查看构建地址]({job_url}) \n"
                  f"#### 测试结果：{'测试通过'  if result['success'] else '测试不通过'}\n"
                  f"#### 通过用例：{result['stat']['teststeps']['successes']}\n"
