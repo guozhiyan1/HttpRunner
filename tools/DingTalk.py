@@ -5,6 +5,7 @@ import json
 import urllib3
 import platform
 from config import config
+import sys
 
 # jenkins登录地址
 jenkins_url = config.get_conf("jenkins", "jenkins_url")
@@ -33,7 +34,8 @@ def DingTalkSend(now_timestamp):
     # report_url = job_last_build_url + 'HTML_20Report' #'allure'为我的Jenkins全局工具配置中allure别名
     remote_ip = config.get_conf("remote", "remote_ip")
     remote_report_url = 'http://' + remote_ip + '/gmc-http-autotest/reports/' + now_timestamp + '.html'
-    local_report_url = 'http://localhost:63344/gmc-http-test/reports/' + now_timestamp + '.html'
+    project_name = os.path.split(sys.path[1])[1]
+    local_report_url = 'http://localhost:63344/'+ project_name+ '/reports/' + now_timestamp + '.html'
     # 获取项目绝对路径
     path = os.path.abspath(os.path.dirname((__file__)))
     # 打开prometheusData 获取需要发送的信息
@@ -76,4 +78,7 @@ def DingTalkSend(now_timestamp):
 
 
 if __name__ == '__main__':
-    DingTalkSend()
+
+    print()
+
+    # DingTalkSend()
