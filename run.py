@@ -17,6 +17,6 @@ if __name__ == '__main__':
     # 生成报告
     gen_html_report(result, now_timestamp)
 
-    DingTalk.DingTalkSend(now_timestamp, result)
+    # DingTalk.DingTalkSend(now_timestamp, result)
 
 

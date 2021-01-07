@@ -17,3 +17,4 @@ site/
 *.xml
 htmlcov/
 .csv
+reports
