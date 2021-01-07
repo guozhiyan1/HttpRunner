@@ -18,3 +18,4 @@ site/
 htmlcov/
 .csv
 reports
+*.env
