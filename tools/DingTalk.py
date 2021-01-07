@@ -26,9 +26,24 @@ job_last_build_url = server.get_info(job_name)['lastBuild']['url']
 读取report文件中"prometheusData.txt"，循环遍历获取需要的值。
 使用钉钉机器人的接口，拼接后推送text
 '''
+"""
+ print("{0}{1}{2}".format("="*27,"测试报告","="*27))
+#         print("CUSTOM_NAME_passedScenariosCount: PASS")
+#         print("CUSTOM_VAL_passedScenariosCount: ", result['stat']['teststeps']['successes'])
+#         print("CUSTOM_NAME_failedScenariosCount: FAIL")
+#         print("CUSTOM_VAL_failedScenariosCount: ", result['stat']['teststeps']['failures'])
+#         print("CUSTOM_NAME_skippedScenariosCount: SKIP")
+#         print("CUSTOM_VAL_skippedScenariosCount: ", result['stat']['teststeps']['skipped'])
+#         print("TEST_NAME: ens_test")
+#         print("TEST_CASE_AMOUNT: {\"passed\":%s,\"failed\":%s,\"skipped\":%s}" % (
+#             result['stat']['teststeps']['successes'], result['stat']['teststeps']['failures'],
+#             result['stat']['teststeps']['skipped']))
+#         print("="*60)
+# 
+"""
 
 
-def DingTalkSend(now_timestamp):
+def DingTalkSend(now_timestamp, result):
     # 报告地址
     # report_url = job_last_build_url + 'HTML_20Report' #'allure'为我的Jenkins全局工具配置中allure别名
     remote_ip = config.get_conf("remote", "remote_ip")
@@ -56,17 +71,36 @@ def DingTalkSend(now_timestamp):
     url = config.get_conf("dingding", "dingtalk_url")
     # windows和mac为本地路径
     flag = platform.system() == 'Windows' or platform.system() == 'Darwin'
-    con = {"msgtype": "text",
-           "text": {
-               "content": "gmc-http-test自动化测试脚本执行完成"
-                          "\n测试概述:"
-                          # "\n运行总数:" + retries_run +
-                          # "\n通过数量:" + status_passed +
-                          # "\n失败数量:" + status_failed +
-                          "\n构建地址：\n" + job_url +
-                          "\n报告地址：\n" + (remote_report_url if (flag == True) else local_report_url)
-           }
-           }
+    # con = {"msgtype": "text",
+    #        "text": {
+    #            "content": "gmc-http-test自动化测试脚本执行完成"
+    #                       "\n测试概述:"
+    #                       # "\n运行总数:" + retries_run +
+    #                       # "\n通过数量:" + status_passed +
+    #                       # "\n失败数量:" + status_failed +
+    #                       "\n构建地址：\n" + job_url +
+    #                       "\n报告地址：\n" + (remote_report_url if (flag == True) else local_report_url)
+    #        }
+    #        }
+
+    report_path = remote_report_url if (flag == True) else local_report_url
+    con = {
+     "msgtype": "markdown",
+     "markdown": {
+         "title" : "[gmc-http-test]自动化测试",
+         "text": f"### gmc-http-test自动化测试结果\n>####  [查看测试报告]({report_path}) \n>####  [查看构建地址]({job_url}) \n"
+                 f"#### 测试结果：{'测试通过'  if result['success'] else '测试不通过'}\n"
+                 f"#### 通过用例：{result['stat']['teststeps']['successes']}\n"
+                 f"#### 失败用例：{result['stat']['teststeps']['failures']}\n"
+                 f"#### 跳过用例：{result['stat']['teststeps']['skipped']}\n"
+     },
+     "at": {
+          "atMobiles": [
+              "15757115799"
+          ],
+          "isAtAll": False
+      }
+    }
     urllib3.disable_warnings()
     http = urllib3.PoolManager()
     jd = json.dumps(con)
@@ -75,5 +109,3 @@ def DingTalkSend(now_timestamp):
     http.request('POST', url, body=jd, headers={'Content-Type': 'application/json'})
 
 
-if __name__ == '__main__':
-    DingTalkSend()

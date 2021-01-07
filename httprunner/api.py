@@ -230,7 +230,7 @@ class HttpRunner(object):
         summary['details'] = self.change_summary(summary['details'])  # < - - - summary['details']和summary['stat']['teststeps']是笔者为了将重试次数合并添加的
         summary['stat']['teststeps'] = self.change_steps(summary['details'])
         # Aone实验室展示测试结果（设置卡点时用）
-        utils.print_aone_laboratory(summary)
+        # utils.print_aone_laboratory(summary)
         return summary
 
     def change_summary(self, summary_details):
