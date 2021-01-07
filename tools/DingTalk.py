@@ -7,20 +7,21 @@ import platform
 from config import config
 import sys
 
-# jenkins登录地址
+
+# # jenkins登录地址
 jenkins_url = config.get_conf("jenkins", "jenkins_url")
-# 获取jenkins对象
-# Jenkins登录名 ，密码
-username = config.get_conf("jenkins", "username")
-password = config.get_conf("jenkins", "password")
-server = jenkins.Jenkins(jenkins_url, username=username, password=password)
-# job名称
-# Jenkins运行任务名称
+# # 获取jenkins对象
+# # Jenkins登录名 ，密码
+# username = config.get_conf("jenkins", "username")
+# password = config.get_conf("jenkins", "password")
+# server = jenkins.Jenkins(jenkins_url, username=username, password=password)
+# # job名称
+# # Jenkins运行任务名称
 job_name = config.get_conf("jenkins", "job_name")
-# job的url地址
+# # job的url地址
 job_url = jenkins_url + job_name
-# 获取最后一次构建
-job_last_build_url = server.get_info(job_name)['lastBuild']['url']
+# # 获取最后一次构建
+# job_last_build_url = server.get_info(job_name)['lastBuild']['url']
 
 
 def DingTalkSend(now_timestamp, result):

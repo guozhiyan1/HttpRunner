@@ -3,8 +3,14 @@ from httprunner.report.html import (gen_html_report)
 from tools import DingTalk
 from datetime import datetime
 from httprunner.report import summarize
+import sys
 
 if __name__ == '__main__':
+    args = sys.argv
+    build_user_name = args[1]
+    build_user_id = args[2]
+    build_user_email = args[3]
+    print(build_user_name, build_user_id, build_user_email)
     # runner = HttpRunner(failfast=False, log_level="debug")
     runner = HttpRunner(failfast=False, log_level="debug")
     # result = runner.run("testcase/hospital/HospitalizedRegister.yml", dot_env_path="test.env")
