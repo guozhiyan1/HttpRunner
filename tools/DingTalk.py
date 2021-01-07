@@ -31,7 +31,7 @@ def DingTalkSend(now_timestamp, result):
     visit_url = project_name + '/reports/' + now_timestamp + '.html'
     remote_report_url = 'http://' + remote_ip + visit_url
     local_report_url = 'http://localhost:/' + config.get_conf("local",
-                                                              "port") + visit_url
+                                                              "html_open_port") + visit_url
     # # 获取项目绝对路径
     # path = os.path.abspath(os.path.dirname((__file__)))
     # 钉钉推送
