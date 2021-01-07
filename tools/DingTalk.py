@@ -1,15 +1,21 @@
 import os
-import jenkins  # 安装pip install python-jenkins
+# 安装pip install python-jenkins
+import jenkins
 import json
 import urllib3
 import platform
+from config import config
 
 # jenkins登录地址
-jenkins_url = "http://jenkins-gmc-dev.cfuture.shop/"
+jenkins_url = config.get_conf("jenkins", "jenkins_url")
 # 获取jenkins对象
-server = jenkins.Jenkins(jenkins_url, username='kele.xxj', password='4123043xxj')  # Jenkins登录名 ，密码
+# Jenkins登录名 ，密码
+username = config.get_conf("jenkins", "username")
+password = config.get_conf("jenkins", "password")
+server = jenkins.Jenkins(jenkins_url, username=username, password=password)
 # job名称
-job_name = "job/gmc-http-autotest/"  # Jenkins运行任务名称
+# Jenkins运行任务名称
+job_name = config.get_conf("jenkins", "job_name")
 # job的url地址
 job_url = jenkins_url + job_name
 # 获取最后一次构建
@@ -25,9 +31,9 @@ job_last_build_url = server.get_info(job_name)['lastBuild']['url']
 def DingTalkSend(now_timestamp):
     # 报告地址
     # report_url = job_last_build_url + 'HTML_20Report' #'allure'为我的Jenkins全局工具配置中allure别名
-    remote_report_url = 'http://192.168.54.132/gmc-http-autotest/reports/' + now_timestamp + '.html'
+    remote_ip = config.get_conf("remote", "remote_ip")
+    remote_report_url = 'http://' + remote_ip + '/gmc-http-autotest/reports/' + now_timestamp + '.html'
     local_report_url = 'http://localhost:63344/gmc-http-test/reports/' + now_timestamp + '.html'
-    d = {}
     # 获取项目绝对路径
     path = os.path.abspath(os.path.dirname((__file__)))
     # 打开prometheusData 获取需要发送的信息
@@ -47,9 +53,9 @@ def DingTalkSend(now_timestamp):
     # print('通过数量：{}'.format(status_failed))
 
     # 钉钉推送
-
-    url = 'https://oapi.dingtalk.com/robot/send?access_token=6d297ce9ae271c205d2b0d4e45bd087698ea310194f61bdda554f7061ec8e9a1'
-    flag = platform.system() == 'Windows'
+    url = config.get_conf("dingding", "dingtalk_url")
+    # windows和mac为本地路径
+    flag = platform.system() == 'Windows' or platform.system() == 'Darwin'
     con = {"msgtype": "text",
            "text": {
                "content": "Pytest_Allure_Demo自动化脚本执行完成"
