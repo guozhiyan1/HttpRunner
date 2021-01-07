@@ -583,22 +583,22 @@ def prepare_log_file_abs_path(test_path: str, file_name: str) -> str:
     return dumped_json_file_abs_path
 
 
-def print_aone_laboratory(result):
-    # Aone实验室展示测试结果（设置卡点时用）
-    try:
-        print("{0}{1}{2}".format("="*27,"测试报告","="*27))
-        print("CUSTOM_NAME_passedScenariosCount: PASS")
-        print("CUSTOM_VAL_passedScenariosCount: ", result['stat']['teststeps']['successes'])
-        print("CUSTOM_NAME_failedScenariosCount: FAIL")
-        print("CUSTOM_VAL_failedScenariosCount: ", result['stat']['teststeps']['failures'])
-        print("CUSTOM_NAME_skippedScenariosCount: SKIP")
-        print("CUSTOM_VAL_skippedScenariosCount: ", result['stat']['teststeps']['skipped'])
-        print("TEST_NAME: ens_test")
-        print("TEST_CASE_AMOUNT: {\"passed\":%s,\"failed\":%s,\"skipped\":%s}" % (
-            result['stat']['teststeps']['successes'], result['stat']['teststeps']['failures'],
-            result['stat']['teststeps']['skipped']))
-        print("="*60)
-
-    except Exception as e:
-        print("测试报告解析出错 \nerror: {} \n".format(e))
-
+# def print_aone_laboratory(result):
+#     # Aone实验室展示测试结果（设置卡点时用）
+#     try:
+#         print("{0}{1}{2}".format("="*27,"测试报告","="*27))
+#         print("CUSTOM_NAME_passedScenariosCount: PASS")
+#         print("CUSTOM_VAL_passedScenariosCount: ", result['stat']['teststeps']['successes'])
+#         print("CUSTOM_NAME_failedScenariosCount: FAIL")
+#         print("CUSTOM_VAL_failedScenariosCount: ", result['stat']['teststeps']['failures'])
+#         print("CUSTOM_NAME_skippedScenariosCount: SKIP")
+#         print("CUSTOM_VAL_skippedScenariosCount: ", result['stat']['teststeps']['skipped'])
+#         print("TEST_NAME: ens_test")
+#         print("TEST_CASE_AMOUNT: {\"passed\":%s,\"failed\":%s,\"skipped\":%s}" % (
+#             result['stat']['teststeps']['successes'], result['stat']['teststeps']['failures'],
+#             result['stat']['teststeps']['skipped']))
+#         print("="*60)
+#
+#     except Exception as e:
+#         print("测试报告解析出错 \nerror: {} \n".format(e))
+#
