@@ -10,11 +10,11 @@ if __name__ == '__main__':
     build_user_name = args[1]
     build_user_id = args[2]
     build_user_email = args[3]
-    print('111111111' + build_user_name+build_user_id+build_user_email)
     # runner = HttpRunner(failfast=False, log_level="debug")
     runner = HttpRunner(failfast=False, log_level="debug")
     # result = runner.run("testcase/hospital/HospitalizedRegister.yml", dot_env_path="test.env")
     result = runner.run("api/token.yml", dot_env_path="test.env")
+
 
     # 当前时间戳
     now_timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
@@ -23,5 +23,8 @@ if __name__ == '__main__':
     gen_html_report(result, now_timestamp)
     # 钉钉通知
     DingTalk.DingTalkSend(now_timestamp, result)
+
+    # 发送通知邮件
+
 
 
