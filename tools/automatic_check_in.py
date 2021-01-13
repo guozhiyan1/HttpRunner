@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-# @File  : qiangzhiqiantui.py
+# @File  : automatic_check_in.py
 # @Date  : 2020-08-27
 # @Author: wb-zjm733140
 
 import json
-from copy import deepcopy
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
