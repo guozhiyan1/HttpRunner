@@ -1,6 +1,6 @@
 -   config:
         base_url: ${ENV(host)}
-        name: testcase description
+        name: 患者建档
         variables:
             k1: ${ENV(out_k1)}
             k2: ${ENV(out_k2)}

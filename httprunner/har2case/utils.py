@@ -4,7 +4,7 @@ import logging
 import sys
 
 import yaml
-from httprunner.har2case import bytes, ensure_ascii, str, unquote
+from httprunner.har2case.compat import bytes, ensure_ascii, str, unquote
 
 
 def load_har_log_entries(file_path):

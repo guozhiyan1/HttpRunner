@@ -1,4 +1,4 @@
-from httprunner import har2case as core
+from httprunner.har2case import core
 
 
 def run_har2case():
@@ -7,7 +7,7 @@ def run_har2case():
     :return: null
     """
     # a = core.HarParser("testcase/new.har")
-    a = core.HarParser("testcase/new.har", change=True)
+    a = core.HarParser("testcase/gmc-test.cfuture.shop.har", change=True)
 
     a.gen_testcase(file_type="YML")
 

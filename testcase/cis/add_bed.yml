@@ -1,0 +1,348 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 床位维护冒烟测试
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(in_k2)}
+            orgId: ${ENV(orgId)}
+            areaId: ${ENV(in_k3)}
+            roomText: "可乐"
+            # bedNumber: ${get_number(6)}
+            bedStatus: 1
+            bedUseStatus: 0
+            # 0: 空闲
+            locationType: 0
+            roomLocationId: 0
+            # 1：实体床 2：虚拟床
+            virtualBed: 0
+            nowBedTypeId: 2969
+            nowBedTypeName: "WF"
+
+
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        api: api/user_info.yml
+        name: 切换登录院区部门
+
+-   test:
+        name: 获取用户信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-portal/user/info
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取机构系统参数
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                parameterCode: 30000004
+            method: POST
+            url: /app-sys-manage/param/getOrgSystemParam
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - '2'
+#-   test:
+#        name: 查询用户菜单
+#        request:
+#            headers:
+#                Authorization: ${get_token($token)}
+#                Content-Type: application/json; charset=UTF-8
+#                k1: $k1
+#                k2: $k2
+#            json: {}
+#            method: POST
+#            url: /app-portal/permission/query/user/menu
+#        validate:
+#        -   eq:
+#            - content.code
+#            - 2000
+#        -   eq:
+#            - content.message
+#            - success
+#-   test:
+#        name: 通用查询系统参数
+#        request:
+#            headers:
+#                Authorization: ${get_token($token)}
+#                Content-Type: application/json; charset=UTF-8
+#                k1: $k1
+#                k2: $k2
+#            json:
+#                deptSystemParamList:
+#                -   900076
+#            method: POST
+#            url: /app-station-manage/orderCommon/listSystemParam
+#        validate:
+#        -   eq:
+#            - content.code
+#            - 2000
+#        -   eq:
+#            - content.message
+#            - success
+#
+#-   test:
+#        name: 查询床位类型下拉列表
+#        request:
+#            headers:
+#                Authorization: ${get_token($token)}
+#                Content-Type: application/json; charset=UTF-8
+#                k1: $k1
+#                k2: $k2
+#                webUrl: http://gmc-test.cfuture.shop/basis/BedMaintain?k=1-99897828607-XN3142
+#            json: {"SearchText":2929}
+#            method: POST
+#            url: /app-sys-manage/bedTypeManage/queryBedTypeByText
+#        validate:
+#        -   eq:
+#            - content.code
+#            - 2000
+#        -   eq:
+#            - content.message
+#            - success
+##        extract:
+##            - BedType: content.body.0.TypeCode
+##            - BedTypeName: content.body.0.bedTypeName
+#
+#-   test:
+#        name: 首页显示模板列表查询
+#        request:
+#            headers:
+#                Authorization: ${get_token($token)}
+#                Content-Type: application/json; charset=UTF-8
+#                k1: $k1
+#                k2: $k2
+#            json: {}
+#            method: POST
+#            url: /app-portal/stationmanage/stationConfig/list/getHomepage
+#        validate:
+#        -   eq:
+#            - content.code
+#            - 2000
+#        -   eq:
+#            - content.message
+#            - success
+#-   test:
+#        name: 获取病区列表
+#        request:
+#            headers:
+#                Authorization: ${get_token($token)}
+#                Content-Type: application/json; charset=UTF-8
+#                k1: $k1
+#                k2: $k2
+#                webUrl: http://gmc-test.cfuture.shop/basis/BedMaintain?k=1-99897828607-XN3142
+#            json:
+#                keyName: searchText
+#                locationType: 0
+#                searchText: $roomText
+#            method: POST
+#            url: /app-sys-manage/bedManage/getWardLocationList
+#        validate:
+#        -   eq:
+#            - content.code
+#            - 2000
+#        -   eq:
+#            - content.message
+#            - success
+#-   test:
+#        name: 根据病区查询床位最大排序号
+#        request:
+#            headers:
+#                Authorization: ${get_token($token)}
+#                Content-Type: application/json; charset=UTF-8
+#                k1: $k1
+#                k2: $k2
+#                webUrl: http://gmc-test.cfuture.shop/basis/BedMaintain?k=1-99897828607-XN3142
+#            json:
+#                areaId: ${ENV(in_k3)}
+#            method: POST
+#            url: /app-sys-manage/bedManage/getMaxBedSortNum
+#        validate:
+#        -   eq:
+#            - content.code
+#            - 2000
+#        -   eq:
+#            - content.message
+#            - success
+#        extract:
+#          - MaxId: content.body
+#
+#-   test:
+#        name: 据病区查询床位列表
+#        request:
+#            headers:
+#                Authorization: ${get_token($token)}
+#                Content-Type: application/json; charset=UTF-8
+#                k1: $k1
+#                k2: $k2
+#                webUrl: http://gmc-test.cfuture.shop/basis/BedMaintain?k=1-99897828607-XN3142
+#            json:
+#                areaId: ${ENV(in_k3)}
+#                locationType: 0
+#            method: POST
+#            url: /app-sys-manage/bedManage/queryBedByArea
+#        validate:
+#        -   eq:
+#            - content.code
+#            - 2000
+#        -   eq:
+#            - content.message
+#            - success
+#
+#-   test:
+#        name: 查询房间下拉列表
+#        request:
+#            headers:
+#                Authorization: ${get_token($token)}
+#                Content-Type: application/json; charset=UTF-8
+#                k1: $k1
+#                k2: $k2
+#                webUrl: http://gmc-test.cfuture.shop/basis/BedMaintain?k=1-99897828607-XN3142
+#            json:
+#                areaId: $areaId
+#                keyName: searchText
+#                searchText: $roomText
+#            method: POST
+#            url: /app-sys-manage/bedRoomManage/queryRoomByText
+#        validate:
+#        -   eq:
+#            - content.code
+#            - 2000
+#        -   eq:
+#            - content.message
+#            - success
+#        extract:
+#          roomId: content.body.0.id
+#-   test:
+#        name: 验证床位号是否重复
+#        request:
+#            headers:
+#                Authorization: ${get_token($token)}
+#                Content-Type: application/json; charset=UTF-8
+#                k1: $k1
+#                k2: $k2
+#                webUrl: http://gmc-test.cfuture.shop/basis/BedMaintain?k=1-99897828607-XN3142
+#            json:
+#                areaId: $areaId
+#                bedInfoId: 0
+#                bedNumber: $MaxId
+#            method: POST
+#            url: /app-sys-manage/bedManage/verifyBedNumber
+#        validate:
+#        -   eq:
+#            - content.code
+#            - 2000
+#        -   eq:
+#            - content.message
+#            - success
+#        -   eq:
+#            - content.body
+#            - false
+##
+#-   test:
+#        name: 保存新增床位
+#        request:
+#            headers:
+#                Authorization: ${get_token($token)}
+#                Content-Type: application/json; charset=UTF-8
+#                k1: $k1
+#                k2: $k2
+#                webUrl: http://gmc-test.cfuture.shop/basis/BedMaintain?k=1-99897828607-XN3142
+#            json:
+#                areaId: $areaId
+#                bedNumber: $MaxId
+#                bedStatus: $bedStatus
+#                bedTypeId: $nowBedTypeId
+#                bedTypeName: $nowBedTypeName
+#                bedUseStatus: $bedUseStatus
+#                defaultBedTypeId: $nowBedTypeId
+#                locationType: 0
+#                nowBedTypeId: $nowBedTypeId
+#                roomId: $roomId
+#                roomLocationId: $roomLocationId
+#                roomNumber: $roomText
+#                virtualBed: $virtualBed
+#                sortNumber: $MaxId
+#            method: POST
+#            url: /app-sys-manage/bedManage/saveBedInfo
+#        validate:
+#        -   eq:
+#            - content.code
+#            - 2000
+#        -   eq:
+#            - content.message
+#            - success
+#        -   eq:
+#            - content.body
+#            - true
+#-   test:
+#        name: 据病区查询床位列表
+#        request:
+#            headers:
+#                Authorization: ${get_token($token)}
+#                Content-Type: application/json; charset=UTF-8
+#                k1: $k1
+#                k2: $k2
+#                webUrl: http://gmc-test.cfuture.shop/basis/BedMaintain?k=1-99897828607-XN3142
+#            json:
+#                areaId: $areaId
+#                locationType: 0
+#            method: POST
+#            url: /app-sys-manage/bedManage/queryBedByArea
+#        validate:
+#        -   eq:
+#            - content.code
+#            - 2000
+#        -   eq:
+#            - content.message
+#            - success
+
+
+-   test:
+        name: 查询床位及患者信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $areaId
+            method: GET
+            url: /app-nurse-station/bedPatient/findAll
+        validate:
+        -   eq:
+            - content.message
+            - success
+        - eq:
+            - content.code
+            - 2000
+
+

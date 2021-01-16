@@ -23,16 +23,16 @@ def generate_report(now_timestamp, result):
     project_name = os.path.split(sys.path[1])[1]
     visit_url = project_name + '/reports/' + now_timestamp + '.html'
     remote_report_url = 'http://' + remote_ip + '/' + visit_url
-    local_report_url = 'http://localhost:' + config.get_conf("local",
-                                                              "html_open_port") + '/' + visit_url
+    local_report_url = 'http://localhost:' + config.get_conf("local","html_open_port") + '/' + visit_url
     flag = platform.system() == 'Windows' or platform.system() == 'Darwin'
 
     result = {"url": local_report_url if flag else remote_report_url,
-              "result": f"{'测试通过'  if result['success'] else '测试不通过'}",
-              "jenkins_url": f"{jenkins_url}",
-              "pass": f"{result['stat']['teststeps']['successes']}",
-              "fail": f"{result['stat']['teststeps']['failures']}",
-              "skip": f"{result['stat']['teststeps']['skipped']}"}
+              "result": '测试通过' if result['success'] else '测试不通过',
+              "flag": result['success'],
+              "jenkins_url": jenkins_url,
+              "pass": result['stat']['teststeps']['successes'],
+              "fail": result['stat']['teststeps']['failures'],
+              "skip": result['stat']['teststeps']['skipped']}
 
     return result
 

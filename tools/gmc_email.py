@@ -27,7 +27,7 @@ class SendEmail(object):
         mail_content = f"""<p>您好，您的自动化测试任务已完成，以下是测试结果请查收: </p>
                        <p><a href = "{self.result['url']}" >点击查看测试报告 </a></p>
                        <a href = "{self.result['jenkins_url']}" >点击查看jenkins构建地址 </a>
-                       <p>测试结果：<font size="2" color="green">{self.result['result']}</font></p>
+                       <p>测试结果：<font size="2" color={'green' if self.result['flag'] else 'red'}>{self.result['result']}</font></p>
                        <p>通过用例：<font size="2" color="green">{self.result['pass']}</font> </p> 
                        <p>失败用例：<font size="2" color="red">{self.result['fail']}</font></p> 
                        <p>跳过用例：<font size="2" color="grey">{self.result['skip']}</font> </p>"""
@@ -38,7 +38,7 @@ class SendEmail(object):
         msg = MIMEText(mail_content, "html", 'utf-8')
         msg["Subject"] = Header(mail_title, 'utf-8')
         msg["From"] = self.mail_sender
-        msg["To"] = Header("接收者测试", 'utf-8')  ## 接收者的别名
+        msg["To"] = Header("可乐", 'utf-8')  ## 接收者的别名
 
         smtp = SMTP_SSL(self.mail_smtpserver)
         # set_debuglevel()是用来调试的。参数值为1表示开启调试模式，参数值为0关闭调试模式

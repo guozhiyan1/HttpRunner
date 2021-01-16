@@ -13,3 +13,5 @@ jsonpath==0.82
 jenkins~=1.0.2
 python-jenkins~=1.7.0
 configparser~=5.0.1
+pyMysql
+faker

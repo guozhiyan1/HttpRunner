@@ -5,7 +5,7 @@ import os
 import sys
 
 from httprunner.har2case import utils
-from httprunner.har2case import urlparse
+from httprunner.har2case.compat import urlparse
 try:
     from json.decoder import JSONDecodeError
 except ImportError:
@@ -406,6 +406,16 @@ class HarParser(object):
         logging.info("Start to generate testcase.")
         testcase = self._make_testcase(fmt_version)
         logging.debug("prepared testcase: {}".format(testcase))
+        for i in testcase[1:]:
+            name = i['test']['name']
+            for j in ['ws/ws', '.js', '.woff', '.css', 'track', 'c_webskt']:
+                if j in name:
+                    testcase.remove(i)
+                    break
+        for i in testcase:
+            print(i)
+
+
         if file_type == "JSON":
             utils.dump_json(testcase, output_testcase_file)
         else:

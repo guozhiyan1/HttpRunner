@@ -1,6 +1,6 @@
 from httprunner.api import HttpRunner
 from httprunner.report.html import (gen_html_report)
-from tools import ding_talk, report_data, gmc_email
+from tools import report_data
 from datetime import datetime
 import sys
 
@@ -13,8 +13,8 @@ if __name__ == '__main__':
 
     # runner = HttpRunner(failfast=False, log_level="debug")
     runner = HttpRunner(failfast=False, log_level="debug")
-    # result = runner.run("testcase/hospital/HospitalizedRegister.yml", dot_env_path="test.env")
-    result = runner.run("api/token.yml", dot_env_path="test.env")
+    # result = runner.run("testcase/hospital/add_bed.yml", dot_env_path="test.env")
+    result = runner.run("testcase/cis/patient_in_bed.yml", dot_env_path="test.env")
 
     # 当前时间戳
     now_timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
@@ -27,10 +27,10 @@ if __name__ == '__main__':
 
     # 钉钉通知
     # ding_talk.DingTalkSend(result)
-
-    # 发送通知邮件
-    emails = gmc_email.SendEmail(result)
-    emails.sendFile()
-
+    #
+    # # 发送通知邮件
+    # emails = gmc_email.SendEmail(result)
+    # emails.sendFile()
+    #
 
 

@@ -13,8 +13,8 @@ import logging
 import sys
 from distutils.version import StrictVersion
 
-from httprunner.har2case import __description__
-from httprunner.har2case import HarParser
+from httprunner.har2case.__about__ import __description__
+from httprunner.har2case.core import HarParser
 
 try:
     from httprunner.__about__ import __version__ as HRUN_VERSION

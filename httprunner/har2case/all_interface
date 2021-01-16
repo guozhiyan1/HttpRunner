@@ -2262,7 +2262,7 @@
 /app-portal/update/institutionMaintenance  修改机构维护信息
 /app-portal/user/config/get/default/input/method  获取用户设置默认输入法
 /app-portal/user/config/setup/default/input/method/{input}  设置默认输入法
-/app-portal/user/info  getUserInfo
+/app-portal/user/info  获取用户信息
 /app-portal/user/location/default/{orgId}/{locationId}  changeDefaultLocation
 /app-portal/verifyModuleCodeRepetition  验证项目编码的唯一性
 /app-sys-manage/acl/role/delete/role  删除角色
@@ -4505,7 +4505,7 @@
 /app-nurse-station/bedPatient/allergen/ca/sign  保存过敏史ca签名
 /app-nurse-station/bedPatient/baby/show  查询是否显示新生儿
 /app-nurse-station/bedPatient/card/zheyi/print  浙一床卡打印
-/app-nurse-station/bedPatient/findAll  listBedPatient
+/app-nurse-station/bedPatient/findAll  查询床位及患者信息
 /app-nurse-station/bedPatient/location/baby/show  查询指定病区是否显示新生儿
 /app-nurse-station/bedPatient/refresh  查询患者实时状态
 /app-nurse-station/blood/apply/list  查询输血申请列表
@@ -5801,6 +5801,6 @@
 /app-portal/update/institutionMaintenance  修改机构维护信息
 /app-portal/user/config/get/default/input/method  获取用户设置默认输入法
 /app-portal/user/config/setup/default/input/method/{input}  设置默认输入法
-/app-portal/user/info  getUserInfo
+/app-portal/user/info  获取用户信息
 /app-portal/user/location/default/{orgId}/{locationId}  changeDefaultLocation
 /app-portal/verifyModuleCodeRepetition  验证项目编码的唯一性
