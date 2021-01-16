@@ -2,7 +2,10 @@ import faker
 import random
 import string
 from . import genenate_chinese_name
+import threading
+
 fake = faker.Faker(locale='zh_CN')
+thread_local = threading.local()
 
 
 def getcard():
@@ -41,7 +44,10 @@ def get_patient_data():
         "bed_type_id": 2995,
         "bed_id": get_number(6)
     }
+    thread_local.in_hospital_id = dicts['inhospital_id']
     return dicts
 
-
 sql_data_dicts = get_patient_data()
+
+
+

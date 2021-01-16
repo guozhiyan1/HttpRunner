@@ -9,6 +9,7 @@ from tools import gmc_mysql
 import faker
 from data.basic_dict import sql_data_dicts
 from data.newpatient import *
+from data import basic_dict
 
 BASE_URL = "http://127.0.0.1:5000"
 fake = faker.Faker(locale='zh_CN')
@@ -224,11 +225,12 @@ def gmc_run_mysql(master_patient_index, bed_number, *args):
     sql_data_dicts["master_patient_index"] = master_patient_index
     sql_data_dicts["bed_number"] = bed_number
     sql_data_dicts["bed_id"] = bed_number
+    print(basic_dict.thread_local.in_hospital_id)
 
     for j in run_sql:
         for s in sql_data_dicts:
             j = j.replace(f"[{s}]", f"'{sql_data_dicts[s]}'")
-        gmc_mysql.get_database(j)
+        # gmc_mysql.get_database(j)
     return sql_data_dicts
 
 
