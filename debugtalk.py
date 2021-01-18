@@ -234,6 +234,7 @@ def get_sql_result(*args):
     result = gmc_run_mysql(*args)
     for i in result:
         for j in i:
+            print("对比值", i[j], sql_data_dicts[j])
             if str(i[j]) != sql_data_dicts[j]:
                 return False
     return True
