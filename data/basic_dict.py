@@ -23,8 +23,9 @@ def get_card_number():
 
 
 def get_patient_data():
+    bed_number = get_number(6)
     dicts = {
-        "patient_name": genenate_chinese_name.create_name(),
+        "patient_name": "测试"+genenate_chinese_name.create_name(),
         "card_number": fake.ssn(min_age=18, max_age=90),
         "inhospital_id": get_number(8),
         "globelpatient_id": get_number(8),
@@ -42,7 +43,8 @@ def get_patient_data():
         "room_id": 3161,
         "location_id": 99897828609,
         "bed_type_id": 2995,
-        "bed_id": get_number(6)
+        "bed_id": bed_number,
+        "bed_number": bed_number,
     }
     thread_local.dict = dicts
     return dicts

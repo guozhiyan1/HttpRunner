@@ -232,10 +232,11 @@ def gmc_run_mysql(*args, **kwargs):
 
 def get_sql_result(*args):
     result = gmc_run_mysql(*args)
+    print(result, sql_data_dicts)
     for i in result:
         for j in i:
-            print("对比值", i[j], sql_data_dicts[j])
-            if str(i[j]) != sql_data_dicts[j]:
+            print("对比值", str(i[j]), str(sql_data_dicts[j]))
+            if str(i[j]) != str(sql_data_dicts[j]):
                 return False
     return True
 
@@ -250,7 +251,5 @@ def get_list_dict_value(value_list, key, value, result):
             return str(i[result])
 
 
-
 if __name__ == '__main__':
-    # print(get_thread_local())
     print(gmc_run_mysql("search_inhospital_patient_bed"))

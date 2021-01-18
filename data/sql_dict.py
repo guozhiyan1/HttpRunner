@@ -77,5 +77,5 @@ add_bed = ["""INSERT INTO `inhospital_register_db`.`biz_bed_info`(`id`, `org_id`
 
 
 search_inhospital_patient_bed = ["""
-select bed_id, master_patient_index from inhospital_register_db.biz_inhospital_patient  where bed_number = [bed_number];
+select bed_number, master_patient_index, hospitalized_area_id as area_id, hospitalized_dept_id as department_id from inhospital_register_db.biz_inhospital_patient  where bed_id = [bed_id];
 """]
