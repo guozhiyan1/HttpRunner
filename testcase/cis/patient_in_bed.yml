@@ -9,6 +9,7 @@
             locationId: 99897828609
             master_patient_index: ${gen_random_string(32)}
             bed_number: ${get_number(6)}
+            patient_id: ${get_thread_local_patient_id()}
 
 
 -   test:
@@ -23,70 +24,10 @@
         api: api/user_info.yml
         name: 切换登录院区部门
 
-#-   test:
-#        name: getUserInfo
-#        setup_hooks:
-#          - ${gmc_run_mysql($master_patient_index, patient_info, inhospital_register, add_bed)}
-#        request:
-#            headers:
-#                Authorization: ${get_token($token)}
-#                Content-Type: application/json; charset=UTF-8
-#                k1: $k1
-#                k2: $k2
-#            json: {}
-#            method: POST
-#            url: /app-portal/user/info
-#        validate:
-#        -   eq:
-#            - content.code
-#            - 2000
-#        -   eq:
-#            - content.message
-#            - success
-#-   test:
-#        name: 获取机构系统参数(查不到返回'')
-#        request:
-#            headers:
-#                Authorization: ${get_token($token)}
-#                Content-Type: application/json; charset=UTF-8
-#                k1: $k1
-#                k2: $k2
-#            json:
-#                parameterCode: $parameterCode
-#            method: POST
-#            url: /app-sys-manage/param/getOrgSystemParam
-#        validate:
-#        -   eq:
-#            - content.code
-#            - 2000
-#        -   eq:
-#            - content.message
-#            - success
-#        -   eq:
-#            - content.body
-#            - '2'
-#-   test:
-#        name: 获取用户菜单
-#        request:
-#            headers:
-#                Authorization: ${get_token($token)}
-#                Content-Type: application/json; charset=UTF-8
-#                k1: $k1
-#                k2: $k2
-#            json: {}
-#            method: POST
-#            url: /app-portal/permission/query/user/menu
-#        validate:
-#        -   eq:
-#            - content.code
-#            - 2000
-#        -   eq:
-#            - content.message
-#            - success
 -   test:
         name: 通用查询系统参数
         setup_hooks:
-        -   ${gmc_run_mysql($master_patient_index, $bed_number, patient_info, inhospital_register, add_bed)}
+        -   ${gmc_run_mysql(patient_info, inhospital_register, add_bed, master_patient_index=$master_patient_index, bed_number=$bed_number,bed_id=$bed_number, patient_id=$patient_id)}
         request:
             headers:
                 Authorization: ${get_token($token)}
@@ -376,6 +317,8 @@
         -   eq:
             - content.message
             - success
+        extract:
+          nurse_id: content.body.0.userId
 -   test:
         name: 查询某个地点下的医师列表
         request:
@@ -385,7 +328,7 @@
                 k1: $k1
                 k2: $k2
             json:
-                locationId: $locationId
+                locationId: $areaId
                 queryKey: ''
             method: POST
             url: /app-nurse-station/staff/listDoctor
@@ -396,6 +339,9 @@
         -   eq:
             - content.message
             - success
+        extract:
+            - doctor: content.body.0.id
+
 -   test:
         name: 查询患者是否有新生儿
         request:
@@ -404,7 +350,7 @@
                 k1: $k1
                 k2: $k2
             method: GET
-            url: /app-nurse-station/patient/${get_list_dict_value($patientId, masterPatientIndex, $master_patient_index, inHospitalPatientId)}/hasbabys
+            url: /app-nurse-station/patient/$patient_id/hasbabys
         validate:
         -   eq:
             - content.code
@@ -415,105 +361,94 @@
         -   eq:
             - content.body
             - false
-#-   test:
-#        name: 校验床位是否是责任护士管辖
-#        request:
-#            headers:
-#                Authorization: ${get_token($token)}
-#                Content-Type: application/json; charset=UTF-8
-#                k1: $k1
-#                k2: $k2
-#            json:
-#                bedId: $bedId
-#                nurseId: $nurseId
-#            method: POST
-#            url: /app-nurse-station/patient/check/nurse
-#        validate:
-#        -   eq:
-#            - content.code
-#            - 2000
-#        -   eq:
-#            - content.message
-#            - success
-#        -   eq:
-#            - content.body
-#            - false
-#-   test:
-#        name: 病人安床
-#        request:
-#            headers:
-#                Authorization: ${get_token($token)}
-#                Content-Type: application/json; charset=UTF-8
-#                k1: $k1
-#                k2: $k2
-#            json:
-#                babyBackToMom: false
-#                bedId: $bedId
-#                chiefDoctorId: $chiefDoctorId
-#                inDeptId: $inDeptId
-#                inHospitalDate: $inHospitalDate
-#                inHospitalPatientId: $inHospitalPatientId
-#                mainNurseId: $mainNurseId
-#            method: POST
-#            url: /app-nurse-station/patient/arrange/bed
-#        validate:
-#        -   eq:
-#            - content.code
-#            - 2000
-#        -   eq:
-#            - content.message
-#            - success
-#        -   eq:
-#            - content.body
-#            - true
-#-   test:
-#        name: listBedPatient
-#        request:
-#            headers:
-#                Authorization: ${get_token($token)}
-#                k1: $k1
-#                k2: $k2
-#            method: GET
-#            url: /app-nurse-station/bedPatient/findAll
-#        validate:
-#        -   eq:
-#            - content.code
-#            - 2000
-#        -   eq:
-#            - content.message
-#            - success
-#        extract:
-#          -
-#-   test:
-#        name: 查询某个病区的待安床病人列表
-#        request:
-#            headers:
-#                Authorization: ${get_token($token)}
-#                k1: $k1
-#                k2: $k2
-#            method: GET
-#            url: /app-nurse-station/patient/wait/list
-#        validate:
-#        -   eq:
-#            - content.code
-#            - 2000
-#        -   eq:
-#            - content.message
-#            - success
-#-   test:
-#        name: 查询当前病区对应的科室列表
-#        request:
-#            headers:
-#                Authorization: ${get_token($token)}
-#                k1: $k1
-#                k2: $k2
-#            method: GET
-#            url: /app-nurse-station/location/relation/dept
-#        validate:
-#        -   eq:
-#            - content.code
-#            - 2000
-#        -   eq:
-#            - content.message
-#            - success
-#
+-   test:
+        name: 校验床位是否是责任护士管辖
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                bedId: $bed_number
+                nurseId: $nurse_id
+            method: POST
+            url: /app-nurse-station/patient/check/nurse
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - false
+-   test:
+        name: 病人安床
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                babyBackToMom: false
+                bedId: $bed_number
+                chiefDoctorId: $doctor
+                inDeptId: $k2
+                inHospitalDate: ${getdateandtime()}
+                inHospitalPatientId: $patient_id
+                mainNurseId: $nurse_id
+            method: POST
+            url: /app-nurse-station/patient/arrange/bed
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - true
+-   test:
+        name: 查询患者床位信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                k1: $k1
+                k2: $areaId
+            method: GET
+            url: /app-nurse-station/bedPatient/findAll
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        - eq:
+            - content.message
+            - success
+
+-   test:
+        name: 查询某个病区的待安床病人列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                k1: $k1
+                k2: $areaId
+            method: GET
+            url: /app-nurse-station/patient/wait/list
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - ${get_sql_result(search_inhospital_patient_bed)}
+            - True
+

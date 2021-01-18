@@ -8,7 +8,7 @@ from tools.IDCARD.idcard_provide import IDCardProvide
 from tools import gmc_mysql
 import faker
 from data.basic_dict import sql_data_dicts
-from data.newpatient import *
+from data.sql_dict import *
 from data import basic_dict
 
 BASE_URL = "http://127.0.0.1:5000"
@@ -31,7 +31,6 @@ def get_id_no():
             continue
         else:
             break
-
     return [card_no, f'huanzhe{card_no[-6:]}']
 
 
@@ -219,19 +218,29 @@ def get_sql_string(sql_string):
     return new_sql
 
 
-def gmc_run_mysql(master_patient_index, bed_number, *args):
-    run_sql = args
-    run_sql = get_sql_string(run_sql)
-    sql_data_dicts["master_patient_index"] = master_patient_index
-    sql_data_dicts["bed_number"] = bed_number
-    sql_data_dicts["bed_id"] = bed_number
-    print(basic_dict.thread_local.in_hospital_id)
-
+def gmc_run_mysql(*args, **kwargs):
+    run_sql = get_sql_string(args)
+    result_list = []
+    for i in kwargs:
+        sql_data_dicts[i] = kwargs[i]
     for j in run_sql:
         for s in sql_data_dicts:
             j = j.replace(f"[{s}]", f"'{sql_data_dicts[s]}'")
-        # gmc_mysql.get_database(j)
-    return sql_data_dicts
+        result_list += gmc_mysql.get_database(j)
+    return result_list
+
+
+def get_sql_result(*args):
+    result = gmc_run_mysql(*args)
+    for i in result:
+        for j in i:
+            if str(i[j]) != sql_data_dicts[j]:
+                return False
+    return True
+
+
+def get_thread_local_patient_id():
+    return basic_dict.thread_local.dict["inhospital_id"]
 
 
 def get_list_dict_value(value_list, key, value, result):
@@ -240,5 +249,7 @@ def get_list_dict_value(value_list, key, value, result):
             return str(i[result])
 
 
+
 if __name__ == '__main__':
-    print(gmc_run_mysql(gen_random_string(32), "add_bed"))
+    # print(get_thread_local())
+    print(gmc_run_mysql("search_inhospital_patient_bed"))

@@ -74,3 +74,8 @@ add_bed = ["""INSERT INTO `inhospital_register_db`.`biz_bed_info`(`id`, `org_id`
 """,
            """INSERT INTO `nurse_station_db`.`biz_bed_patient_relation`(`org_id`, `location_id`, `location_name`, `room_location_id`, `room_number`, `room_sort_number`, `bed_id`, `bed_number`, `bed_sort_number`, `inhospital_patient_id`, `master_patient_index`, `medical_record_no`, `patient_name`, `patient_pinyin`, `birthdate`, `hospitalized_date`, `gender_code`, `cost_type_code`, `diagnosis_code`, `diagnosis_name`, `operators_id`, `operate_time`, `bed_status`, `bed_use_status`, `create_by`, `gmt_create`, `modify_by`, `gmt_modify`, `active`, `version_no`, `reserve_sign`, `virtual_bed`, `baby_use_bed`, `neonate_sign`, `campus_location_id`, `isolation`, `emergency`, `GMC_ID`) VALUES 
 (1, [area_id], [area_name], [location_id], '可乐', NULL, [bed_id], [bed_id], 9, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 10101, '2021-01-15 13:47:53', 1, '0', 10101, '2021-01-15 13:47:53.179', 10101, '2021-01-15 13:47:53.179', 1, 1, NULL, 0, 0, 0, 2, NULL, NULL, 1);"""]
+
+
+search_inhospital_patient_bed = ["""
+select bed_id, master_patient_index from inhospital_register_db.biz_inhospital_patient  where bed_number = [bed_number];
+"""]

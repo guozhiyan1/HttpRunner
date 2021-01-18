@@ -44,10 +44,12 @@ def get_patient_data():
         "bed_type_id": 2995,
         "bed_id": get_number(6)
     }
-    thread_local.in_hospital_id = dicts['inhospital_id']
+    thread_local.dict = dicts
     return dicts
 
+
 sql_data_dicts = get_patient_data()
+
 
 
 
