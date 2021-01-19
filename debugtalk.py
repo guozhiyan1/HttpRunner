@@ -7,9 +7,9 @@ from httprunner import logger
 from tools.IDCARD.idcard_provide import IDCardProvide
 from tools import gmc_mysql
 import faker
-from data.basic_dict import sql_data_dicts
 from data.sql_dict import *
-from data import basic_dict
+from data.basic_dict import sql_data_dicts
+from importlib import reload
 
 BASE_URL = "http://127.0.0.1:5000"
 fake = faker.Faker(locale='zh_CN')
@@ -78,7 +78,8 @@ def skip_test_in_production_env():
 def sleep_time(i):
     for i in range(i):
         time.sleep(1)
-        logger.log_info(f"前置方法暂停{i}秒")
+        print(f"前置方法暂停{i}秒")
+
 
 def get_user_agent():
     return ["iOS/10.1", "iOS/10.2"]
@@ -102,7 +103,7 @@ def get_account_in_tuple():
     return [("user1", "111111"), ("user2", "222222")]
 
 
-def gen_random_string(str_len):
+def get_random_string(str_len):
     random_char_list = []
     for _ in range(str_len):
         random_char = random.choice(string.ascii_letters + string.digits)
@@ -164,8 +165,6 @@ def alter_response_302(response):
     }
 
 
-
-
 def get_token(token):
     #
     try:
@@ -215,6 +214,7 @@ def get_sql_string(sql_string):
     for i in sql_string:
         i = globals()[i]
         new_sql += i
+    print(new_sql)
     return new_sql
 
 
@@ -223,26 +223,32 @@ def gmc_run_mysql(*args, **kwargs):
     result_list = []
     for i in kwargs:
         sql_data_dicts[i] = kwargs[i]
+
     for j in run_sql:
         for s in sql_data_dicts:
-            j = j.replace(f"[{s}]", f"'{sql_data_dicts[s]}'")
+            if type(sql_data_dicts[s]) == int:
+                j = j.replace(f"[{s}]", f"{sql_data_dicts[s]}")
+            else:
+                j = j.replace(f"[{s}]", f"'{sql_data_dicts[s]}'")
+        print(j)
         result_list += gmc_mysql.get_database(j)
     return result_list
 
 
-def get_sql_result(*args):
-    result = gmc_run_mysql(*args)
+def get_sql_result(*args, **kwargs):
+    result = gmc_run_mysql(*args, **kwargs)
     print(result, sql_data_dicts)
-    for i in result:
-        for j in i:
-            print("对比值", str(i[j]), str(sql_data_dicts[j]))
-            if str(i[j]) != str(sql_data_dicts[j]):
-                return False
-    return True
+    if result:
+        for i in result:
+            for j in i:
+                print("对比值", str(i[j]), str(sql_data_dicts[j]))
+                if str(i[j]) != str(sql_data_dicts[j]):
+                    return False
+        return True
 
 
-def get_thread_local_patient_id():
-    return basic_dict.thread_local.dict["inhospital_id"]
+def reload_dict():
+    pass
 
 
 def get_list_dict_value(value_list, key, value, result):
@@ -252,4 +258,4 @@ def get_list_dict_value(value_list, key, value, result):
 
 
 if __name__ == '__main__':
-    print(gmc_run_mysql("search_inhospital_patient_bed"))
+    pass

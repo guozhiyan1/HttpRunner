@@ -8,8 +8,10 @@
             areaId: ${ENV(in_k3)}
             locationId: 99897828609
             master_patient_index: ${gen_random_string(32)}
-            bed_number: 4995
+            bed_number: ${get_number(6)}
+            bed_id: $bed_number
             patient_id: ${get_thread_local_patient_id()}
+            order_id: 78828401
 
 
 -   test:
@@ -42,7 +44,7 @@
             - content.message
             - success
         -   eq:
-            - ${get_sql_result(search_inhospital_patient_bed)}
+            - ${get_sql_result(query_inhospital_order_exec, master_patient_index=DUqE9m7bWKOdmVbwHCEqTkcVfdJ7ib2a, order_id=$order_id)}
             - True
 
 

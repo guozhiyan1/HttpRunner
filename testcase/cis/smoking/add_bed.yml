@@ -1,83 +1,38 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 床位维护测试
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(in_k2)}
+            orgId: ${ENV(orgId)}
+            areaId: ${ENV(in_k3)}
+            roomText: "可乐"
+            # bedNumber: ${get_number(6)}
+            bedStatus: 1
+            bedUseStatus: 0
+            # 0: 空闲
+            locationType: 0
+            roomLocationId: 0
+            # 1：实体床 2：虚拟床
+            virtualBed: 0
+            nowBedTypeId: 2969
+            nowBedTypeName: "WF"
+            patient_in_bed:
 
 -   test:
-        name: 查询药品打印配置
-        request:
-            headers:
-                Authorization: ${get_token($token)}
-                Content-Type: application/json; charset=UTF-8
-                k1: $k1
-                k2: $k2
-            json:
-                code: $code
-                level: $level
-            method: POST
-            url: /app-medication-manage/system/parameter/query/org/setting
-        validate:
-        -   eq:
-            - content.code
-            - 2000
-        -   eq:
-            - content.message
-            - success
-        -   eq:
-            - content.body
-            - '1'
+        api: api/token.yml
+        name: 登录获取token
+
 -   test:
-        name: 查询本location下护士组下拉框
-        request:
-            headers:
-                Authorization: ${get_token($token)}
-                k1: $k1
-                k2: $k2
-            method: GET
-            url: /app-nurse-station/nurse/group/card/list
-        validate:
-        -   eq:
-            - content.code
-            - 2000
-        -   eq:
-            - content.message
-            - success
+        api: api/setting.yml
+        name: 登录设置
+
 -   test:
-        name: 按护理组查询在院病列表
-        request:
-            headers:
-                Authorization: ${get_token($token)}
-                Content-Type: application/json; charset=UTF-8
-                k1: $k1
-                k2: $k2
-            json:
-                nurseGroupId: ''
-            method: POST
-            url: /app-nurse-station/patient/group/list
-        validate:
-        -   eq:
-            - content.code
-            - 2000
-        -   eq:
-            - content.message
-            - success
+        api: api/user_info.yml
+        name: 切换登录院区部门
+
 -   test:
-        name: 获取当前登陆的location类型，0-病区 1-留观诊区 2-急诊留观部门 3-住院部门 9-其他
-        request:
-            headers:
-                Authorization: ${get_token($token)}
-                k1: $k1
-                k2: $k2
-            method: GET
-            url: /app-nurse-station/location/logintype
-        validate:
-        -   eq:
-            - content.code
-            - 2000
-        -   eq:
-            - content.message
-            - success
-        -   eq:
-            - content.body
-            - 0
--   test:
-        name: /app-sys-manage/personality/table/getStyle/3142/1576809015000
+        name: 获取用户信息
         request:
             headers:
                 Authorization: ${get_token($token)}
@@ -86,26 +41,7 @@
                 k2: $k2
             json: {}
             method: POST
-            url: /app-sys-manage/personality/table/getStyle/3142/1576809015000
-        validate:
-        -   eq:
-            - content.code
-            - 2000
-        -   eq:
-            - content.message
-            - success
-        -   eq:
-            - content.body
-            - null
--   test:
-        name: getNurseProcess
-        request:
-            headers:
-                Authorization: ${get_token($token)}
-                k1: $k1
-                k2: $k2
-            method: GET
-            url: /app-nurse-station/common/process
+            url: /app-portal/user/info
         validate:
         -   eq:
             - content.code
@@ -114,7 +50,7 @@
             - content.message
             - success
 -   test:
-        name: 按护理组查询在院病列表
+        name: 获取机构系统参数
         request:
             headers:
                 Authorization: ${get_token($token)}
@@ -122,25 +58,9 @@
                 k1: $k1
                 k2: $k2
             json:
-                nurseGroupId: ''
+                parameterCode: 30000004
             method: POST
-            url: /app-nurse-station/patient/group/list
-        validate:
-        -   eq:
-            - content.code
-            - 2000
-        -   eq:
-            - content.message
-            - success
--   test:
-        name: 病区是否开启自动请领 true 自动请领 false 手动请领
-        request:
-            headers:
-                Authorization: ${get_token($token)}
-                k1: $k1
-                k2: $k2
-            method: GET
-            url: /app-nurse-station/common/
+            url: /app-sys-manage/param/getOrgSystemParam
         validate:
         -   eq:
             - content.code
@@ -150,7 +70,69 @@
             - success
         -   eq:
             - content.body
-            - true
+            - '2'
+-   test:
+        name: 查询用户菜单
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-portal/permission/query/user/menu
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 通用查询系统参数
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                deptSystemParamList:
+                -   900076
+            method: POST
+            url: /app-station-manage/orderCommon/listSystemParam
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 查询床位类型下拉列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+                webUrl: http://gmc-test.cfuture.shop/basis/BedMaintain?k=1-99897828607-XN3142
+            json: {"SearchText":2929}
+            method: POST
+            url: /app-sys-manage/bedTypeManage/queryBedTypeByText
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+#        extract:
+#            - BedType: content.body.0.TypeCode
+#            - BedTypeName: content.body.0.bedTypeName
+
 -   test:
         name: 首页显示模板列表查询
         request:
@@ -170,47 +152,20 @@
             - content.message
             - success
 -   test:
-        name: 查询医嘱执行列表
+        name: 获取病区列表
         request:
             headers:
                 Authorization: ${get_token($token)}
                 Content-Type: application/json; charset=UTF-8
                 k1: $k1
                 k2: $k2
+                webUrl: http://gmc-test.cfuture.shop/basis/BedMaintain?k=1-99897828607-XN3142
             json:
-                orderCategoryList: []
-                orderExecutionDate: $orderExecutionDate
-                orderSignStatus: 0
-                patientIdList: $patientIdList
-                usageType: $usageType
+                keyName: searchText
+                locationType: 0
+                searchText: $roomText
             method: POST
-            url: /app-nurse-station/order/execution/list
-        validate:
-        -   eq:
-            - content.code
-            - 4007
-        -   eq:
-            - content.message
-            - 患者:赵**,已不在本病区,请刷新患者列表
-        -   eq:
-            - content.body
-            - null
--   test:
-        name: 查询医嘱执行列表
-        request:
-            headers:
-                Authorization: ${get_token($token)}
-                Content-Type: application/json; charset=UTF-8
-                k1: $k1
-                k2: $k2
-            json:
-                orderCategoryList: []
-                orderExecutionDate: $orderExecutionDate
-                orderSignStatus: 0
-                patientIdList: $patientIdList
-                usageType: $usageType
-            method: POST
-            url: /app-nurse-station/order/execution/list
+            url: /app-sys-manage/bedManage/getWardLocationList
         validate:
         -   eq:
             - content.code
@@ -219,14 +174,89 @@
             - content.message
             - success
 -   test:
-        name: 病区是否开启CA
+        name: 根据病区查询床位最大排序号
         request:
             headers:
                 Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
                 k1: $k1
                 k2: $k2
-            method: GET
-            url: /app-nurse-station/ca/isOpen
+                webUrl: http://gmc-test.cfuture.shop/basis/BedMaintain?k=1-99897828607-XN3142
+            json:
+                areaId: ${ENV(in_k3)}
+            method: POST
+            url: /app-sys-manage/bedManage/getMaxBedSortNum
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          - MaxId: content.body
+
+-   test:
+        name: 据病区查询床位列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+                webUrl: http://gmc-test.cfuture.shop/basis/BedMaintain?k=1-99897828607-XN3142
+            json:
+                areaId: ${ENV(in_k3)}
+                locationType: 0
+            method: POST
+            url: /app-sys-manage/bedManage/queryBedByArea
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 查询房间下拉列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+                webUrl: http://gmc-test.cfuture.shop/basis/BedMaintain?k=1-99897828607-XN3142
+            json:
+                areaId: $areaId
+                keyName: searchText
+                searchText: $roomText
+            method: POST
+            url: /app-sys-manage/bedRoomManage/queryRoomByText
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          roomId: content.body.0.id
+-   test:
+        name: 验证床位号是否重复
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+                webUrl: http://gmc-test.cfuture.shop/basis/BedMaintain?k=1-99897828607-XN3142
+            json:
+                areaId: $areaId
+                bedInfoId: 0
+                bedNumber: $MaxId
+            method: POST
+            url: /app-sys-manage/bedManage/verifyBedNumber
         validate:
         -   eq:
             - content.code
@@ -237,19 +267,33 @@
         -   eq:
             - content.body
             - false
+#
 -   test:
-        name: 执行前的验证
+        name: 保存新增床位
         request:
             headers:
                 Authorization: ${get_token($token)}
                 Content-Type: application/json; charset=UTF-8
                 k1: $k1
                 k2: $k2
+                webUrl: http://gmc-test.cfuture.shop/basis/BedMaintain?k=1-99897828607-XN3142
             json:
-                exeDate: $exeDate
-                patientIdList: $patientIdList
+                areaId: $areaId
+                bedNumber: $MaxId
+                bedStatus: $bedStatus
+                bedTypeId: $nowBedTypeId
+                bedTypeName: $nowBedTypeName
+                bedUseStatus: $bedUseStatus
+                defaultBedTypeId: $nowBedTypeId
+                locationType: 0
+                nowBedTypeId: $nowBedTypeId
+                roomId: $roomId
+                roomLocationId: $roomLocationId
+                roomNumber: $roomText
+                virtualBed: $virtualBed
+                sortNumber: $MaxId
             method: POST
-            url: /app-nurse-station/order/execution/valid
+            url: /app-sys-manage/bedManage/saveBedInfo
         validate:
         -   eq:
             - content.code
@@ -257,22 +301,23 @@
         -   eq:
             - content.message
             - success
+        -   eq:
+            - content.body
+            - true
 -   test:
-        name: 查询医嘱执行列表
+        name: 据病区查询床位列表
         request:
             headers:
                 Authorization: ${get_token($token)}
                 Content-Type: application/json; charset=UTF-8
                 k1: $k1
                 k2: $k2
+                webUrl: http://gmc-test.cfuture.shop/basis/BedMaintain?k=1-99897828607-XN3142
             json:
-                orderCategoryList: []
-                orderExecutionDate: $orderExecutionDate
-                orderSignStatus: 0
-                patientIdList: $patientIdList
-                usageType: $usageType
+                areaId: $areaId
+                locationType: 0
             method: POST
-            url: /app-nurse-station/order/execution/list
+            url: /app-sys-manage/bedManage/queryBedByArea
         validate:
         -   eq:
             - content.code
@@ -280,66 +325,25 @@
         -   eq:
             - content.message
             - success
+
+
 -   test:
-        name: 医嘱执行
+        name: 查询床位及患者信息
         request:
             headers:
                 Authorization: ${get_token($token)}
                 Content-Type: application/json; charset=UTF-8
                 k1: $k1
-                k2: $k2
-            json:
-                executeDate: $executeDate
-                orderIdList: $orderIdList
-            method: POST
-            url: /app-nurse-station/order/execution/execute
+                k2: $areaId
+            method: GET
+            url: /app-nurse-station/bedPatient/findAll
         validate:
-        -   eq:
-            - content.code
-            - 2000
         -   eq:
             - content.message
             - success
--   test:
-        name: 执行前的验证
-        request:
-            headers:
-                Authorization: ${get_token($token)}
-                Content-Type: application/json; charset=UTF-8
-                k1: $k1
-                k2: $k2
-            json:
-                exeDate: $exeDate
-                patientIdList: $patientIdList
-            method: POST
-            url: /app-nurse-station/order/execution/valid
-        validate:
-        -   eq:
+        - eq:
             - content.code
             - 2000
-        -   eq:
-            - content.message
-            - success
--   test:
-        name: 查询医嘱执行列表
-        request:
-            headers:
-                Authorization: ${get_token($token)}
-                Content-Type: application/json; charset=UTF-8
-                k1: $k1
-                k2: $k2
-            json:
-                orderCategoryList: []
-                orderExecutionDate: $orderExecutionDate
-                orderSignStatus: 0
-                patientIdList: $patientIdList
-                usageType: $usageType
-            method: POST
-            url: /app-nurse-station/order/execution/list
-        validate:
-        -   eq:
-            - content.code
-            - 2000
-        -   eq:
-            - content.message
-            - success
+        teardown_hooks:
+          - ${reload_dict()}
+

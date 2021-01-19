@@ -1,6 +1,6 @@
 -   config:
         base_url: ${ENV(host)}
-        name: 床位维护冒烟测试
+        name: 患者安床测试
         variables:
             k1: ${ENV(out_k1)}
             k2: ${ENV(in_k2)}
@@ -9,7 +9,8 @@
             locationId: 99897828609
             master_patient_index: ${gen_random_string(32)}
             bed_number: ${get_number(6)}
-            patient_id: ${get_thread_local_patient_id()}
+            patient_id: ${get_number(8)}
+            inhospital_id: ${get_number(8)}
 
 
 -   test:
@@ -27,7 +28,7 @@
 -   test:
         name: 通用查询系统参数
         setup_hooks:
-        -   ${gmc_run_mysql(patient_info, inhospital_register, add_bed, master_patient_index=$master_patient_index, bed_number=$bed_number,bed_id=$bed_number, patient_id=$patient_id)}
+        -   ${gmc_run_mysql(patient_info, inhospital_register, add_bed, master_patient_index=$master_patient_index, bed_number=$bed_number,bed_id=$bed_number, patient_id=$patient_id,inhospital_id=$inhospital_id)}
         request:
             headers:
                 Authorization: ${get_token($token)}
@@ -46,6 +47,9 @@
         -   eq:
             - content.message
             - success
+
+
+
 -   test:
         name: 获取护士站医嘱打印二级路由
         request:
@@ -398,7 +402,7 @@
                 chiefDoctorId: $doctor
                 inDeptId: $k2
                 inHospitalDate: ${getdateandtime()}
-                inHospitalPatientId: $patient_id
+                inHospitalPatientId: $inhospital_id
                 mainNurseId: $nurse_id
             method: POST
             url: /app-nurse-station/patient/arrange/bed
@@ -451,4 +455,5 @@
         -   eq:
             - ${get_sql_result(search_inhospital_patient_bed)}
             - True
-
+        teardown_hooks:
+          - ${reload_dict()}

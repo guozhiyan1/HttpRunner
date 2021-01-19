@@ -1,7 +1,7 @@
 import faker
 import random
 import string
-from . import genenate_chinese_name
+from data import genenate_chinese_name
 import threading
 
 fake = faker.Faker(locale='zh_CN')
@@ -16,6 +16,16 @@ def getcard():
 def get_number(n):
     new_number = ''.join(random.sample('0123456789', n))
     return new_number
+
+
+def get_random_string(str_len):
+    random_char_list = []
+    for _ in range(str_len):
+        random_char = random.choice(string.ascii_letters + string.digits)
+        random_char_list.append(random_char)
+
+    random_string = ''.join(random_char_list)
+    return random_string
 
 
 def get_card_number():
@@ -45,12 +55,24 @@ def get_patient_data():
         "bed_type_id": 2995,
         "bed_id": bed_number,
         "bed_number": bed_number,
+        "medical_record_no": get_number(10),
+        "bed_patient_relation_id": get_number(10),
+        "order_id": int(get_number(6)),
+        "master_patient_index": get_random_string(32),
+        "user_id": 3142,
+        "user_name": "医快一7",
     }
     thread_local.dict = dicts
     return dicts
 
 
 sql_data_dicts = get_patient_data()
+
+
+if __name__ == '__main__':
+    sql_data_dicts = get_patient_data()
+
+
 
 
 
