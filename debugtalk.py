@@ -8,12 +8,13 @@ from tools.IDCARD.idcard_provide import IDCardProvide
 from tools import gmc_mysql
 import faker
 from data.sql_dict import *
-from data.basic_dict import sql_data_dicts
+from data import basic_dict
+
 from importlib import reload
 
 BASE_URL = "http://127.0.0.1:5000"
 fake = faker.Faker(locale='zh_CN')
-
+sql_data_dicts = basic_dict.sql_data_dicts
 
 def get_id_no():
     """
@@ -182,6 +183,7 @@ def getdateandtime(month=""):
     today = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     return today
 
+
 def getTZdate():
     today = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.localtime())
     return today
@@ -223,7 +225,6 @@ def gmc_run_mysql(*args, **kwargs):
     result_list = []
     for i in kwargs:
         sql_data_dicts[i] = kwargs[i]
-
     for j in run_sql:
         for s in sql_data_dicts:
             if type(sql_data_dicts[s]) == int:
@@ -248,7 +249,12 @@ def get_sql_result(*args, **kwargs):
 
 
 def reload_dict():
-    pass
+    global sql_data_dicts
+    sql_data_dicts = basic_dict.get_patient_data()
+
+
+def get_result_dicts(key):
+    return sql_data_dicts[key]
 
 
 def get_list_dict_value(value_list, key, value, result):
@@ -258,4 +264,6 @@ def get_list_dict_value(value_list, key, value, result):
 
 
 if __name__ == '__main__':
-    pass
+    print(sql_data_dicts)
+    reload_dict()
+    print(sql_data_dicts)

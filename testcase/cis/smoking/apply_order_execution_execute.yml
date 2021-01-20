@@ -1,16 +1,12 @@
 -   config:
         base_url: ${ENV(host)}
-        name: 药品医嘱执行测试
+        name: 检验医嘱执行测试
         variables:
             k1: ${ENV(out_k1)}
             k2: ${ENV(in_k2)}
             orgId: ${ENV(orgId)}
             areaId: ${ENV(in_k3)}
             locationId: 99897828609
-            master_patient_index: ${gen_random_string(32)}
-            bed_number: ${get_number(6)}
-            patient_id: ${get_number(8)}
-            inhospital_id: ${get_number(8)}
 
 -   test:
         api: api/token.yml
@@ -28,7 +24,7 @@
 -   test:
         name: 查询某个病区的待安床病人列表
         setup_hooks:
-          - ${gmc_run_mysql(patient_info, inhospital_register, add_bed,patient_add_bed, inhospital_patient_doctor_order, master_patient_index=$master_patient_index, bed_number=$bed_number,bed_id=$bed_number, patient_id=$patient_id, inhospital_id=$inhospital_id)}
+          - ${gmc_run_mysql(patient_info, inhospital_register, add_bed,patient_add_bed, apply_order_add)}
         request:
             headers:
                 Authorization: ${get_token($token)}
@@ -47,103 +43,10 @@
           - patientId: content.body
 
 
-
-
--   test:
-        name: /app-sys-manage/personality/table/getStyle/3142/1576809015000
-        request:
-            headers:
-                Authorization: ${get_token($token)}
-                Content-Type: application/json; charset=UTF-8
-                k1: $k1
-                k2: $areaId
-            json: {}
-            method: POST
-            url: /app-sys-manage/personality/table/getStyle/3142/1576809015000
-        validate:
-        -   eq:
-            - content.code
-            - 2000
-        -   eq:
-            - content.message
-            - success
-        -   eq:
-            - content.body
-            - null
--   test:
-        name: getNurseProcess
-        request:
-            headers:
-                Authorization: ${get_token($token)}
-                k1: $k1
-                k2: $areaId
-            method: GET
-            url: /app-nurse-station/common/process
-        validate:
-        -   eq:
-            - content.code
-            - 2000
-        -   eq:
-            - content.message
-            - success
--   test:
-        name: 按护理组查询在院病列表
-        request:
-            headers:
-                Authorization: ${get_token($token)}
-                Content-Type: application/json; charset=UTF-8
-                k1: $k1
-                k2: $areaId
-            json:
-                nurseGroupId: ''
-            method: POST
-            url: /app-nurse-station/patient/group/list
-        validate:
-        -   eq:
-            - content.code
-            - 2000
-        -   eq:
-            - content.message
-            - success
--   test:
-        name: 病区是否开启自动请领 true 自动请领 false 手动请领
-        request:
-            headers:
-                Authorization: ${get_token($token)}
-                k1: $k1
-                k2: $areaId
-            method: GET
-            url: /app-nurse-station/common/
-        validate:
-        -   eq:
-            - content.code
-            - 2000
-        -   eq:
-            - content.message
-            - success
-        -   eq:
-            - content.body
-            - true
--   test:
-        name: 首页显示模板列表查询
-        request:
-            headers:
-                Authorization: ${get_token($token)}
-                Content-Type: application/json; charset=UTF-8
-                k1: $k1
-                k2: $areaId
-            json: {}
-            method: POST
-            url: /app-portal/stationmanage/stationConfig/list/getHomepage
-        validate:
-        -   eq:
-            - content.code
-            - 2000
-        -   eq:
-            - content.message
-            - success
 -   test:
         name: 查询医嘱执行列表
+        setup_hooks:
+          - ${sleep_time(2)}
         request:
             headers:
                 Authorization: ${get_token($token)}
@@ -151,12 +54,12 @@
                 k1: $k1
                 k2: $areaId
             json:
-                orderCategoryList: []
-                orderExecutionDate: ${getdate()}
-                orderSignStatus: 0
-                patientIdList:
-                - $inhospital_id
-                usageType:
+              orderCategoryList: []
+              orderExecutionDate: ${getdate()}
+              orderSignStatus: 0
+              patientIdList:
+                - ${get_result_dicts(inhospital_id)}
+              usageType:
                 - 0: "1"
                 - 1: "2"
             method: POST
@@ -170,7 +73,6 @@
             - success
         extract:
           - order_id: content.body.0.id
-
 -   test:
         name: 病区是否开启CA
         request:
@@ -199,9 +101,9 @@
                 k1: $k1
                 k2: $areaId
             json:
-                exeDate: ${getdate()}
-                patientIdList:
-                - $inhospital_id
+              exeDate: ${getdate()}
+              patientIdList:
+                - ${get_result_dicts(inhospital_id)}
             method: POST
             url: /app-nurse-station/order/execution/valid
         validate:
@@ -233,13 +135,11 @@
         -   eq:
             - content.message
             - success
-        -   eq:
+        - eq:
             - content.body.message
             - 操作成功,请稍后查看结果
 -   test:
         name: 执行前的验证
-        setup_hooks:
-        -   ${sleep_time(2)}
         request:
             headers:
                 Authorization: ${get_token($token)}
@@ -249,7 +149,7 @@
             json:
                 exeDate: ${getdate()}
                 patientIdList:
-                - $inhospital_id
+                  - ${get_result_dicts(inhospital_id)}
             method: POST
             url: /app-nurse-station/order/execution/valid
         validate:
@@ -259,8 +159,14 @@
         -   eq:
             - content.message
             - success
-        -   eq:
-            - ${get_sql_result(query_inhospital_order_exec, bed_number=$bed_number)}
-            - True
+-   test:
+        name: 查询某个病区的待安床病人列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                k1: $k1
+                k2: $areaId
+            method: GET
+            url: /app-nurse-station/patient/wait/list
         teardown_hooks:
           - ${reload_dict()}

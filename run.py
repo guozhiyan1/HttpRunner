@@ -15,7 +15,7 @@ if __name__ == '__main__':
     # runner = HttpRunner(failfast=False, log_level="debug")
     runner = HttpRunner(failfast=False, log_level="debug")
     # result = runner.run("testcase/hospital/add_bed.yml", dot_env_path="test.env")
-    result = runner.run("testcase/cis/smoking/patient_in_bed.yml", dot_env_path="test.env")
+    result = runner.run("testcase/cis/smoking/", dot_env_path="test.env")
 
     # 当前时间戳
     now_timestamp = datetime.now().strftime('%Y%m%d%H%M%S')

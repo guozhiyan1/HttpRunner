@@ -7,10 +7,6 @@
             orgId: ${ENV(orgId)}
             areaId: ${ENV(in_k3)}
             locationId: 99897828609
-            master_patient_index: ${gen_random_string(32)}
-            bed_number: ${get_number(6)}
-            patient_id: ${get_number(8)}
-            inhospital_id: ${get_number(8)}
 
 -   test:
         api: api/token.yml
@@ -28,7 +24,7 @@
 -   test:
         name: 查询某个病区的待安床病人列表
         setup_hooks:
-          - ${gmc_run_mysql(patient_info, inhospital_register, add_bed,patient_add_bed, inhospital_patient_doctor_order, master_patient_index=$master_patient_index, bed_number=$bed_number,bed_id=$bed_number, patient_id=$patient_id, inhospital_id=$inhospital_id)}
+          - ${gmc_run_mysql(patient_info, inhospital_register, add_bed,patient_add_bed, inhospital_patient_doctor_order)}
         request:
             headers:
                 Authorization: ${get_token($token)}
@@ -155,7 +151,7 @@
                 orderExecutionDate: ${getdate()}
                 orderSignStatus: 0
                 patientIdList:
-                - $inhospital_id
+                - ${get_result_dicts(inhospital_id)}
                 usageType:
                 - 0: "1"
                 - 1: "2"
@@ -201,7 +197,7 @@
             json:
                 exeDate: ${getdate()}
                 patientIdList:
-                - $inhospital_id
+                - ${get_result_dicts(inhospital_id)}
             method: POST
             url: /app-nurse-station/order/execution/valid
         validate:
@@ -249,7 +245,7 @@
             json:
                 exeDate: ${getdate()}
                 patientIdList:
-                - $inhospital_id
+                - ${get_result_dicts(inhospital_id)}
             method: POST
             url: /app-nurse-station/order/execution/valid
         validate:
@@ -260,7 +256,126 @@
             - content.message
             - success
         -   eq:
-            - ${get_sql_result(query_inhospital_order_exec, bed_number=$bed_number)}
+            - ${get_sql_result(query_inhospital_order_exec)}
             - True
+-   test:
+        name: 查询某个病区的待安床病人列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                k1: $k1
+                k2: $areaId
+            method: GET
+            url: /app-nurse-station/patient/wait/list
         teardown_hooks:
           - ${reload_dict()}
+
+#
+#-   test:
+#        name: 药品标签打印获取用法打印分类
+#        request:
+#            headers:
+#                Authorization: ${get_token($token)}
+#                Content-Type: application/json; charset=UTF-8
+#                k1: $k1
+#                k2: $k2
+#            json:
+#                cnMedicine: $cnMedicine
+#                endDate: $endDate
+#                medicationUsageTypes: $medicationUsageTypes
+#                oralMedicationType: ''
+#                orderFeeType: ''
+#                orderType: ''
+#                paging: $paging
+#                patientIdList: []
+#                startDate: $startDate
+#                staticConfigType: ''
+#                surgeryContainsSign: $surgeryContainsSign
+#                tagPrintStatus: $tagPrintStatus
+#                tagPrintStatusPatrol: null
+#                tagPrintType: 0
+#            method: POST
+#            url: /app-nurse-station/order/tag/print/drop/usage/printtype
+#        validate:
+#        -   eq:
+#            - content.code
+#            - 2000
+#        -   eq:
+#            - content.message
+#            - success
+#-   test:
+#        name: 滴液药
+#        request:
+#            headers:
+#                Authorization: ${get_token($token)}
+#                Content-Type: application/json; charset=UTF-8
+#                k1: $k1
+#                k2: $k2
+#            json:
+#                endDate: $endDate
+#                medicationUsagePrintTypeList: []
+#                medicationUsageTypes: $medicationUsageTypes
+#                oralMedicationType: ''
+#                orderFeeType: ''
+#                orderType: ''
+#                paging: $paging
+#                patientIdList: $patientIdList
+#                startDate: $startDate
+#                staticConfigType: ''
+#                surgeryContainsSign: $surgeryContainsSign
+#                tagPrintStatus: $tagPrintStatus
+#                tagPrintStatusPatrol: null
+#                tagPrintType: 0
+#            method: POST
+#            url: /app-nurse-station/order/tag/print/drop/list
+#        validate:
+#        -   eq:
+#            - content.code
+#            - 2000
+#        -   eq:
+#            - content.message
+#            - success
+#-   test:
+#        name: 滴液服药卡/打印内容
+#        request:
+#            headers:
+#                Authorization: ${get_token($token)}
+#                Content-Type: application/json; charset=UTF-8
+#                k1: $k1
+#                k2: $k2
+#            json:
+#                idList: $idList
+#                medicationUsageType: $medicationUsageType
+#                tagPrintStatusPatrol: ''
+#                tagPrintType: 0
+#            method: POST
+#            url: /app-nurse-station/order/tag/print/drop/card/list
+#        validate:
+#        -   eq:
+#            - content.code
+#            - 2000
+#        -   eq:
+#            - content.message
+#            - success
+#
+#-   test:
+#        name: 批量查询用户打印模板
+#        request:
+#            headers:
+#                Authorization: ${get_token($token)}
+#                Content-Type: application/json; charset=UTF-8
+#                k1: $k1
+#                k2: $k2
+#            json:
+#                bussType: $bussType
+#                isNewTemplate: $isNewTemplate
+#                macAddress: $macAddress
+#            method: POST
+#            url: /app-sys-manage/print/template/customer/queryPrintResultTemplateList
+#        validate:
+#        -   eq:
+#            - content.code
+#            - 2000
+#        -   eq:
+#            - content.message
+#            - success

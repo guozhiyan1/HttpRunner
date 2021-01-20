@@ -7,12 +7,12 @@
             orgId: ${ENV(orgId)}
             areaId: ${ENV(in_k3)}
             locationId: 99897828609
-            master_patient_index: ${gen_random_string(32)}
-            bed_number: ${get_number(6)}
-            bed_id: $bed_number
-            patient_id: ${get_thread_local_patient_id()}
-            order_id: 78828401
-
+            master_patient_index: ${get_result_dicts(master_patient_index)}
+            bed_number: ${get_result_dicts(bed_number)}
+            bed_id: ${get_result_dicts(bed_id)}
+            patient_id: ${get_result_dicts(patient_id)}
+            order_id: ${get_result_dicts(order_id)}
+            inhospital_id: ${get_result_dicts(inhospital_id)}
 
 -   test:
         api: api/token.yml
@@ -29,22 +29,9 @@
 
 -   test:
         name: 查询某个病区的待安床病人列表
-        request:
-            headers:
-                Authorization: ${get_token($token)}
-                k1: $k1
-                k2: $areaId
-            method: GET
-            url: /app-nurse-station/patient/wait/list
-        validate:
-        -   eq:
-            - content.code
-            - 2000
-        -   eq:
-            - content.message
-            - success
-        -   eq:
-            - ${get_sql_result(query_inhospital_order_exec, master_patient_index=DUqE9m7bWKOdmVbwHCEqTkcVfdJ7ib2a, order_id=$order_id)}
-            - True
-
-
+        t
+#        -   eq:
+#            - ${get_sql_result(query_inhospital_order_exec, master_patient_index=DUqE9m7bWKOdmVbwHCEqTkcVfdJ7ib2a, order_id=$order_id)}
+#            - True
+#
+#
