@@ -266,3 +266,5 @@
                 k2: $areaId
             method: GET
             url: /app-nurse-station/patient/wait/list
+        teardown_hooks:
+          - ${reload_dict()}

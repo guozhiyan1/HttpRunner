@@ -7,7 +7,7 @@
             orgId: ${ENV(orgId)}
             areaId: ${ENV(in_k3)}
             roomText: "可乐"
-            # bedNumber: ${get_number(6)}
+            bedNumber: ${get_number(6)}
             bedStatus: 1
             bedUseStatus: 0
             # 0: 空闲
@@ -254,7 +254,7 @@
             json:
                 areaId: $areaId
                 bedInfoId: 0
-                bedNumber: $MaxId
+                bedNumber: $bedNumber
             method: POST
             url: /app-sys-manage/bedManage/verifyBedNumber
         validate:
@@ -279,7 +279,7 @@
                 webUrl: http://gmc-test.cfuture.shop/basis/BedMaintain?k=1-99897828607-XN3142
             json:
                 areaId: $areaId
-                bedNumber: $MaxId
+                bedNumber: $bedNumber
                 bedStatus: $bedStatus
                 bedTypeId: $nowBedTypeId
                 bedTypeName: $nowBedTypeName
