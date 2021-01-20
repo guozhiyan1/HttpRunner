@@ -175,8 +175,12 @@ def get_token(token):
     return token
 
 
-def getdate():
-    return time.strftime("%Y-%m-%d", time.localtime())
+def getdate(add_date=None):
+    if add_date:
+        result = (datetime.datetime.now() + datetime.timedelta(days=add_date)).strftime("%Y-%m-%d")
+    else:
+        result = datetime.datetime.now().strftime("%Y-%m-%d")
+    return result
 
 
 def getdateandtime(month=""):
@@ -230,7 +234,7 @@ def gmc_run_mysql(*args, **kwargs):
             if type(sql_data_dicts[s]) == int:
                 j = j.replace(f"[{s}]", f"{sql_data_dicts[s]}")
             else:
-                j = j.replace(f"[{s}]", f"'{sql_data_dicts[s]}'")
+                j = j.replace(f"[{s}]", f'"{sql_data_dicts[s]}"')
         print(j)
         result_list += gmc_mysql.get_database(j)
     return result_list
@@ -263,7 +267,12 @@ def get_list_dict_value(value_list, key, value, result):
             return str(i[result])
 
 
+def get_id_list(id_list):
+    new_list = []
+    for i in id_list:
+        new_list.append(i['id'])
+    print(new_list)
+    return new_list
+
 if __name__ == '__main__':
-    print(sql_data_dicts)
-    reload_dict()
-    print(sql_data_dicts)
+    print(getdate(1))

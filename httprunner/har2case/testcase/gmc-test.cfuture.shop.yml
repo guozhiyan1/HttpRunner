@@ -21,7 +21,7 @@
                 orderFeeType: ''
                 orderType: ''
                 paging: $paging
-                patientIdList: []
+                patientIdList: $patientIdList
                 startDate: $startDate
                 staticConfigType: ''
                 surgeryContainsSign: $surgeryContainsSign
@@ -92,6 +92,26 @@
             - content.message
             - success
 -   test:
+        name: 批量查询用户打印模板
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                bussType: $bussType
+                macAddress: $macAddress
+            method: POST
+            url: /app-sys-manage/print/template/customer/queryPrintResultTemplateList
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
         name: 药品标签打印获取用法打印分类
         request:
             headers:
@@ -148,27 +168,6 @@
                 tagPrintType: 0
             method: POST
             url: /app-nurse-station/order/tag/print/drop/list
-        validate:
-        -   eq:
-            - content.code
-            - 2000
-        -   eq:
-            - content.message
-            - success
--   test:
-        name: 批量查询用户打印模板
-        request:
-            headers:
-                Authorization: ${get_token($token)}
-                Content-Type: application/json; charset=UTF-8
-                k1: $k1
-                k2: $k2
-            json:
-                bussType: $bussType
-                isNewTemplate: $isNewTemplate
-                macAddress: $macAddress
-            method: POST
-            url: /app-sys-manage/print/template/customer/queryPrintResultTemplateList
         validate:
         -   eq:
             - content.code

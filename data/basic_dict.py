@@ -64,7 +64,9 @@ def get_patient_data():
         "user_name": "医快一7",
         "apply_center_id": int(get_number(8)),
         "apply_id": int(get_number(8)),
-        "apply_item_id": int(get_number(8))
+        "apply_item_id": int(get_number(8)),
+        "usageId": 1,
+        "usageName": "口服"
     }
     thread_local.dict = dicts
     return dicts
