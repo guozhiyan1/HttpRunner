@@ -1,6 +1,6 @@
 -   config:
         base_url: ${ENV(host)}
-        name: 药品打印-静脉输液打印
+        name: 药品执行及打印-静脉输液打印
         variables:
             k1: ${ENV(out_k1)}
             k2: ${ENV(in_k2)}

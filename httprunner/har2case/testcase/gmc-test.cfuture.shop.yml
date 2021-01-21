@@ -1,12 +1,5 @@
--   config:
-        base_url: ${ENV(host)}
-        name: testcase description
-        variables:
-            k1: ${ENV(out_k1)}
-            k2: ${ENV(out_k2)}
-            orgId: ${ENV(orgId)}
 -   test:
-        name: 药品标签打印获取用法打印分类
+        name: 查询在住院患者信息列表
         request:
             headers:
                 Authorization: ${get_token($token)}
@@ -14,22 +7,10 @@
                 k1: $k1
                 k2: $k2
             json:
-                cnMedicine: $cnMedicine
-                endDate: $endDate
-                medicationUsageTypes: $medicationUsageTypes
-                oralMedicationType: ''
-                orderFeeType: ''
-                orderType: ''
-                paging: $paging
-                patientIdList: $patientIdList
-                startDate: $startDate
-                staticConfigType: ''
-                surgeryContainsSign: $surgeryContainsSign
-                tagPrintStatus: $tagPrintStatus
-                tagPrintStatusPatrol: null
-                tagPrintType: 0
+                queryParam: ''
+                queryType: $queryType
             method: POST
-            url: /app-nurse-station/order/tag/print/drop/usage/printtype
+            url: /app-billing/inPatient/list
         validate:
         -   eq:
             - content.code
@@ -38,7 +19,7 @@
             - content.message
             - success
 -   test:
-        name: 滴液药
+        name: 根据住院患者id查询在住院患者信息
         request:
             headers:
                 Authorization: ${get_token($token)}
@@ -46,22 +27,9 @@
                 k1: $k1
                 k2: $k2
             json:
-                endDate: $endDate
-                medicationUsagePrintTypeList: []
-                medicationUsageTypes: $medicationUsageTypes
-                oralMedicationType: ''
-                orderFeeType: ''
-                orderType: ''
-                paging: $paging
-                patientIdList: $patientIdList
-                startDate: $startDate
-                staticConfigType: ''
-                surgeryContainsSign: $surgeryContainsSign
-                tagPrintStatus: $tagPrintStatus
-                tagPrintStatusPatrol: null
-                tagPrintType: 0
+                inPatientId: $inPatientId
             method: POST
-            url: /app-nurse-station/order/tag/print/drop/list
+            url: /app-billing/inPatient/detail
         validate:
         -   eq:
             - content.code
@@ -70,7 +38,7 @@
             - content.message
             - success
 -   test:
-        name: 滴液服药卡/打印内容
+        name: 根据住院患者id查询在住院患者信息
         request:
             headers:
                 Authorization: ${get_token($token)}
@@ -78,12 +46,9 @@
                 k1: $k1
                 k2: $k2
             json:
-                idList: $idList
-                medicationUsageType: $medicationUsageType
-                tagPrintStatusPatrol: ''
-                tagPrintType: 0
+                inPatientId: $inPatientId
             method: POST
-            url: /app-nurse-station/order/tag/print/drop/card/list
+            url: /app-billing/inPatient/detail
         validate:
         -   eq:
             - content.code
@@ -92,7 +57,7 @@
             - content.message
             - success
 -   test:
-        name: 批量查询用户打印模板
+        name: 根据住院患者id查询在住院患者信息
         request:
             headers:
                 Authorization: ${get_token($token)}
@@ -100,10 +65,9 @@
                 k1: $k1
                 k2: $k2
             json:
-                bussType: $bussType
-                macAddress: $macAddress
+                inPatientId: $inPatientId
             method: POST
-            url: /app-sys-manage/print/template/customer/queryPrintResultTemplateList
+            url: /app-billing/inPatient/detail
         validate:
         -   eq:
             - content.code
@@ -112,7 +76,7 @@
             - content.message
             - success
 -   test:
-        name: 药品标签打印获取用法打印分类
+        name: 根据费用类别编码 查询是否医保类别
         request:
             headers:
                 Authorization: ${get_token($token)}
@@ -120,22 +84,38 @@
                 k1: $k1
                 k2: $k2
             json:
-                cnMedicine: $cnMedicine
-                endDate: $endDate
-                medicationUsageTypes: $medicationUsageTypes
-                oralMedicationType: ''
-                orderFeeType: ''
-                orderType: ''
-                paging: $paging
-                patientIdList: $patientIdList
-                startDate: $startDate
-                staticConfigType: ''
-                surgeryContainsSign: $surgeryContainsSign
-                tagPrintStatus: $tagPrintStatus
-                tagPrintStatusPatrol: null
-                tagPrintType: 0
+                code: $code
             method: POST
-            url: /app-nurse-station/order/tag/print/drop/usage/printtype
+            url: /app-sys-manage/cost/nature/isMedicareByCode
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - false
+-   test:
+        name: 按不同条件查询费用列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                birthDate: $birthDate
+                cardType: $cardType
+                chargeItemName: ''
+                inPatientId: $inPatientId
+                masterPatientIndex: $masterPatientIndex
+                queryType: $queryType
+                recordBeginTime: $recordBeginTime
+                recordEndTime: $recordEndTime
+            method: POST
+            url: /app-billing/inPatient/charge/list
         validate:
         -   eq:
             - content.code
@@ -144,7 +124,7 @@
             - content.message
             - success
 -   test:
-        name: 滴液药
+        name: 根据费用类别编码 查询是否医保类别
         request:
             headers:
                 Authorization: ${get_token($token)}
@@ -152,22 +132,140 @@
                 k1: $k1
                 k2: $k2
             json:
-                endDate: $endDate
-                medicationUsagePrintTypeList: []
-                medicationUsageTypes: $medicationUsageTypes
-                oralMedicationType: ''
-                orderFeeType: ''
-                orderType: ''
-                paging: $paging
-                patientIdList: $patientIdList
-                startDate: $startDate
-                staticConfigType: ''
-                surgeryContainsSign: $surgeryContainsSign
-                tagPrintStatus: $tagPrintStatus
-                tagPrintStatusPatrol: null
-                tagPrintType: 0
+                code: $code
             method: POST
-            url: /app-nurse-station/order/tag/print/drop/list
+            url: /app-sys-manage/cost/nature/isMedicareByCode
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - false
+-   test:
+        name: 按不同条件查询费用列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                birthDate: $birthDate
+                cardType: $cardType
+                chargeItemName: ''
+                inPatientId: $inPatientId
+                masterPatientIndex: $masterPatientIndex
+                queryType: $queryType
+                recordBeginTime: $recordBeginTime
+                recordEndTime: $recordEndTime
+            method: POST
+            url: /app-billing/inPatient/charge/list
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询收费项目列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                birthDate: $birthDate
+                cardType: $cardType
+                occurDate: $occurDate
+                queryParam: ''
+                queryType: $queryType
+            method: POST
+            url: /app-billing/chargeItem/query/list
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 费用补退-药品库存校验
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                cardType: $cardType
+                chargeDetailList: $chargeDetailList
+                inPatientId: $inPatientId
+                masterPatientIndex: $masterPatientIndex
+                refundChargeList: []
+                sourceId: ''
+                supplementType: $supplementType
+            method: POST
+            url: /app-billing/inPatient/charge/supplementMedicine/valid
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 费用补退-可补可退
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                cardType: $cardType
+                chargeDetailList: $chargeDetailList
+                inPatientId: $inPatientId
+                masterPatientIndex: $masterPatientIndex
+                refundChargeList: []
+                sourceId: ''
+                supplementType: $supplementType
+            method: POST
+            url: /app-billing/inPatient/charge/supplement
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - true
+-   test:
+        name: 按不同条件查询费用列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                birthDate: $birthDate
+                cardType: $cardType
+                chargeItemName: ''
+                inPatientId: $inPatientId
+                masterPatientIndex: $masterPatientIndex
+                queryType: $queryType
+                recordBeginTime: $recordBeginTime
+                recordEndTime: $recordEndTime
+            method: POST
+            url: /app-billing/inPatient/charge/list
         validate:
         -   eq:
             - content.code

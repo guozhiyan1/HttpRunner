@@ -1,0 +1,255 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 床位一览—患者信息修改
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(in_k2)}
+            orgId: ${ENV(orgId)}
+            areaId: ${ENV(in_k3)}
+            locationId: 99897828609
+            birthdate:  220153600000
+            telecom: 15757115799
+
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        api: api/user_info.yml
+        name: 切换登录院区部门
+
+
+-   test:
+        name: 查询某个病区的待安床病人列表
+        setup_hooks:
+          - ${gmc_run_mysql(patient_info, inhospital_register, add_bed,patient_add_bed)}
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                k1: $k1
+                k2: $areaId
+            method: GET
+            url: /app-nurse-station/patient/wait/list
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 获得病区内的护士下拉列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $areaId
+            json:
+                queryParam: ''
+            method: POST
+            url: /app-nurse-station/staff/nurse/list
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 患者信息修改明细信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $areaId
+            json:
+                inHospitalPatientId: ${get_result_dicts(inhospital_id)}
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+            method: POST
+            url: /app-nurse-station/patient/modify/detail
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            - chiefDoctorId: content.body.chiefDoctorId
+            - chiefDoctorName: content.body.chiefDoctorName
+            - contactName: content.body.contactName
+            - gender: content.body.gender
+            - genderCode: content.body.genderCode
+            - homeAddress: content.body.homeAddress
+            - hospitalizedCondition: content.body.hospitalizedCondition
+            - hospitalizedDate: content.body.hospitalizedDate
+            - hospitalizedRoute: content.body.hospitalizedRoute
+            - id: content.body.id
+            - mainNurseId: content.body.mainNurseId
+            - mainNurseName: content.body.mainNurseName
+            - masterPatientIndex: content.body.masterPatientIndex
+            - masterPatientIndexVersion: content.body.masterPatientIndexVersion
+            - patientCardNum: content.body.patientCardNum
+            - patientCardTypeName: content.body.patientCardTypeName
+            - patientName: content.body.patientName
+            - relationTypeCode: content.body.relationTypeCode
+            - hospitalizedDeptId: content.body.hospitalizedDeptId
+
+-   test:
+        name: 根据系统参数code获取系统参数值
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $areaId
+            json:
+                defaultValue: 1
+                paramCode: 10020201
+            method: POST
+            url: /app-patient-manage/register/getSystemParameValue
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - '1'
+-   test:
+        name: 查询某个地点下的医师列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $areaId
+            json:
+                locationId: $areaId
+                queryKey: ''
+            method: POST
+            url: /app-nurse-station/staff/listDoctor
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取病人登记所有的字典数据
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $areaId
+            json: {}
+            method: POST
+            url: /app-patient-manage/register/getPatientRegisterDictData
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 患者信息修改
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $areaId
+            json:
+                birthdate: $birthdate
+                chiefDoctorId: $chiefDoctorId
+                chiefDoctorName: $chiefDoctorName
+                contactCardNum: ''
+                contactCardType: ''
+                contactName: $contactName
+                contactTelecom: ''
+                gender: $gender
+                genderCode: $genderCode
+                homeAddress: $homeAddress
+                hospitalizedCondition: $hospitalizedCondition
+                hospitalizedDate: $hospitalizedDate
+                hospitalizedDeptId: $hospitalizedDeptId
+                hospitalizedDeptName: null
+                hospitalizedRoute: $hospitalizedRoute
+                id: $id
+                mainNurseId: $mainNurseId
+                mainNurseName: $mainNurseName
+                masterPatientIndex: $masterPatientIndex
+                masterPatientIndexVersion: $masterPatientIndexVersion
+                patientCardNum: $patientCardNum
+                patientCardTypeName: $patientCardTypeName
+                patientName: $patientName
+                relationTypeCode: $relationTypeCode
+                telecom: $telecom
+            method: POST
+            url: /app-nurse-station/patient/modify
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - true
+-   test:
+        name: 患者信息修改明细信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $areaId
+            json:
+                inHospitalPatientId: ${get_result_dicts(inhospital_id)}
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+            method: POST
+            url: /app-nurse-station/patient/modify/detail
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        - eq:
+            - content.code
+            - 2000
+        - eq:
+            - content.body.chiefDoctorId
+            - $chiefDoctorId
+        - eq:
+            - content.body.birthdate
+            - $birthdate
+        - str_eq:
+            - content.body.telecom
+            - $telecom
+
+-   test:
+        name: 查询某个病区的待安床病人列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                k1: $k1
+                k2: $areaId
+            method: GET
+            url: /app-nurse-station/patient/wait/list
+        teardown_hooks:
+          - ${reload_dict()}

@@ -118,8 +118,7 @@
         -   eq:
             - content.message
             - success
-        extract:
-          - patientId: content.body
+
 -   test:
         name: 查询当前病区对应的科室列表
         request:

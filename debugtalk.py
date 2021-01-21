@@ -188,9 +188,15 @@ def getdateandtime(month=""):
     return today
 
 
-def getTZdate():
-    today = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.localtime())
-    return today
+def getTZdate(add_date=None, delete_date=None):
+    if add_date:
+        result = (datetime.datetime.now() + datetime.timedelta(days=add_date)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+    elif delete_date:
+        result = (datetime.datetime.now() - datetime.timedelta(days=delete_date)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+    else:
+        result = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S.000Z")
+    return result
+
 
 
 def stamp():
@@ -275,4 +281,4 @@ def get_id_list(id_list):
     return new_list
 
 if __name__ == '__main__':
-    print(getdate(1))
+    print(getTZdate(add_date=1))

@@ -23,7 +23,7 @@ def generate_report(now_timestamp, result):
     project_name = os.path.split(sys.path[1])[1]
     visit_url = project_name + '/reports/' + now_timestamp + '.html'
     remote_report_url = 'http://' + remote_ip + '/' + visit_url
-    local_report_url = 'http://localhost:' + config.get_conf("local","html_open_port") + '/' + visit_url
+    local_report_url = 'http://localhost:' + config.get_conf("local", "html_open_port") + '/' + visit_url
     flag = platform.system() == 'Windows' or platform.system() == 'Darwin'
 
     result = {"url": local_report_url if flag else remote_report_url,
