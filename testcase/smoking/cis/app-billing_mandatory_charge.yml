@@ -172,6 +172,8 @@
         - operatorName: content.body.0.chargeItemList.0.operatorName
         - editPrice: content.body.0.chargeItemList.0.price
         - amountss: content.body.0.chargeItemList.0.price
+
+
 -   test:
         name: 费用补退-药品库存校验
         request:
@@ -183,13 +185,13 @@
             json:
                 cardType: FH0121.01
                 chargeDetailList:
-                    occurDate: ${get_date()} 08:01
+                -   occurDate: ${get_date()} 08:01
                     supplementNumber: 1
                     priceId:
                     billingDeptName: ${ENV(in_k2_name)}
                     billingDeptId: ${ENV(in_k2)}
-                    executeDeptName: $executeDeptName
-                    executeDeptId: $executeDeptId
+                    executeDeptName: ${ENV(in_k3_name)}
+                    executeDeptId: $areaId
                     doctorName: 扁鹊
                     doctorId: 10101
                     chargeItemId: $chargeItemId
@@ -218,7 +220,7 @@
                     frequencyId: null
                     frequencyName: null
                     frequencyScope: null
-                    editPrice: $editPrice
+                    editPrice: false
                     chargePriceId:
                     amountss: $amountss
                 inPatientId: ${get_result_dicts(inhospital_id)}
@@ -235,46 +237,111 @@
         -   eq:
             - content.message
             - success
-#
-#-   test:
-#        name: 按不同条件查询费用列表
-#        request:
-#            headers:
-#                Authorization: ${get_token($token)}
-#                Content-Type: application/json; charset=UTF-8
-#                k1: $k1
-#                k2: $areaId
-#            json:
-#                birthDate: "1990-12-03"
-#                cardType: FH0121.01
-#                chargeItemName: ''
-#                inPatientId: ${get_result_dicts(inhospital_id)}
-#                masterPatientIndex: ${get_result_dicts(master_patient_index)}
-#                queryType: 1
-#                recordBeginTime: ${get_date(delete_date=1)}
-#                recordEndTime: ${get_date(add_date=1)}
-#            method: POST
-#            url: /app-billing/inPatient/charge/list
-#        validate:
-#        -   eq:
-#            - content.code
-#            - 2000
-#        -   eq:
-#            - content.message
-#            - success
-#        - eq:
-#            - content.body.0.totalAmount
-#            - $price
-#
-#
-#-   test:
-#        name: 查询某个病区的待安床病人列表
-#        request:
-#            headers:
-#                Authorization: ${get_token($token)}
-#                k1: $k1
-#                k2: $areaId
-#            method: GET
-#            url: /app-nurse-station/patient/wait/list
-#        teardown_hooks:
-#          - ${reload_dict()}
+
+
+-   test:
+        name: 补录费用
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $areaId
+            json:
+                cardType: FH0121.01
+                chargeDetailList:
+                -   occurDate: ${get_date()} 08:01
+                    supplementNumber: 1
+                    priceId:
+                    billingDeptName: ${ENV(in_k2_name)}
+                    billingDeptId: ${ENV(in_k2)}
+                    executeDeptName: ${ENV(in_k3_name)}
+                    executeDeptId: $areaId
+                    doctorName: 扁鹊
+                    doctorId: 10101
+                    chargeItemId: $chargeItemId
+                    chargeItemName: $chargeItemName
+                    chargeItemType: $chargeItemType
+                    chargeItemTypeName: $chargeItemTypeName
+                    pricesCode: $pricesCode
+                    manufacturer:
+                    price: $price
+                    itemNumber: null
+                    amounts: null
+                    unitName: $unitName
+                    chargeItemNameOther: null
+                    baseItemId: $baseItemId
+                    baseItemName: $baseItemName
+                    typeDesc: $typeDesc
+                    specification: null
+                    largePackagingUnit: null
+                    smallLargePackageRatio: null
+                    operatorLocationId: $operatorLocationId
+                    operatorLocationName: $operatorLocationName
+                    operatorId: $operatorId
+                    operatorName: $operatorName
+                    enableState: null
+                    drugsType: null
+                    frequencyId: null
+                    frequencyName: null
+                    frequencyScope: null
+                    editPrice: false
+                    chargePriceId:
+                    amountss: $amountss
+                inPatientId: ${get_result_dicts(inhospital_id)}
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                refundChargeList: []
+                sourceId: ''
+                supplementType: 1
+            method: POST
+            url: /app-billing/inPatient/charge/supplement
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 按不同条件查询费用列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $areaId
+            json:
+                birthDate: "1990-12-03"
+                cardType: FH0121.01
+                chargeItemName: ''
+                inPatientId: ${get_result_dicts(inhospital_id)}
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                queryType: 1
+                recordBeginTime: ${get_date(delete_date=1)}
+                recordEndTime: ${get_date(add_date=1)}
+            method: POST
+            url: /app-billing/inPatient/charge/list
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        - eq:
+            - content.body.chargeList.0.baseItemName
+            - $baseItemName
+
+
+-   test:
+        name: 查询某个病区的待安床病人列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                k1: $k1
+                k2: $areaId
+            method: GET
+            url: /app-nurse-station/patient/wait/list
+        teardown_hooks:
+          - ${reload_dict()}

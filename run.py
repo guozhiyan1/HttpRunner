@@ -26,11 +26,11 @@ if __name__ == '__main__':
     # 生成通知内容
     result = report_data.generate_report(now_timestamp, result)
 
-    # 钉钉通知
-    ding_talk.DingTalkSend(result)
+    # # 钉钉通知
+    # ding_talk.DingTalkSend(result)
 
-    # 发送通知邮件
-    emails = gmc_email.SendEmail(result)
-    emails.sendFile()
+    # # 发送通知邮件
+    # emails = gmc_email.SendEmail(result)
+    # emails.sendFile()
 
 
