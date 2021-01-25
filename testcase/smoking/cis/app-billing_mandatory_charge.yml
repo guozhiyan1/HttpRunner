@@ -119,8 +119,8 @@
                 inPatientId: ${get_result_dicts(inhospital_id)}
                 masterPatientIndex: ${get_result_dicts(master_patient_index)}
                 queryType: 1
-                recordBeginTime: ${getTZdate(delete_date=1)}
-                recordEndTime: ${getTZdate(add_date=1)}
+                recordBeginTime: ${get_date(number=1, delete_date=1)}
+                recordEndTime: ${get_date(number=1, add_date=1)}
             method: POST
             url: /app-billing/inPatient/charge/list
         validate:
@@ -141,7 +141,7 @@
             json:
                 birthDate: "1990-12-03"
                 cardType: FH0121.01
-                occurDate: ${getdate()} 08:01
+                occurDate: ${get_date()} 08:01
                 queryParam: ''
                 queryType: 4
             method: POST
@@ -183,7 +183,7 @@
             json:
                 cardType: FH0121.01
                 chargeDetailList:
-                    occurDate: ${getdate()} 08:01
+                    occurDate: ${get_date()} 08:01
                     supplementNumber: 1
                     priceId:
                     billingDeptName: ${ENV(in_k2_name)}
@@ -251,8 +251,8 @@
 #                inPatientId: ${get_result_dicts(inhospital_id)}
 #                masterPatientIndex: ${get_result_dicts(master_patient_index)}
 #                queryType: 1
-#                recordBeginTime: ${getTZdate(delete_date=1)}
-#                recordEndTime: ${getTZdate(add_date=1)}
+#                recordBeginTime: ${get_date(delete_date=1)}
+#                recordEndTime: ${get_date(add_date=1)}
 #            method: POST
 #            url: /app-billing/inPatient/charge/list
 #        validate:

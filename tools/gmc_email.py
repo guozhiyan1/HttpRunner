@@ -51,10 +51,7 @@ class SendEmail(object):
         smtp.quit()
 
 
-# def run(result):
-#     emails = SendEmail(result)
-#     emails.sendFile()
-#
+
 
 # 调试
 if __name__ == "__main__":

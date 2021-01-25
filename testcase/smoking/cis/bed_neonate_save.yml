@@ -170,7 +170,7 @@
                 k1: $k1
                 k2: $areaId
             json:
-                birthTime: ${getdate()} 19:57
+                birthTime: ${get_date()} 19:57
                 childbirthExpectedDate: ''
                 deliveryMode: ''
                 discountPlanId: $discountPlanId
@@ -189,16 +189,16 @@
                 patientName: ${get_result_dicts(patient_name)}之女
             method: POST
             url: /app-nurse-station/neonate/save
-        validate:
-        -   eq:
-            - content.code
-            - 2000
-        -   eq:
-            - content.message
-            - success
-        -   eq:
-            - content.body
-            - true
+#        validate:
+#        -   eq:
+#            - content.code
+#            - 2000
+#        -   eq:
+#            - content.message
+#            - success
+#        -   eq:
+#            - content.body
+#            - true
 -   test:
         name: 查询患者新生儿信息
         request:
@@ -208,19 +208,19 @@
                 k2: $areaId
             method: GET
             url: /app-nurse-station/neonate/${get_result_dicts(inhospital_id)}/list
-        validate:
-        -   eq:
-            - content.code
-            - 2000
-        -   eq:
-            - content.message
-            - success
-        -   eq:
-            - content.message
-            - success
-        - eq:
-            - content.body.0.babyName
-            - ${get_result_dicts(patient_name)}之女
+#        validate:
+#        -   eq:
+#            - content.code
+#            - 2000
+#        -   eq:
+#            - content.message
+#            - success
+#        -   eq:
+#            - content.message
+#            - success
+#        - eq:
+#            - content.body.0.babyName
+#            - ${get_result_dicts(patient_name)}之女
 
 
 -   test:

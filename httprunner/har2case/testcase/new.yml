@@ -14,9 +14,9 @@
                 k1: $k1
                 k2: $k2
             json:
-                cardContentOri: $cardContentOri
+                cardContentOri: 1zdhtest
                 cardTypeCode: ''
-                felog: $felog
+                felog: new-read-card
                 medicareRecordsFlag: false
             method: POST
             url: /app-medicare-platform-manage/parser
@@ -36,10 +36,10 @@
                 k1: $k1
                 k2: $k2
             json:
-                cardNo: $cardNo
+                cardNo: 1zdhtest
                 cardType: ''
-                orgId: $orgId
-                updateOrgPatientFlag: $updateOrgPatientFlag
+                orgId: '123551'
+                updateOrgPatientFlag: true
             method: POST
             url: /app-patient-manage/register/queryForCommonByVoucherNo
         validate:
@@ -59,8 +59,8 @@
                 k2: $k2
             json:
                 hospitalizedArea: ''
-                keyName: $keyName
-                queryParam: $queryParam
+                keyName: queryParam
+                queryParam: 1zdhtest
             method: POST
             url: /app-hospitalized-register/patientPrepayments/get/inHospitalizedRegister
         validate:
@@ -139,7 +139,7 @@
                 k1: $k1
                 k2: $k2
             json:
-                inhospitalPatientId: $inhospitalPatientId
+                inhospitalPatientId: 4037412
             method: POST
             url: /app-hospitalized-register/hospitalizedRegister/query/hospitalizedRegisterInfo
         validate:
@@ -158,8 +158,8 @@
                 k1: $k1
                 k2: $k2
             json:
-                masterPatientIndex: $masterPatientIndex
-                patientRegisterId: $patientRegisterId
+                masterPatientIndex: b6ce02986ef642a594340cc4451c49c0
+                patientRegisterId: 20427
             method: POST
             url: /app-hospitalized-register/patientPrepayments/get/inHospitalTemporary
         validate:
@@ -181,7 +181,7 @@
                 k1: $k1
                 k2: $k2
             json:
-                inhospitalPatientId: $inhospitalPatientId
+                inhospitalPatientId: 4037412
                 payDateEnd: null
                 payDateStart: null
                 searchNum: ''
@@ -203,8 +203,8 @@
                 k1: $k1
                 k2: $k2
             json:
-                masterPatientIndex: $masterPatientIndex
-                patientRegisterId: $patientRegisterId
+                masterPatientIndex: b6ce02986ef642a594340cc4451c49c0
+                patientRegisterId: 20427
             method: POST
             url: /app-hospitalized-register/patientPrepayments/get/inHospitalTemporary
         validate:
@@ -226,8 +226,8 @@
                 k1: $k1
                 k2: $k2
             json:
-                masterPatientIndex: $masterPatientIndex
-                patientRegisterId: $patientRegisterId
+                masterPatientIndex: b6ce02986ef642a594340cc4451c49c0
+                patientRegisterId: 20427
             method: POST
             url: /app-hospitalized-register/patientPrepayments/get/inHospitalTemporary
         validate:
@@ -249,8 +249,8 @@
                 k1: $k1
                 k2: $k2
             json:
-                inhospitalPatientId: $inhospitalPatientId
-                masterPatientIndex: $masterPatientIndex
+                inhospitalPatientId: 4037412
+                masterPatientIndex: b6ce02986ef642a594340cc4451c49c0
                 settleState: 0
             method: POST
             url: /app-hospitalized-register/hospitalizedRegister/query/patientAccoutFeeInfo
@@ -270,10 +270,10 @@
                 k1: $k1
                 k2: $k2
             json:
-                cardNumber: $cardNumber
-                cardTypeCode: $cardTypeCode
-                costTypeCode: $costTypeCode
-                orgId: $orgId
+                cardNumber: 1Zdhtest
+                cardTypeCode: FH0121.01
+                costTypeCode: '1'
+                orgId: '123551'
             method: POST
             url: /app-patient-manage/voucher/isPublicPatient
         validate:
@@ -292,8 +292,8 @@
                 k1: $k1
                 k2: $k2
             json:
-                masterPatientIndex: $masterPatientIndex
-                patientRegisterId: $patientRegisterId
+                masterPatientIndex: b6ce02986ef642a594340cc4451c49c0
+                patientRegisterId: 20427
             method: POST
             url: /app-hospitalized-register/patientPrepayments/get/inHospitalTemporary
         validate:
@@ -315,10 +315,10 @@
                 k1: $k1
                 k2: $k2
             json:
-                cardType: $cardType
-                costCategoryCode: $costCategoryCode
-                inhospitalPatientId: $inhospitalPatientId
-                medicalRecordNo: $medicalRecordNo
+                cardType: FH0121.01
+                costCategoryCode: '1'
+                inhospitalPatientId: 4037412
+                medicalRecordNo: '2000421353'
                 publicFeePatientFlag: false
             method: POST
             url: /app-billing/AccoutQuery/checkDetail
@@ -341,7 +341,7 @@
                 k1: $k1
                 k2: $k2
             json:
-                code: $code
+                code: '1'
             method: POST
             url: /app-sys-manage/cost/nature/isMedicareByCode
         validate:
@@ -369,9 +369,9 @@
                 k1: $k1
                 k2: $k2
             json:
-                id: $id
-                inhospitalPatientId: $inhospitalPatientId
-                patientRegisterId: $patientRegisterId
+                id: 1801
+                inhospitalPatientId: 4037412
+                patientRegisterId: 20427
             method: POST
             url: /app-hospitalized-register/patientPrepayments/cancelPrepayments
         validate:
@@ -393,7 +393,7 @@
                 k1: $k1
                 k2: $k2
             json:
-                inhospitalPatientId: $inhospitalPatientId
+                inhospitalPatientId: 4037412
                 payDateEnd: null
                 payDateStart: null
                 searchNum: ''
@@ -415,8 +415,8 @@
                 k1: $k1
                 k2: $k2
             json:
-                masterPatientIndex: $masterPatientIndex
-                patientRegisterId: $patientRegisterId
+                masterPatientIndex: b6ce02986ef642a594340cc4451c49c0
+                patientRegisterId: 20427
             method: POST
             url: /app-hospitalized-register/patientPrepayments/get/inHospitalTemporary
         validate:
@@ -438,7 +438,7 @@
                 k1: $k1
                 k2: $k2
             json:
-                inhospitalPatientId: $inhospitalPatientId
+                inhospitalPatientId: 4037412
             method: POST
             url: /app-hospitalized-register/hospitalizedRegister/query/hospitalizedRegisterInfo
         validate:
@@ -457,8 +457,8 @@
                 k1: $k1
                 k2: $k2
             json:
-                masterPatientIndex: $masterPatientIndex
-                patientRegisterId: $patientRegisterId
+                masterPatientIndex: b6ce02986ef642a594340cc4451c49c0
+                patientRegisterId: 20427
             method: POST
             url: /app-hospitalized-register/patientPrepayments/get/inHospitalTemporary
         validate:
@@ -480,8 +480,8 @@
                 k1: $k1
                 k2: $k2
             json:
-                inhospitalPatientId: $inhospitalPatientId
-                masterPatientIndex: $masterPatientIndex
+                inhospitalPatientId: 4037412
+                masterPatientIndex: b6ce02986ef642a594340cc4451c49c0
                 settleState: 0
             method: POST
             url: /app-hospitalized-register/hospitalizedRegister/query/patientAccoutFeeInfo

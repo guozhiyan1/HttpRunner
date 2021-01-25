@@ -395,7 +395,7 @@
                 bedId: ${get_result_dicts(bed_id)}
                 chiefDoctorId: $doctor
                 inDeptId: $k2
-                inHospitalDate: ${getdateandtime()}
+                inHospitalDate: ${get_date(number=1)}
                 inHospitalPatientId: ${get_result_dicts(inhospital_id)}
                 mainNurseId: $nurse_id
             method: POST

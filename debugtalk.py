@@ -5,103 +5,24 @@ import time
 import datetime
 from httprunner import logger
 from tools.IDCARD.idcard_provide import IDCardProvide
-from tools import gmc_mysql
+from tools import gmc_mysql, generate_date, generate_run_sql
 import faker
 from data.sql_dict import *
 from data import basic_dict
 
-from importlib import reload
-
 BASE_URL = "http://127.0.0.1:5000"
 fake = faker.Faker(locale='zh_CN')
 sql_data_dicts = basic_dict.sql_data_dicts
-
-def get_id_no():
-    """
-    随机生成一个年龄为14到90之间的身份证号
-    :return: 身份证号
-    """
-    while True:
-        # 部分挂号科室有挂号年龄限制，故生成身份证时取年龄为14到90
-        card_no = IDCardProvide().create_idnum_all_elements()[0]
-        city, birth, sex = IDCardProvide().resolution_idnum(card_no)
-        birth_year = int(birth.split('-')[0])
-        curr_year = datetime.date.today().year
-        age = curr_year - birth_year
-        if age <= 14 or age > 90:
-            continue
-        else:
-            break
-    return [card_no, f'huanzhe{card_no[-6:]}']
-
-
-def get_base_url():
-    return BASE_URL
-
-
-def get_default_request():
-    return {
-        "base_url": BASE_URL,
-        "headers": {
-            "content-type": "application/json"
-        }
-    }
 
 
 def sum_two(m, n):
     return m + n
 
 
-def sum_status_code(status_code, expect_sum):
-    """ sum status code digits
-        e.g. 400 => 4, 201 => 3
-    """
-    sum_value = 0
-    for digit in str(status_code):
-        sum_value += int(digit)
-
-    assert sum_value == expect_sum
-
-
-def is_status_code_200(status_code):
-    return status_code == 200
-
-
-os.environ["TEST_ENV"] = "PRODUCTION"
-
-
-def skip_test_in_production_env():
-    """ skip this test in production environment
-    """
-    return os.environ["TEST_ENV"] == "PRODUCTION"
-
-
 def sleep_time(i):
     for i in range(i):
         time.sleep(1)
         print(f"前置方法暂停{i}秒")
-
-
-def get_user_agent():
-    return ["iOS/10.1", "iOS/10.2"]
-
-
-def gen_app_version():
-    return [
-        {"app_version": "2.8.5"},
-        {"app_version": "2.8.6"}
-    ]
-
-
-def get_account():
-    return [
-        {"username": "user1", "password": "111111"},
-        {"username": "user2", "password": "222222"}
-    ]
-
-
-def get_account_in_tuple():
-    return [("user1", "111111"), ("user2", "222222")]
 
 
 def get_random_string(str_len):
@@ -122,31 +43,6 @@ def setup_hook_remove_kwargs(request):
     request.pop("key")
 
 
-def teardown_hook_sleep_N_secs(response, n_secs):
-    """ sleep n seconds after request
-    """
-    if response.status_code == 200:
-        time.sleep(0.1)
-    else:
-        time.sleep(n_secs)
-
-
-def hook_print(msg):
-    print(msg)
-
-
-def modify_request_json(request, os_platform):
-    request["json"]["os_platform"] = os_platform
-
-
-# def setup_hook_httpntlmauth(request):
-#     if "httpntlmauth" in request:
-#         from requests_ntlm import HttpNtlmAuth
-#         auth_account = request.pop("httpntlmauth")
-#         request["auth"] = HttpNtlmAuth(
-#             auth_account["username"], auth_account["password"])
-
-
 def alter_response(response):
     response.status_code = 500
     response.headers["Content-Type"] = "html/text"
@@ -156,18 +52,8 @@ def alter_response(response):
         "key": 123
     }
 
-def alter_response_302(response):
-    response.status_code = 500
-    response.headers["Content-Type"] = "html/text"
-    response.text = "abcdef"
-    response.new_attribute = "new_attribute_value"
-    response.new_attribute_dict = {
-        "key": 123
-    }
-
 
 def get_token(token):
-    #
     try:
         token = token['token_type'] + " " + token["access_token"]
     except Exception as e:
@@ -175,37 +61,19 @@ def get_token(token):
     return token
 
 
-def getdate(add_date=None):
-    if add_date:
-        result = (datetime.datetime.now() + datetime.timedelta(days=add_date)).strftime("%Y-%m-%d")
-    else:
-        result = datetime.datetime.now().strftime("%Y-%m-%d")
-    return result
-
-
-def getdateandtime(month=""):
-    today = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-    return today
-
-
-def getTZdate(add_date=None, delete_date=None):
-    if add_date:
-        result = (datetime.datetime.now() + datetime.timedelta(days=add_date)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
-    elif delete_date:
-        result = (datetime.datetime.now() - datetime.timedelta(days=delete_date)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
-    else:
-        result = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S.000Z")
-    return result
-
+def get_date(**kwargs):
+    """
+    "%Y-%m-%d"
+    "%Y-%m-%d %H:%M:%S"
+    "%Y-%m-%dT%H:%M:%S.000Z"
+    add_date=None
+    delete_date=None
+    """
+    return generate_date.getdate(**kwargs)
 
 
 def stamp():
     return time.time()
-
-
-def getcard():
-    newstring = ''.join(random.sample(string.ascii_letters + string.digits, 10))
-    return "0zdh" + newstring
 
 
 def get_number(n):
@@ -213,49 +81,18 @@ def get_number(n):
     return new_number
 
 
-def get_name():
-    return fake.name()
-
-
 def get_card_number():
     return fake.ssn(min_age=18, max_age=90)
 
 
-def get_sql_string(sql_string):
-    new_sql = []
-    for i in sql_string:
-        i = globals()[i]
-        new_sql += i
-    print(new_sql)
-    return new_sql
-
-
 def gmc_run_mysql(*args, **kwargs):
-    run_sql = get_sql_string(args)
-    result_list = []
-    for i in kwargs:
-        sql_data_dicts[i] = kwargs[i]
-    for j in run_sql:
-        for s in sql_data_dicts:
-            if type(sql_data_dicts[s]) == int:
-                j = j.replace(f"[{s}]", f"{sql_data_dicts[s]}")
-            else:
-                j = j.replace(f"[{s}]", f'"{sql_data_dicts[s]}"')
-        print(j)
-        result_list += gmc_mysql.get_database(j)
-    return result_list
+    s = generate_run_sql.RunSql(sql_data_dicts, *args, **kwargs)
+    return s.get_sql_result()
 
 
 def get_sql_result(*args, **kwargs):
-    result = gmc_run_mysql(*args, **kwargs)
-    print(result, sql_data_dicts)
-    if result:
-        for i in result:
-            for j in i:
-                print("对比值", str(i[j]), str(sql_data_dicts[j]))
-                if str(i[j]) != str(sql_data_dicts[j]):
-                    return False
-        return True
+    s = generate_run_sql.RunSql(sql_data_dicts, *args, **kwargs)
+    return s.validation_sql()
 
 
 def reload_dict():
@@ -280,5 +117,6 @@ def get_id_list(id_list):
     print(new_list)
     return new_list
 
+
 if __name__ == '__main__':
-    print(getTZdate(add_date=1))
+    print(get_date())

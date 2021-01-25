@@ -55,7 +55,7 @@
                 k2: $areaId
             json:
                 orderCategoryList: []
-                orderExecutionDate: ${getdate()}
+                orderExecutionDate: ${get_date()}
                 orderSignStatus: 0
                 patientIdList:
                 - ${get_result_dicts(inhospital_id)}
@@ -85,7 +85,7 @@
                 k1: $k1
                 k2: $areaId
             json:
-                executeDate: ${getdate()}
+                executeDate: ${get_date()}
                 orderIdList:
                 - $order_id
             method: POST
@@ -114,7 +114,7 @@
                 k2: $k2
             json:
                 cnMedicine: true
-                endDate: ${getdate(2)} 07:59
+                endDate: ${get_date(add_date=2)} 07:59
                 medicationUsageTypes:
                   - $medicationUsageTypes
                 oralMedicationType: ''
@@ -123,7 +123,7 @@
                 paging: true
                 patientIdList:
                   - ${get_result_dicts(inhospital_id)}
-                startDate: ${getdate(1)} 08:00
+                startDate: ${get_date(add_date=1)} 08:00
                 staticConfigType: ''
                 surgeryContainsSign: 2
                 tagPrintStatus: 0
@@ -149,7 +149,7 @@
                 k1: $k1
                 k2: $k2
             json:
-                endDate: ${getdate(2)} 07:59
+                endDate: ${get_date(add_date=2)} 07:59
                 medicationUsagePrintTypeList: []
                 medicationUsageTypes:
                   -   $medicationUsageTypes
@@ -159,7 +159,7 @@
                 paging: true
                 patientIdList:
                   - ${get_result_dicts(inhospital_id)}
-                startDate: ${getdate(1)} 08:00
+                startDate: ${get_date(add_date=1)} 08:00
                 staticConfigType: ''
                 surgeryContainsSign: 2
                 tagPrintStatus: 0
@@ -241,7 +241,7 @@
                 k2: $k2
             json:
                 cnMedicine: true
-                endDate: ${getdate(2)} 07:59
+                endDate: ${get_date(add_date=2)} 07:59
                 medicationUsageTypes:
                   -   $medicationUsageTypes
                 oralMedicationType: ''
@@ -250,7 +250,7 @@
                 paging: true
                 patientIdList:
                   - ${get_result_dicts(inhospital_id)}
-                startDate: ${getdate(1)} 08:00
+                startDate: ${get_date(add_date=1)} 08:00
                 staticConfigType: ''
                 surgeryContainsSign: 2
                 tagPrintStatus: 0
@@ -277,7 +277,7 @@
                 k1: $k1
                 k2: $k2
             json:
-                endDate: ${getdate(2)} 07:59
+                endDate: ${get_date(add_date=2)} 07:59
                 medicationUsagePrintTypeList: []
                 medicationUsageTypes:
                   -   $medicationUsageTypes
@@ -287,7 +287,7 @@
                 paging: true
                 patientIdList:
                   - ${get_result_dicts(inhospital_id)}
-                startDate: ${getdate(1)} 08:00
+                startDate: ${get_date(add_date=1)} 08:00
                 staticConfigType: ''
                 surgeryContainsSign: 2
                 tagPrintStatus: 0

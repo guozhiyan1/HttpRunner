@@ -145,7 +145,7 @@
                 k2: $areaId
             json:
                 orderCategoryList: []
-                orderExecutionDate: ${getdate()}
+                orderExecutionDate: ${get_date()}
                 orderSignStatus: 0
                 patientIdList:
                 - ${get_result_dicts(inhospital_id)}
@@ -192,7 +192,7 @@
                 k1: $k1
                 k2: $areaId
             json:
-                exeDate: ${getdate()}
+                exeDate: ${get_date()}
                 patientIdList:
                 - ${get_result_dicts(inhospital_id)}
             method: POST
@@ -214,7 +214,7 @@
                 k1: $k1
                 k2: $areaId
             json:
-                executeDate: ${getdate()}
+                executeDate: ${get_date()}
                 orderIdList:
                 - $order_id
             method: POST
@@ -240,7 +240,7 @@
                 k1: $k1
                 k2: $areaId
             json:
-                exeDate: ${getdate()}
+                exeDate: ${get_date()}
                 patientIdList:
                 - ${get_result_dicts(inhospital_id)}
             method: POST

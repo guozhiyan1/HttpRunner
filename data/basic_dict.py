@@ -9,11 +9,6 @@ fake = faker.Faker(locale='zh_CN')
 thread_local = threading.local()
 
 
-def getcard():
-    newstring = ''.join(random.sample(string.ascii_letters + string.digits, 10))
-    return "0zdh" + newstring
-
-
 def get_number(n):
     new_number = ''.join(random.sample('0123456789', n))
     return new_number

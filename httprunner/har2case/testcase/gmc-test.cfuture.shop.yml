@@ -1,3 +1,10 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: testcase description
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(out_k2)}
+            orgId: ${ENV(orgId)}
 -   test:
         name: 查询在住院患者信息列表
         request:

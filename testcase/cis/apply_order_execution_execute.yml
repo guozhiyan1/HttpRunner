@@ -1,6 +1,6 @@
 -   config:
         base_url: ${ENV(host)}
-        name: 检验医嘱执行测试
+        name: 检验医嘱执
         variables:
             k1: ${ENV(out_k1)}
             k2: ${ENV(in_k2)}
@@ -53,7 +53,7 @@
                 k2: $areaId
             json:
               orderCategoryList: []
-              orderExecutionDate: ${getdate()}
+              orderExecutionDate: ${get_date()}
               orderSignStatus: 0
               patientIdList:
                 - ${get_result_dicts(inhospital_id)}
@@ -99,7 +99,7 @@
                 k1: $k1
                 k2: $areaId
             json:
-              exeDate: ${getdate()}
+              exeDate: ${get_date()}
               patientIdList:
                 - ${get_result_dicts(inhospital_id)}
             method: POST
@@ -121,7 +121,7 @@
                 k1: $k1
                 k2: $areaId
             json:
-                executeDate: ${getdate()}
+                executeDate: ${get_date()}
                 orderIdList:
                 - $order_id
             method: POST
@@ -145,7 +145,7 @@
                 k1: $k1
                 k2: $areaId
             json:
-                exeDate: ${getdate()}
+                exeDate: ${get_date()}
                 patientIdList:
                   - ${get_result_dicts(inhospital_id)}
             method: POST
