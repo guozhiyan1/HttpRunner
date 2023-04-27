@@ -1,0 +1,625 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 入院登记
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(out_k2)}
+            orgId: ${ENV(orgId)}
+            hospitalizedArea: ${ENV(in_k2)}
+            hospitalizedAreaName: ${ENV(in_k2_name)}
+            hospitalizedDept: ${ENV(in_k3)}
+            hospitalizedDeptName: ${ENV(in_k3_name)}
+            hospitalizedDate: ${get_date()}
+            cardTypeCode: FH0121.01
+#            入院情况:一般，入院方式:普通入院
+            hospitalizedCondition: "FH0081.01"
+            hospitalizedRoute: "FH0080.01"
+            hospitalizedDiagnosis: "癌"
+            hospitalizedDiagnosisCode: "M80100/3"
+            hospitalizedDiagnosisId: 29583
+            costPropertyId: 1710
+            costTypeId: 254
+            costTypeName: "现金"
+            familyPlanningCertificationDate: "2021-01-27T16:00:00.000Z"
+            planningDate: "2021-01-27T16:00:00.000Z"
+            outpatientDoctorId: 58
+            outpatientDoctorName: "项燕"
+            relationTypeCode: "GB/T4761.0"
+            relationTypeHusband: "GB/T4761.1"
+            relationTypeNameHusband: "配偶"
+
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        api: api/user_info.yml
+        name: 切换登录院区部门
+
+#查询患者建档信息/app-hospitalized-register/hospitalizedRegister/query/patientInfoRecord
+-   test:
+        name: 传入页面输入的号码查询患者建档信息
+#        skip: 跳过
+        #data/all_sql_list.json文件下的数据，patient_info为患者建档
+        setup_hooks:
+          - ${gmc_run_mysql(patient_info)}
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+              #get_result_dicts方法为debugtalk中的函数方法，会调用到data/basic_dict.py中的值，inhospital_id就是其中的值
+              #如果要在basic_dict.py中新增变量AAA,需要在basic_sql_dict.json中插入变量以[AAA]打标
+                cardNo: ${get_result_dicts(medicare_card)}
+                cardTypeCode: $cardTypeCode
+            method: POST
+            url: /app-hospitalized-register/hospitalizedRegister/query/patientInfoRecord
+        extract:
+#            获取接口返回值body中第一块内容
+#            patientInfo: content.body.0
+            ageText: content.body.0.ageText
+            birthdate: content.body.0.birthdate
+            contactAddress: content.body.0.contactAddress
+            cardNumber: content.body.0.voucherCardNumber
+            contactName: content.body.0.contactPeopleName
+            costTypeCode: content.body.0.costTypeCode
+            contactPeopleAddress: content.body.0.contactPeopleAddress
+            contactPeopleName: content.body.0.contactPeopleName
+            contactPeopleTelecom: content.body.0.contactPeopleTelecom
+            contactPersonAddress: content.body.0.contactAddress
+            contactRelationType: content.body.0.contactRelationType
+            contactRelationTypeCode: content.body.0.contactRelationTypeCode
+            contactTelecom: content.body.0.telecom
+            costProperty: content.body.0.costProperty
+            costPropertyName: content.body.0.costPropertyName
+            costPropertyCode: content.body.0.costPropertyCode
+            costType: content.body.0.costType
+            enableStatus: content.body.0.enableStatus
+            gender: content.body.0.gender
+            genderCode: content.body.0.genderCode
+            homeAddress: content.body.0.homeAddress
+            hospitalizationNumber: content.body.0.hospitalizationNumber
+            hospitalizedStatusCode: content.body.0.hospitalizedStatusCode
+            idCard: content.body.0.idCard
+            idcard: content.body.0.idcard
+            idCardTypeCode: content.body.0.idCardTypeCode
+            idCardTypeName: content.body.0.idCardTypeName
+            maritalStatus: content.body.0.maritalStatus
+            maritalStatusCode: content.body.0.maritalStatusCode
+            masterPatientIndexVersion: content.body.0.masterPatientIndexVersion
+            medicalRecordNo: content.body.0.medicalRecordNo
+            medicareCardInfo: content.body.0.medicareCardInfo
+            nation: content.body.0.nation
+            nationCode: content.body.0.nationCode
+            nationality: content.body.0.nationality
+            nationalityCode: content.body.0.nationalityCode
+            nativePlace: content.body.0.nativePlace
+            nativePlaceCode: content.body.0.nativePlaceCode
+            patientName: content.body.0.patientName
+            permanentAddress: content.body.0.permanentAddress
+            telecom: content.body.0.telecom
+            socialSecurityCardNum: content.body.0.voucherCardNumber
+            voucherCardNumber: content.body.0.voucherCardNumber
+            profession: content.body.0.profession
+            professionCode: content.body.0.professionCode
+            voucherCardTypeCode: content.body.0.voucherCardTypeCode
+
+            masterPatientIndex: content.body.0.masterPatientIndex
+            patientRegisterId: content.body.0.patientRegisterId
+        validate:
+        -   eq: ["content.code",2000]
+        -   eq: ["content.message",success]
+#判断是否公费患者/app-patient-manage/voucher/isPublicPatient
+-   test:
+        name: 判断是否公费患者
+#        skip: 跳过
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                cardNumber: $cardNumber
+                cardTypeCode: $cardTypeCode
+                costTypeCode: $costTypeCode
+                orgId: $orgId
+            method: POST
+            url: /app-patient-manage/voucher/isPublicPatient
+        validate:
+        -   eq: ["content.code",2000]
+        -   eq: ["content.message",success]
+#获取该患者暂存金/app-hospitalized-register/patientPrepayments/get/inHospitalTemporary
+#-   test:
+#        name: 获取该患者暂存金
+#        skip: 跳过，天台不使用暂存金
+#        request:
+#            headers:
+#                Authorization: ${get_token($token)}
+#                Content-Type: application/json; charset=UTF-8
+#                k1: $k1
+#                k2: $k2
+#            json:
+#                masterPatientIndex: $masterPatientIndex
+#                patientRegisterId: $patientRegisterId
+#            method: POST
+#            url: /app-hospitalized-register/patientPrepayments/get/inHospitalTemporary
+#        validate:
+#        -   eq:
+#            - content.code
+#            - 2000
+#        -   eq:
+#            - content.message
+#            - success
+#查询优惠规则/app-billing/discount/rule/list
+-   test:
+        name: 查询优惠规则
+#        skip: 跳过
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                costTypeCode: $costTypeCode
+                enable: 1
+                inpatientEnable: true
+                orgId: $orgId
+            method: POST
+            url: /app-billing/discount/rule/list
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+#检查入院登记信息/app-hospitalized-register/hospitalizedRegister/save/checkRegister
+-   test:
+        name: 检查入院登记信息-无优惠
+#        skip: 跳过
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                aboBloodCode: null
+                aboBloodName: null
+                ageText: $ageText
+                bedNumber: ''
+                birthdate: $birthdate
+                cardType: $cardTypeCode
+                company: ''
+                companyTelecom: ''
+                contactAddress: $contactAddress
+                contactCardNum: ''
+                contactCardType: ''
+                contactName: $contactName
+                contactPeopleAddress: $contactPeopleAddress
+                contactPeopleName: $contactPeopleName
+                contactPeopleTelecom: $contactPeopleTelecom
+                contactPersonAddress: $contactPersonAddress
+                contactRelationType: $contactRelationType
+                contactRelationTypeCode: $contactRelationTypeCode
+                contactTelecom: $contactTelecom
+                costProperty: $costProperty
+                costPropertyCode: $costPropertyCode
+#                入参1710？？？下面获取的是1
+#                costPropertyId: $patientInfo.costPropertyId
+                costPropertyId: $costPropertyId
+                costPropertyName: $costPropertyName
+                costType: $costType
+                costTypeCode: $costTypeCode
+                costTypeId: $costTypeId
+                costTypeName: $costTypeName
+                discount: null
+                discountPlanName: ''
+                discountType: ''
+                educationLevel: null
+                educationLevelCode: null
+                enableStatus: $enableStatus
+                expenseCompanyId: null
+                expenseCompanyName: null
+#                ？？？？？
+                familyPlanningCertificationDate: $familyPlanningCertificationDate
+                gender: $gender
+                genderCode: $genderCode
+                greenChannel: 0
+                height: null
+                homeAddress: $homeAddress
+                hospitalizationNumber: $hospitalizationNumber
+                hospitalizedArea: $hospitalizedArea
+                hospitalizedAreaName: $hospitalizedAreaName
+                hospitalizedCondition: $hospitalizedCondition
+                hospitalizedDate: $hospitalizedDate
+                hospitalizedDept: $hospitalizedDept
+                hospitalizedDeptName: $hospitalizedDeptName
+                hospitalizedDiagnos: ''
+                hospitalizedDiagnosis: $hospitalizedDiagnosis
+                hospitalizedDiagnosisCode: $hospitalizedDiagnosisCode
+                hospitalizedDiagnosisId: $hospitalizedDiagnosisId
+                hospitalizedRoute: $hospitalizedRoute
+                hospitalizedStatus: 0
+                hospitalizedStatusCode: $hospitalizedStatusCode
+                idCard: $idCard
+                idCardTypeCode: $idCardTypeCode
+                idCardTypeName: $idCardTypeName
+                idcard: $idcard
+                inBedId: ''
+                inBedName: ''
+                inProvince: true
+                inRoomId: ''
+                inRoomName: ''
+                maritalStatus: $maritalStatus
+                maritalStatusCode: $maritalStatusCode
+                masterPatientIndex: $masterPatientIndex
+                masterPatientIndexVersion: $masterPatientIndexVersion
+                medicalRecordNo: $medicalRecordNo
+                medicareCardInfo: $medicareCardInfo
+                medicarePersonInfo: ''
+                medicarePersonNo: null
+                nation: $nation
+                nationCode: $nationCode
+                nationality: $nationality
+                nationalityCode: $nationalityCode
+                nativePlace: $nativePlace
+                nativePlaceCode: $nativePlaceCode
+                outpatientDoctorId: $outpatientDoctorId
+                outpatientDoctorName: $outpatientDoctorName
+                patienflag: []
+                patientIdentificationNumber: null
+                patientName: $patientName
+                patientNameBefore: null
+                patientRegisterId: $patientRegisterId
+                patientSpecFlagAppDTO: []
+                permanentAddress: $permanentAddress
+                planningDate: $planningDate
+                profession: $profession
+                professionCode: $professionCode
+                publicExpenseNo: null
+                relationTypeCode: $relationTypeCode
+                relationTypeHusband: $relationTypeHusband
+#                relationTypeName: $relationTypeName
+                relationTypeNameHusband: $relationTypeNameHusband
+                rhBloodCode: null
+                rhBloodName: null
+                socialSecurityCardNum: $socialSecurityCardNum
+                specialDiseaseCode: null
+                specialDiseaseFlag: null
+                specialNo: null
+                telecom: $telecom
+#                voucherCardNumber: ${get_content_json_value($patientInfo,voucherCardNumber)}
+                voucherCardNumber: $voucherCardNumber
+                voucherCardTypeCode: $voucherCardTypeCode
+                voucherCardTypeName: null
+                weight: null
+                workingAddress: ''
+                workingAddressPostCode: ''
+            method: POST
+            url: /app-hospitalized-register/hospitalizedRegister/save/checkRegister
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+#自费入院直接调用该接口，医保入院三步走第一步是这个接口/app-hospitalized-register/hospitalizedRegister/save/newHospitalizedRegister
+-   test:
+        name: 自费入院
+#        skip: 跳过
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                aboBloodCode: null
+                aboBloodName: null
+                ageText: $ageText
+                bedNumber: ''
+                birthdate: $birthdate
+                cardType: $cardTypeCode
+                company: ''
+                companyTelecom: ''
+                contactAddress: $contactAddress
+                contactCardNum: ''
+                contactCardType: ''
+                contactName: $contactName
+                contactPeopleAddress: $contactPeopleAddress
+                contactPeopleName: $contactPeopleName
+                contactPeopleTelecom: $contactPeopleTelecom
+                contactPersonAddress: $contactPersonAddress
+                contactRelationType: $contactRelationType
+                contactRelationTypeCode: $contactRelationTypeCode
+                contactTelecom: $contactTelecom
+                costProperty: $costProperty
+                costPropertyCode: $costPropertyCode
+                costPropertyId: $costPropertyId
+                costPropertyName: $costPropertyName
+                costType: $costType
+                costTypeCode: $costTypeCode
+                costTypeId: $costTypeId
+                costTypeName: $costTypeName
+                discount: null
+                discountPlanName: ''
+                discountType: ''
+                educationLevel: null
+                educationLevelCode: null
+                enableStatus: $enableStatus
+                expenseCompanyId: null
+                expenseCompanyName: null
+                familyPlanningCertificationDate: $familyPlanningCertificationDate
+                gender: $gender
+                genderCode: $genderCode
+                greenChannel: 0
+                height: null
+                homeAddress: $homeAddress
+                hospitalizationNumber: $hospitalizationNumber
+                hospitalizedArea: $hospitalizedArea
+                hospitalizedAreaName: $hospitalizedAreaName
+                hospitalizedCondition: $hospitalizedCondition
+                hospitalizedDate: $hospitalizedDate
+                hospitalizedDept: $hospitalizedDept
+                hospitalizedDeptName: $hospitalizedDeptName
+                hospitalizedDiagnos: ''
+                hospitalizedDiagnosis: $hospitalizedDiagnosis
+                hospitalizedDiagnosisCode: $hospitalizedDiagnosisCode
+                hospitalizedDiagnosisId: $hospitalizedDiagnosisId
+                hospitalizedRoute: $hospitalizedRoute
+                hospitalizedStatus: 0
+                hospitalizedStatusCode: $hospitalizedStatusCode
+                idCard: $idCard
+                idCardTypeCode: $idCardTypeCode
+                idCardTypeName: $idCardTypeName
+                idcard: $idcard
+                inBedId: ''
+                inBedName: ''
+                inProvince: false
+                inRoomId: ''
+                inRoomName: ''
+                maritalStatus: $maritalStatus
+                maritalStatusCode: $maritalStatusCode
+                masterPatientIndex: $masterPatientIndex
+                masterPatientIndexVersion: $masterPatientIndexVersion
+                medicalRecordNo: $medicalRecordNo
+                medicareCardInfo: $medicareCardInfo
+                medicarePersonInfo: ''
+                medicarePersonNo: null
+                nation: $nation
+                nationCode: $nationCode
+                nationality: $nationality
+                nationalityCode: $nationalityCode
+                nativePlace: $nativePlace
+                nativePlaceCode: $nativePlaceCode
+                outpatientDoctorId: $outpatientDoctorId
+                outpatientDoctorName: $outpatientDoctorName
+                patienflag: []
+                patientIdentificationNumber: null
+                patientName: $patientName
+                patientNameBefore: null
+                patientRegisterId: $patientRegisterId
+                patientSpecFlagAppDTO: []
+                permanentAddress: $permanentAddress
+                planningDate: $planningDate
+                profession: $profession
+                professionCode: $professionCode
+                publicExpenseNo: null
+                relationTypeCode: $relationTypeCode
+                relationTypeHusband: $relationTypeHusband
+#                relationTypeName: $relationTypeName
+                relationTypeNameHusband: $relationTypeNameHusband
+                rhBloodCode: null
+                rhBloodName: null
+                socialSecurityCardNum: $socialSecurityCardNum
+                specialDiseaseCode: null
+                specialDiseaseFlag: null
+                specialNo: null
+                telecom: $telecom
+                voucherCardNumber: $voucherCardNumber
+                voucherCardTypeCode: $voucherCardTypeCode
+                voucherCardTypeName: null
+                weight: null
+                workingAddress: ''
+                workingAddressPostCode: ''
+            method: POST
+            url: /app-hospitalized-register/hospitalizedRegister/save/newHospitalizedRegister
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            inhospitalPatientId: content.body.inhospitalPatientId
+#查询test.evnv中username用户的住院预交金收据/app-invoice/invoiceGiveOut/listPersonalInvoiceGiveOutByParameters
+#原因：api/token.yml中使用的是test.env中的值
+-   test:
+        name: 查询住院预交金收据
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                invoiceStates: ["FH0232.01", "FH0232.02"]
+                invoiceType: "FH0062.03"
+                paging: false
+            method: POST
+            url: /app-invoice/invoiceGiveOut/listPersonalInvoiceGiveOutByParameters
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            invoiceNumber: content.body.data.0.currentNumber
+            numberPrefix: content.body.data.0.numberPrefix
+            invoiceOutId: content.body.data.0.id
+            invoiceOutVersionNo: content.body.data.0.versionNo
+#入院病人预交款新增/app-hospitalized-register/patientPrepayments/saveInsertPrepayments
+-   test:
+        name: 入院病人预交款新增
+#        skip: 跳过
+#        如果函数返回为true，则跳过本步骤
+#        skipIf: ${get_data_isnull($pjData)}
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                inhospitalPatientId: $inhospitalPatientId
+                masterPatientIndex: $masterPatientIndex
+                patientRegisterId: $patientRegisterId
+#                付款金额
+                payAmount: 1
+                payDate: ${get_date(number=1)}
+#                缴费方式：入院交
+                payRoute: "FH0086.01"
+                payType: "FH0085.01"
+                payTypeName: "现金"
+                posType: 2
+            method: POST
+            url: /app-hospitalized-register/patientPrepayments/saveInsertPrepayments
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            prepaymentId: content.body.id
+#打印预交款/app-hospitalized-register/patientPrepayments/prepaymentsReceiptNumPrint
+-   test:
+        name: 打印预交款
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                invoiceAllNumber: $numberPrefix$invoiceNumber
+                invoiceNumber: $invoiceNumber
+                invoiceOutId: $invoiceOutId
+                invoiceOutVersionNo: $invoiceOutVersionNo
+                prepaymentId: $prepaymentId
+                prepaymentVersionNo: 0
+            method: POST
+            url: /app-hospitalized-register/patientPrepayments/prepaymentsReceiptNumPrint
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+#查询领用人为当前登录人并且在使用中的票据信息/app-hospitalized-register/patientPrepayments/getInuseInvoiceGiveOutByUser
+-   test:
+        name: 查询领用人为当前登录人并且在使用中的票据信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-hospitalized-register/patientPrepayments/getInuseInvoiceGiveOutByUser
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+#预交金打印信息/app-hospitalized-register/patientPrepayments/get/queryPrepaymentsMsgById
+-   test:
+        name: 预交金打印信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                id: $prepaymentId
+            method: POST
+            url: /app-hospitalized-register/patientPrepayments/get/queryPrepaymentsMsgById
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+#根据患者主索引查询住院患者记录/app-hospitalized-register/hospitalizedRegister/query/patientInfoByIndex
+-   test:
+        name: 根据患者主索引查询住院患者记录
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                masterPatientIndex: $masterPatientIndex
+            method: POST
+            url: /app-hospitalized-register/hospitalizedRegister/query/patientInfoByIndex
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+#查询系统参数/app-hospitalized-settlement/inhospital/settle/query/querySystemParameter
+-   test:
+        name: 查询系统参数
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                parameterLevel: "FH0159.05"
+                systemParameterCode: "201002"
+            method: POST
+            url: /app-hospitalized-settlement/inhospital/settle/query/querySystemParameter
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 查询某个病区的待安床病人列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                k1: $k1
+                k2: $k2
+            method: GET
+            url: /app-nurse-station/patient/wait/list
+        teardown_hooks:
+          - ${reload_dict()}

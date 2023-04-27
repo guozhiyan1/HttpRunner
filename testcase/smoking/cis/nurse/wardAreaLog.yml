@@ -1,0 +1,109 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 病区日志查询
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(in_k2)}
+            orgId: ${ENV(orgId)}
+            areaId: ${ENV(in_k3)}
+            locationId: 99897828609
+            orgName: 城站院区
+            areaName: ${ENV(in_k3_name)}
+
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        api: api/user_info.yml
+        name: 切换登录院区部门
+
+
+-   test:
+        name: 用户个人样式
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-sys-manage/personality/table/getStyle/3142/1553599672893
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - null
+-   test:
+        name: 查询院区列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-station-manage/wardAreaLog/listCampus
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 查询院区下面的病区
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                id: $orgId
+            method: POST
+            url: /app-station-manage/wardAreaLog/listWardById
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 病区日志统计展示
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                beginTime: ${get_date(delete_date=1)}
+                campusId: $orgId
+                campusName: $orgName
+                endTime: ${get_date()}
+                wardId: $areaId
+                wardName: $areaName
+            method: POST
+            url: /app-station-manage/wardAreaLog/listWardLog
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success

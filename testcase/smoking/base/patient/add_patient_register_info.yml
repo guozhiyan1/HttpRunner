@@ -1,0 +1,338 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 患者建档
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(out_k2)}
+            orgId: ${ENV(orgId)}
+
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        api: api/user_info.yml
+        name: 切换登录院区部门
+
+
+-   test:
+        name: 行政区划Lookup
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                felog: seenew-front-util-post
+                gradeList:
+                - 1
+                size: 100
+            method: POST
+            url: /app-sys-manage/common/listAdministrativeDivisionLookup
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+
+-   test:
+        name: 获取病人登记所有的字典数据
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                felog: seenew-front-util-post
+            method: POST
+            url: /app-patient-manage/register/getPatientRegisterDictData
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取本机构下病人费用类别和费用性质
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                felog: seenew-front-util-post
+            method: POST
+            url: /app-patient-manage/register/queryCostType
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 根据系统参数code获取系统参数值
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                felog: seenew-front-util-post
+                paramCode: '18700001'
+            method: POST
+            url: /app-patient-manage/register/getSystemParameValue
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - '1'
+
+-   test:
+        name: 查询系统参数
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                felog: seenew-front-util-post
+                parameterLevel: FH0159.02
+                systemParameterCode: '10300002'
+            method: POST
+            url: /app-hospitalized-settlement/inhospital/settle/query/querySystemParameter
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 当前机构区域
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                felog: seenew-front-util-post
+            method: POST
+            url: /app-patient-manage/register/currentOrgArea
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取机构系统参数(查不到返回'')
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                code: '18900001'
+                level: FH0159.02
+                parameterCode: '18900001'
+            method: POST
+            url: /app-sys-manage/param/getOrgSystemParam
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - '0'
+-   test:
+        name: 字典下拉
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                felog: seenew-front-util-post
+                mainCode: FH0121
+            method: POST
+            url: /app-medicare-platform-manage/medicare/invoke/getSelectList
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 新增及更新患者登记
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                felog: new-read-card-post
+                hasMedicalVoucher: true
+                inHosRegisterSign: 1
+                patientAddress:
+                -   cityId: '145666'
+                    cityName: 哈尔滨市
+                    countryCode: GB/T2659.156
+                    countryName: 中国
+                    countyId: '145668'
+                    countyName: 道里区
+                    id: ''
+                    line: 小河街
+                    postalCode: '150000'
+                    provinceId: '145665'
+                    provinceName: 道里区
+                    useCode: CV02.01.205.01
+                -   cityId: '145666'
+                    cityName: 哈尔滨市
+                    countryCode: GB/T2659.156
+                    countryName: 中国
+                    countyId: '145668'
+                    countyName: 道里区
+                    id: ''
+                    line: 小河街
+                    postalCode: '150000'
+                    provinceId: '145665'
+                    provinceName: 道里区
+                    useCode: CV02.01.205.03
+                patientBiologyInfoVO:
+                    aboBloodCode:
+                    aboBloodName:
+                    kidneyTransplant:
+                    liverTransplant:
+                    patientChronicDiseaseList:
+                    -   diseaseCode:
+                        diseaseName:
+                    rhBloodCode:
+                    rhBloodName:
+                patientCompanyVO:
+                    addressVO:
+                        cityId:
+                        cityName:
+                        countryCode:
+                        countryName:
+                        countyId:
+                        countyName:
+                        id:
+                        line:
+                        postalCode:
+                        provinceId:
+                        provinceName:
+                        useCode:
+                    company:
+                    companyTelecom:
+                patientContact:
+                -   contactCardNum:
+                    contactCardType:
+                    contactPeopleAddress:
+                    contactPeopleName:
+                    contactPeopleTelecom:
+                    relationType:
+                    relationTypeCode:
+                patientProcreateInfoVO:
+                -   deliveryMode:
+                    deliveryModeCode:
+                    fetusType:
+                    fetusTypeCode:
+                    procreateDate:
+                patientRegisterBaseInfo:
+                    ageText: 27岁
+                    birthdate: '1993-03-07'
+                    costProperty: 自费
+                    costPropertyCode: '0'
+                    costPropertyId: 1
+                    costType: 自费
+                    costTypeCode: '1'
+                    costTypeId: 1
+                    defaultLanguage: 汉语
+                    defaultLanguageCode: FH0067.06
+                    educationLevel: 博士研究生肄业
+                    educationLevelCode: GB/T4658.13
+                    gender: 男
+                    genderCode: GB/T2261.1.1
+                    greenChannel: 0
+                    height: ''
+                    maritalStatus: 复婚
+                    maritalStatusCode: GB/T2261.2.23
+                    medicalVoucherNo: ${get_result_dicts(medicare_card)}
+                    medicalVoucherType: FH0121.01
+                    medicareCardInfo: '{"cardNumberOri":"JZK00018","cardTypeOri":"FH0121.01","registerIdOri":"","cardTypeList":[{"createBy":0,"gmtCreate":"2018-11-20
+                        11:40:56","modifyBy":0,"gmtModify":"2018-11-20 11:40:56","active":1,"id":1007610,"mainCode":"FH0121","subCode":"FH0121.01","codeNo":"","sortNo":1,"typeDesc":"就诊卡","version":null,"dictType":"","parentCode":null,"pinyinCode":null,"dictExplain":null,"fastKey":"","label":"就诊卡"},{"createBy":0,"gmtCreate":"2018-11-20
+                        11:40:56","modifyBy":0,"gmtModify":"2018-11-20 11:40:56","active":1,"id":1007606,"mainCode":"FH0121","subCode":"FH0121.02","codeNo":"96","sortNo":2,"typeDesc":"省医保S","version":null,"dictType":"","parentCode":null,"pinyinCode":null,"dictExplain":null,"fastKey":"S","label":"省医保S"},{"createBy":0,"gmtCreate":"2018-11-20
+                        11:40:56","modifyBy":0,"gmtModify":"2018-11-20 11:40:56","active":1,"id":1007607,"mainCode":"FH0121","subCode":"FH0121.03","codeNo":"97","sortNo":3,"typeDesc":"市医保K","version":null,"dictType":"","parentCode":null,"pinyinCode":null,"dictExplain":null,"fastKey":"K","label":"市医保K"},{"createBy":0,"gmtCreate":"2018-11-20
+                        11:40:56","modifyBy":0,"gmtModify":"2018-11-20 11:40:56","active":1,"id":1007608,"mainCode":"FH0121","subCode":"FH0121.04","codeNo":"98","sortNo":4,"typeDesc":"省异地D","version":null,"dictType":"","parentCode":null,"pinyinCode":null,"dictExplain":null,"fastKey":"D","label":"省异地D"},{"createBy":0,"gmtCreate":"2018-11-20
+                        11:40:56","modifyBy":0,"gmtModify":"2018-11-20 11:40:56","active":1,"id":1007609,"mainCode":"FH0121","subCode":"FH0121.05","codeNo":"","sortNo":5,"typeDesc":"公费卡","version":null,"dictType":"","parentCode":null,"pinyinCode":null,"dictExplain":null,"fastKey":"","label":"公费卡"},{"createBy":1,"gmtCreate":"2020-04-02
+                        17:08:38","modifyBy":1,"gmtModify":"2020-04-02 17:08:38","active":1,"id":100875944,"mainCode":"FH0121","subCode":"FH0121.06","codeNo":"06","sortNo":6,"typeDesc":"天台医保卡T","version":null,"dictType":"","parentCode":null,"pinyinCode":null,"dictExplain":null,"fastKey":"T","label":"天台医保卡T"},{"createBy":1,"gmtCreate":"2020-04-02
+                        17:08:38","modifyBy":1,"gmtModify":"2020-04-02 17:08:38","active":1,"id":100875945,"mainCode":"FH0121","subCode":"FH0121.07","codeNo":"07","sortNo":7,"typeDesc":"台州医保卡R","version":null,"dictType":"","parentCode":null,"pinyinCode":null,"dictExplain":null,"fastKey":"R","label":"台州医保卡R"},{"createBy":1,"gmtCreate":"2019-10-08
+                        17:05:28","modifyBy":1,"gmtModify":"2019-10-08 17:05:28","active":1,"id":1008963,"mainCode":"FH0121","subCode":"FH0121.08","codeNo":"","sortNo":8,"typeDesc":"身份证F","version":null,"dictType":"","parentCode":null,"pinyinCode":null,"dictExplain":null,"fastKey":"F","label":"身份证F"},{"createBy":0,"gmtCreate":null,"modifyBy":0,"gmtModify":null,"active":1,"id":100876015,"mainCode":"FH0121","subCode":"FH0121.10","codeNo":"101","sortNo":11,"typeDesc":"市医保K(巍山)","version":null,"dictType":"","parentCode":null,"pinyinCode":null,"dictExplain":null,"fastKey":"K","label":"市医保K(巍山)"},{"createBy":1,"gmtCreate":"2020-05-25
+                        16:42:15","modifyBy":1,"gmtModify":"2020-05-25 16:42:15","active":1,"id":100876183,"mainCode":"FH0121","subCode":"FH0121.12","codeNo":"","sortNo":12,"typeDesc":"两卡融合L","version":null,"dictType":"","parentCode":null,"pinyinCode":null,"dictExplain":null,"fastKey":"L","label":"两卡融合L"},{"createBy":1,"gmtCreate":"2020-05-25
+                        16:42:15","modifyBy":1,"gmtModify":"2020-05-25 16:42:15","active":1,"id":100876184,"mainCode":"FH0121","subCode":"FH0121.15","codeNo":"","sortNo":15,"typeDesc":"电子健康卡","version":null,"dictType":"","parentCode":null,"pinyinCode":null,"dictExplain":null,"fastKey":"","label":"电子健康卡"},{"createBy":1,"gmtCreate":"2020-09-22
+                        16:18:01","modifyBy":1,"gmtModify":"2020-09-22 16:18:01","active":1,"id":100876879,"mainCode":"FH0121","subCode":"FH0121.16","codeNo":"102","sortNo":16,"typeDesc":"电子凭证X","version":null,"dictType":"","parentCode":null,"pinyinCode":null,"dictExplain":null,"fastKey":"X","label":"电子凭证X"}],"userConfig":{"code":"","defaultCardType":"FH0121.01","getMedicareCenterPatInfo":true,"updateOrgPatientFlag":true,"patientInfoConfirm":false,"leastSearchLength":2,"enableCreateDoc":false,"scene":"patientInfoContentFlow"},"env":"tiantai","debug":{"mode":0,"disabledNodes":[]},"extendProps":{},"cardType":"FH0121.01","cardNumber":"JZK00018","cardNo":"JZK00018","registerId":null,"cardModel":{"origin":{},"format":{}},"patInfoModel":{"origin":{},"format":{}},"userDetailInfo":{},"patientList":[],"updateMedicare":false}'
+                    nation: 汉族
+                    nationCode: GB/T3304.01
+                    nationality: 中国
+                    nationalityCode: GB/T2659.156
+                    nativePlace: 河北省石家庄市
+                    nativePlaceCode: '130100000000'
+                    patientCardInfo:
+                    -   cardNumber: ${get_result_dicts(card_number)}
+                        cardType: 居民身份证
+                        cardTypeCode: FH0066.01
+                        id: 0
+                    patientCommunicationLanguages: []
+                    patientName: ${get_result_dicts(patient_name)}
+                    profession: 学生
+                    professionCode: FH0063.06
+                    telecom: ${get_result_dicts(telephone)}
+                    weight: ''
+                patientRiskFactor:
+                -   riskFactorType:
+                    riskFactorValue:
+                patientTelecoms:
+                -   telecom:
+                    telecomType:
+                    telecomTypeCode:
+            method: POST
+            url: /app-patient-manage/register/savePatientRegisterInfo
+        validate:
+        -   contained_by:
+            - content.code
+            - [2000,4007]
+        -   contained_by:
+            - content.message
+            - [success,"就诊凭据已经存在!"]
+        teardown_hooks:
+            - ${reload_dict()}

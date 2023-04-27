@@ -1,0 +1,213 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 门诊挂号查询
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(out_k2)}
+            orgId: ${ENV(orgId)}
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        api: api/user_info.yml
+        name: 切换登录院区部门
+
+-   test:
+        name: /newappointmentAndRegister/RegisterQuery
+        request:
+            method: GET
+            params:
+                k: 1-99897828604-XN9305
+            url: /newappointmentAndRegister/RegisterQuery
+        validate: []
+
+-   test:
+        name: /app-sys-manage/personality/table/getStyle/10101/tradition-register-query-19-10-15-03-07
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-sys-manage/personality/table/getStyle/10101/tradition-register-query-19-10-15-03-07
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - null
+-   test:
+        name: 查询打印类型list
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-sys-manage/print/template/queryPrintTypeList
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询挂号需要用的字典信息-已完成
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-schedule-manage/tradition/register/traditionListRegisterAllDictData
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 条件查询挂号信息-已完成
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                chargeId: ''
+                endDate: ${get_date()}
+                orderKey: "registerConfirmTime"
+                orderType: "asc"
+                pageCount: 20
+                pageNum: 1
+                paging: true
+                patientSearchText: ''
+                payTypeCode: ''
+                registeredStatus:  [1, 2, 3, 5]
+                searchRegisterFlag: 1
+                startDate: ${get_date()}
+            method: POST
+            url: /app-schedule-manage/tradition/register/queryTraditionPatientByParam
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            - id: content.body.data.0.id
+-   test:
+        name: /app-outpatient-charge/outpatient/newcharge/receipt/parameters
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-outpatient-charge/outpatient/newcharge/receipt/parameters
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 首页显示模板列表查询
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-portal/stationmanage/stationConfig/list/getHomepage
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取门诊挂号简报的合计/退号等次数
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                chargeId: ''
+                endDate: ${get_date()}
+                orderKey: "registerConfirmTime"
+                orderType: "asc"
+                pageCount: 20
+                pageNum: 1
+                patientSearchText: ''
+                payTypeCode: ''
+                registeredStatus: [1, 2, 3, 5]
+                searchRegisterFlag: 1
+                startDate: ${get_date()}
+            method: POST
+            url: /app-schedule-manage/tradition/register/getRegisterReportNum
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 获取挂号票据数据详情
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                id: $id
+            method: POST
+            url: /app-schedule-manage/tradition/register/getRegisterInvoiceMsg
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询某个病区的待安床病人列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                k1: $k1
+                k2: $k2
+            method: GET
+            url: /app-nurse-station/patient/wait/list
+        teardown_hooks:
+          - ${reload_dict()}

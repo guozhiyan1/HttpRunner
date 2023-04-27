@@ -1,0 +1,84 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 门诊日结
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(out_k2)}
+            orgId: ${ENV(orgId)}
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        api: api/user_info.yml
+        name: 切换登录院区部门
+
+-   test:
+        name: 查询日结汇总,对账使用
+        setup_hooks:
+          - ${gmc_run_mysql(querySettlement)}
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                endDate: ${get_endtimestamp()}
+                isRegistration: 1
+                startDate: ${get_starttimestamp()}
+            method: POST
+            url: /app-outpatient-charge/outpatient/daily/querySettlement
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            - dailyAccounts: content.body
+-   test:
+        name: 新增日结
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                accountDate: ${get_date()}
+                dailyAccounts: $dailyAccounts
+            method: POST
+            url: /app-outpatient-charge/outpatient/daily/insertSettlement
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询登录人员的签到信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-medicare-platform-manage/signin/queryMySign
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        teardown_hooks:
+          - ${reload_dict()}

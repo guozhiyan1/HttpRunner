@@ -1,0 +1,17 @@
+#dubbo请求示例
+name: dubbo测试
+base_url: cn.seenew.future.his.service.medication.hsf.service
+variables:
+    tmp_key: medication-service
+    tmp_port: 20880
+    space: gmc-test
+request:
+    url: HSFMedicationService
+    method: queryMedicationRuleByIds
+    params:
+        ip: ${get_dubbo_ip($space,$tmp_key)}
+        port: $tmp_port
+        args: {"orgId": 1,"medIdList": [7867]}
+
+
+

@@ -1,0 +1,204 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 住院手工登记
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(inspect_k2)}
+            applyHospitalDistrictId=: ${ENV(applyHospitalDistrictId)}
+            inspect_k2: ${ENV(inspect_k2)}
+            inspect_k2_name: ${ENV(inspect_k2_name)}
+            applyHospitalDistrictName: ${ENV(applyHospitalDistrictName)}
+            applyAdmissionDeptId: ${ENV(applyAdmissionDeptId)}
+            applyAdmissionDeptName: ${ENV(applyAdmissionDeptName)}
+            applyAdmissionAreaId: ${ENV(applyAdmissionAreaId)}
+            applyAdmissionAreaName: ${ENV(applyAdmissionAreaId)}
+
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        name: 个人资料查询
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                "cardNo": "9810"
+                "orgId": "$k1"
+                "updateOrgPatientFlag": false
+                "cardType": ""
+            method: POST
+            url: /app-patient-manage/register/queryForCommonByVoucherNo
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          contactAddress: content.body.0.contactAddress
+          genderCode: content.body.0.genderCode
+          idCard: content.body.0.idCard
+          masterPatientIndex: content.body.0.masterPatientIndex
+          patientName: content.body.0.patientName
+          patientRegisterId: content.body.0.patientRegisterId
+          telecom: content.body.0.telecom
+
+-   test:
+        name: 查询检查项目id=4的可用队列
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                diagnosisTreatmentIds: [4]
+                deptId: $k2
+                effectVersion: false
+
+            method: POST
+            url: /app-schedule-manage/medical/technology/quenue/operation/searchInspectQueune
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          quenueId: content.body.0.quenueId
+          quenueName: content.body.0.quenueName
+          quenuePrefix: content.body.0.quenuePrefix
+
+-   test:
+        name: 住院手工登记
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                 "contactAddress": $contactAddress
+                 "genderCode": $genderCode
+                 "idCard": $idCard
+                 "masterPatientIndex": $masterPatientIndex
+                 "patientName": $patientName
+                 "patientRegisterId": $patientRegisterId
+                 "telecom": $telecom
+                 "age": "30"
+                 "quenueId": $quenueId
+                 "quenueName": $quenueName
+                 "quenuePrefix": $quenuePrefix
+                 "confirmSource": ""
+                 "inspectNo": ""
+                 "specifiedBeginTime": ""
+                 "specifiedEndTime": ""
+                 "specifiedServiceDate": ""
+                 "specifiedTime": false
+                 "tempAffirms":
+                  -   "inspectMethodName": null
+                      "inspectMethodNo": null
+                      "inspectType": "ECT"
+                      "inspectTypeCode": "ECT"
+                      "inspectionTypePrefix": null
+                      "partsName": null
+                      "partsNo": null
+                      "patientRegisterId": 13847
+                      "treatmentId": 13378
+                      "treatmentName": "CT平扫+增强(男)-咋-否"
+                      "treatmentTypeCode": null
+                      "techList":
+                      -   "itemCode": "9"
+                          "partsId": 9
+                          "partsName": "颈部"
+                          "techId": 2
+                          "techDetailDTOS":
+                          -   "itemCode": "2001"
+                              "itemName": "颈部1"
+                              "techDetailId": 4
+                              "itemId": 4
+                              "partsChargeId": 2
+            method: POST
+            url: /app-medical-technology/inspect/inpatient/apply/temp/affirm
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            applyId: content.body.applyId
+            applyItemIdList: content.body.applyItemIdList
+
+-   test:
+        name: 判断是否有住院新增检查申请单
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                 "orderKey": ""
+                 "orderType": ""
+                 "startDate": "${get_date(number=0)} 00:00:00"
+                 "endDate": "${get_date(number=0)} 23:59:59"
+                 "medicalStatus": ""
+                 "dateQueryType": "0"
+                 "noQueryType": "0"
+                 "reservationStatus": ""
+                 coordinations: [$inspect_k2]
+                 "wardId": null
+                 "bedNumber": null
+                 "patientName": ""
+                 "deptConfig": ""
+                 "pageNum": 1
+                 "pageCount": 50
+                 "paging": true
+                 "applyNo": ""
+                 "inspectNo": ""
+            method: POST
+            url: /app-medical-technology/inspect/page/inpatient
+        extract:
+            data: content.body.data
+        validate:
+        -   str_eq:
+            - ${get_list_dict_value($data, applyId, $applyId, applyId)}
+            - $applyId
+        -   eq:
+            - content.message
+            - success
+
+
+-   test:
+        name: 住院撤销登记
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                applyId: $applyId
+                itemIdList: $applyItemIdList
+            method: POST
+            url: /app-medical-technology/inspect/inpatient/cancelConfirm
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+

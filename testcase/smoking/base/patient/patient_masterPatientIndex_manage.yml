@@ -1,0 +1,69 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 患者主索引管理
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(out_k2)}
+            orgId: ${ENV(orgId)}
+
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        api: api/user_info.yml
+        name: 切换登录院区部门
+
+-   test:
+        name: 查询患者主索引信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                birthdate: ''
+                felog: queryPatientMasterIndex-post
+                pageCount: 20
+                pageNum: 1
+                patientName: ''
+            method: POST
+            url: /app-patient-manage/patient/masterindex/manage/queryPage
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          - mergeIndex: content.body.data.0.mergeIndex
+
+-   test:
+        name: 查询主索引关联关系
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                felog: queryPatientMasterIndex-post
+                mergeIndex: $mergeIndex
+            method: POST
+            url: /app-patient-manage/patient/masterindex/manage/queryRelationList
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        teardown_hooks:
+          - ${reload_dict()}
+

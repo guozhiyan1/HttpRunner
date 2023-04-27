@@ -1,0 +1,105 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 医嘱单签名
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(in_k2)}
+            orgId: ${ENV(orgId)}
+            areaId: ${ENV(in_k3)}
+            locationId: 99897828609
+
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        api: api/user_info.yml
+        name: 切换登录院区部门
+
+-   test:
+        name: 医嘱打印
+        setup_hooks:
+          - ${gmc_run_mysql(patient_info, inhospital_register, add_bed,patient_add_bed)}
+        request:
+            headers:
+                If-Modified-Since: Fri, 29 Jan 2021 06:32:43 GMT
+                If-None-Match: W/"6013ac0b-2b8e"
+            method: GET
+            params:
+                k: 1-99897828607-XN3142
+            url: /newNurseStation/OrderPrintingTime
+        validate: []
+
+-   test:
+        name: 按护理组查询在院病列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                nurseGroupId: ''
+            method: POST
+            url: /app-nurse-station/patient/group/list
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+
+-   test:
+        name: 查询医嘱单签名列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                orderSign: ''
+                qcIdList: []
+                beginDate: ${get_date(delete_date=3)} 00:00
+                endDate: ${get_date()} 23:59
+                openingType: 0
+                orderCategoryList: [1, 2, 4, 7]
+                orderSignStatus: 1
+                orderSignType: 1
+                orderType:
+                patientIdList:
+                  - ${get_result_dicts(inhospital_id)}
+            method: POST
+            url: /app-nurse-station/order/sign/modify/list
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询床位及患者信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $areaId
+            method: GET
+            url: /app-nurse-station/bedPatient/findAll
+        validate:
+        -   eq:
+            - content.message
+            - success
+        - eq:
+            - content.code
+            - 2000
+        teardown_hooks:
+          - ${reload_dict()}

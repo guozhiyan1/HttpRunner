@@ -1,0 +1,596 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 手术费用
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(in_k2)}
+            orgId: ${ENV(orgId)}
+            loginCampus: 城站院区
+            loginCampusCode: 2
+            locationId_keshi: 99897828605  #城战自动化消化血液科
+            locationId_shoushu: 99897829060 #城战自动化手术室
+            locationId_mazui: 99897829061  #城战自动化麻醉室
+            locationId_bingqu: 99897828607 #城站消化血液科自动化病区
+            locationId_shoushujian: 1210   #手术间C1
+            hospitalizedAreaName: 城站消化血液科自动化病区
+            hospitalizedDeptName: 城战自动化消化血液科
+            surgeryDeptName: 城战自动化手术室
+            anesthesiaDept: 城战自动化麻醉室
+            locationName: C1
+            operator: 医快一7
+            operatorId: 3142
+            #sql写死了手术名，如果该手术被删除的话，可能需要更改手术类型的传参，surgeryType
+
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        api: api/user_info.yml
+        name: 切换登录院区部门
+
+-   test:
+        name: 根据病历号查询患者手术费用
+        setup_hooks:
+            - ${gmc_run_mysql(patient_info, inhospital_register, add_bed,patient_add_bed,surgery_manage, complete_surgery)}
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                keyName: searchNumber
+                searchNumber: ${get_result_dicts(surgery_apply_no)}
+                searchType: 1
+                surgeryType: 2
+            method: POST
+            url: /surgery-station-manage/surgeryCharge/queryPatientSurgeryCharge
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            - sourceId: content.body.0.surgeryApplyNo
+-   test:
+        name: 根据住院患者id查询在住院患者信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                inPatientId: ${get_result_dicts(inhospital_id)}
+            method: POST
+            url: /app-billing/inPatient/detail
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            - birthDate: content.body.birthDate
+
+-   test:
+        name: 查询收费项目列表（医疗收费）
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                birthDate: $birthDate
+                cardType: FH0121.01
+                occurDate: ${get_date(number=1)}
+                queryParam: ''
+                queryType: '1'
+            method: POST
+            url: /app-billing/chargeItem/query/list
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            - baseItemId_zhiliao: content.body.0.baseFinanceItemId
+            - baseItemName_zhiliao: content.body.0.baseFinanceItemName
+            - chargeItemId_zhiliao: content.body.0.chargeItemList.0.chargeItemId
+            - chargeItemName_zhiliao: content.body.0.chargeItemList.0.chargeItemName
+            - chargeItemType_zhiliao: content.body.0.chargeItemList.0.chargeItemType
+            - typeDesc_zhiliao: content.body.0.chargeItemList.0.typeDesc
+            - price_zhiliao: content.body.0.price
+            - itemCode_zhiliao: content.body.0.itemCode
+            - unitName_zhiliao: content.body.0.unitName
+
+
+-   test:
+        name: 查询收费项目列表（手术材料）
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                birthDate: $birthDate
+                cardType: FH0121.01
+                occurDate: ${get_date(number=1)}
+                queryParam: ''
+                queryType: '2'
+            method: POST
+            url: /app-billing/chargeItem/query/list
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            - baseItemId_cailiao: content.body.0.baseFinanceItemId
+            - baseItemName_cailiao: content.body.0.baseFinanceItemName
+            - chargeItemId_cailiao: content.body.0.chargeItemList.0.chargeItemId
+            - chargeItemName_cailiao: content.body.0.chargeItemList.0.chargeItemName
+            - chargeItemType_cailiao: content.body.0.chargeItemList.0.chargeItemType
+            - typeDesc_cailiao: content.body.0.chargeItemList.0.typeDesc
+            - price_cailiao: content.body.0.price
+            - itemCode_cailiao: content.body.0.itemCode
+            - unitName_cailiao: content.body.0.unitName
+
+-   test:
+        name: 查询收费项目列表（科室药品）
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                birthDate: $birthDate
+                cardType: FH0121.01
+                occurDate: ${get_date(number=1)}
+                queryParam: ''
+                queryType: '5'
+            method: POST
+            url: /app-billing/chargeItem/query/list
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            - baseItemId_yaopin: content.body.0.baseFinanceItemId
+            - baseItemName_yaopin: content.body.0.baseFinanceItemName
+            - baseItemId_yaopin: content.body.0.chargeItemList.0.baseItemId
+            - baseItemName_yaopin: content.body.0.chargeItemList.0.baseItemName
+            - chargeItemId_yaopin: content.body.0.chargeItemList.0.chargeItemId
+            - chargeItemName_yaopin: content.body.0.chargeItemList.0.chargeItemName
+            - chargeItemType_yaopin: content.body.0.chargeItemList.0.chargeItemType
+            - chargeItemTypeName_yaopin: content.body.0.chargeItemList.0.chargeItemTypeName
+            - largePrice_yaopin: content.body.0.chargeItemList.0.largePrice
+            - largePackagingUnit_yaopin: content.body.0.chargeItemList.0.largePackagingUnit
+            - typeDesc_yaopin: content.body.0.chargeItemList.0.typeDesc
+            - smallLargePackageRatio_yaopin: content.body.0.chargeItemList.0.smallLargePackageRatio
+            - price_yaopin: content.body.0.price
+            - itemCode_yaopin: content.body.0.itemCode
+            - unitName_yaopin: content.body.0.unitName
+            - largeUnitName_yaopin: content.body.0.largeUnitName
+            - manufacturer_yaopin: content.body.0.manufacturer
+            - specification_yaopin: content.body.0.specification
+
+
+-   test:
+        name: 费用补退-药品库存校验
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                cardType: FH0121.01
+                chargeDetailList:
+                -   addNumber: ''
+                    amounts: null
+                    amountss: $price_zhiliao
+                    baseItemId: $baseItemId_zhiliao
+                    baseItemName: $baseItemName_zhiliao
+                    billingDeptId: $locationId_keshi
+                    billingDeptName: $hospitalizedDeptName
+                    chargeItemId: $chargeItemId_zhiliao
+                    chargeItemName: $chargeItemName_zhiliao
+                    chargeItemNameOther: null
+                    chargeItemType: $chargeItemType_zhiliao
+                    chargeItemTypeName: $typeDesc_zhiliao
+                    chargePriceId: ''
+                    columnData:
+                    -   label: 主手术
+                        value: '1'
+                    -   label: 次手术
+                        value: '2'
+                    -   label: 手术套餐
+                        value: '3'
+                    costColumn: '1'
+                    costType: '1'
+                    costTypeName: 医疗收费
+                    doctorId: 1
+                    doctorName: 樊蕊蕊
+                    drugsType: null
+                    editPrice: false
+                    enableState: null
+                    executeDeptId: $locationId_shoushu
+                    executeDeptName: $surgeryDeptName
+                    executorId: 1
+                    executorName: 樊蕊蕊
+                    frequencyId: null
+                    frequencyName: null
+                    frequencyScope: null
+                    itemNumber: null
+                    largePackagingUnit: null
+                    largePrice: null
+                    largeUnitName: null
+                    manufacturer: ''
+                    occurDate: ${get_date(number=1)}
+                    operatorId: $operatorId
+                    operatorLocationId: $locationId_shoushu
+                    operatorLocationName: $surgeryDeptName
+                    operatorName: $operator
+                    price: $price_zhiliao
+                    priceId: ''
+                    pricesCode: $itemCode_zhiliao
+                    proportion: '1.0'
+                    smallLargePackageRatio: null
+                    specification: null
+                    supplementNumber: '1'
+                    typeDesc: $typeDesc_zhiliao
+                    unitName: $unitName_zhiliao
+                -   addNumber: ''
+                    amounts: null
+                    amountss: $price_cailiao
+                    baseItemId: $baseItemId_cailiao
+                    baseItemName: $baseItemName_cailiao
+                    billingDeptId: $locationId_keshi
+                    billingDeptName: $hospitalizedDeptName
+                    birthDate: $birthDate
+                    chargeItemId: $chargeItemId_cailiao
+                    chargeItemName: $chargeItemName_cailiao
+                    chargeItemNameOther: null
+                    chargeItemType: $chargeItemType_cailiao
+                    chargeItemTypeName: $chargeItemName_cailiao
+                    chargePriceId: ''
+                    columnData:
+                    -   label: 手术套餐
+                        value: '3'
+                    costColumn: '3'
+                    costColumnName: 手术套餐
+                    costType: '2'
+                    costTypeName: 手术材料
+                    doctorId: 1
+                    doctorName: 樊蕊蕊
+                    drugsType: null
+                    editPrice: false
+                    enableState: null
+                    executeDeptId: $locationId_shoushu
+                    executeDeptName: $surgeryDeptName
+                    executorId: 1
+                    executorName: 樊蕊蕊
+                    frequencyId: null
+                    frequencyName: null
+                    frequencyScope: null
+                    itemNumber: null
+                    largePackagingUnit: null
+                    largePrice: null
+                    largeUnitName: null
+                    manufacturer: null
+                    occurDate: ${get_date(number=1)}
+                    operatorId: $operatorId
+                    operatorLocationId: $locationId_shoushu
+                    operatorLocationName: $surgeryDeptName
+                    operatorName: $operator
+                    price: $price_cailiao
+                    priceId: ''
+                    pricesCode: null
+                    proportion: '1.0'
+                    smallLargePackageRatio: null
+                    specification: null
+                    supplementNumber: '1'
+                    typeDesc: $typeDesc_cailiao
+                    unitName: $unitName_cailiao
+                -   addNumber: ''
+                    amounts: null
+                    amountss: $price_yaopin
+                    baseItemId: $baseItemId_yaopin
+                    baseItemName: $baseItemName_yaopin
+                    billingDeptId: $locationId_keshi
+                    billingDeptName: $hospitalizedDeptName
+                    chargeItemId: $chargeItemId_yaopin
+                    chargeItemName: $chargeItemName_yaopin
+                    chargeItemNameOther: null
+                    chargeItemType: $chargeItemType_yaopin
+                    chargeItemTypeName: $chargeItemTypeName_yaopin
+                    chargePriceId: ''
+                    columnData:
+                    -   label: 手术套餐
+                        value: '3'
+                    costColumn: '3'
+                    costColumnName: 手术套餐
+                    costType: '5'
+                    costTypeName: 科室药品
+                    doctorId: 1
+                    doctorName: 樊蕊蕊
+                    drugsType: null
+                    editPrice: false
+                    enableState: true
+                    executeDeptId: $locationId_shoushu
+                    executeDeptName: $surgeryDeptName
+                    executorId: 1
+                    executorName: 樊蕊蕊
+                    frequencyId: null
+                    frequencyName: null
+                    frequencyScope: null
+                    itemNumber: null
+                    largePackagingUnit: $largePackagingUnit_yaopin
+                    largePrice: $largePrice_yaopin
+                    largeUnitName: $largeUnitName_yaopin
+                    manufacturer: $manufacturer_yaopin
+                    occurDate: ${get_date(number=1)}
+                    operatorId: $operatorId
+                    operatorLocationId: $locationId_shoushu
+                    operatorLocationName: $surgeryDeptName
+                    operatorName: $operator
+                    price: $price_cailiao
+                    priceId: ''
+                    pricesCode: null
+                    proportion: '1.0'
+                    smallLargePackageRatio: $smallLargePackageRatio_yaopin
+                    specification: $specification_yaopin
+                    supplementNumber: '1'
+                    typeDesc: $typeDesc_yaopin
+                    unitName: $unitName_yaopin
+                inPatientId: ${get_result_dicts(inhospital_id)}
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                refundChargeList: []
+                sourceId: $sourceId
+                supplementType: '3'
+            method: POST
+            url: /app-billing/inPatient/charge/supplementMedicine/valid
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 费用补退-可补可退
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                cardType: FH0121.01
+                chargeDetailList:
+                -   addNumber: ''
+                    amounts: null
+                    amountss: $price_zhiliao
+                    baseItemId: $baseItemId_zhiliao
+                    baseItemName: $baseItemName_zhiliao
+                    billingDeptId: $locationId_keshi
+                    billingDeptName: $hospitalizedDeptName
+                    chargeItemId: $chargeItemId_zhiliao
+                    chargeItemName: $chargeItemName_zhiliao
+                    chargeItemNameOther: null
+                    chargeItemType: $chargeItemType_zhiliao
+                    chargeItemTypeName: $typeDesc_zhiliao
+                    chargePriceId: ''
+                    columnData:
+                    -   label: 主手术
+                        value: '1'
+                    -   label: 次手术
+                        value: '2'
+                    -   label: 手术套餐
+                        value: '3'
+                    costColumn: '1'
+                    costType: '1'
+                    costTypeName: 医疗收费
+                    doctorId: 1
+                    doctorName: 樊蕊蕊
+                    drugsType: null
+                    editPrice: false
+                    enableState: null
+                    executeDeptId: $locationId_shoushu
+                    executeDeptName: $surgeryDeptName
+                    executorId: 1
+                    executorName: 樊蕊蕊
+                    frequencyId: null
+                    frequencyName: null
+                    frequencyScope: null
+                    itemNumber: null
+                    largePackagingUnit: null
+                    largePrice: null
+                    largeUnitName: null
+                    manufacturer: ''
+                    occurDate: ${get_date(number=1)}
+                    operatorId: $operatorId
+                    operatorLocationId: $locationId_shoushu
+                    operatorLocationName: $surgeryDeptName
+                    operatorName: $operator
+                    price: $price_zhiliao
+                    priceId: ''
+                    pricesCode: $itemCode_zhiliao
+                    proportion: '1.0'
+                    smallLargePackageRatio: null
+                    specification: null
+                    supplementNumber: '1'
+                    typeDesc: $typeDesc_zhiliao
+                    unitName: $unitName_zhiliao
+                -   addNumber: ''
+                    amounts: null
+                    amountss: $price_cailiao
+                    baseItemId: $baseItemId_cailiao
+                    baseItemName: $baseItemName_cailiao
+                    billingDeptId: $locationId_keshi
+                    billingDeptName: $hospitalizedDeptName
+                    birthDate: $birthDate
+                    chargeItemId: $chargeItemId_cailiao
+                    chargeItemName: $chargeItemName_cailiao
+                    chargeItemNameOther: null
+                    chargeItemType: $chargeItemType_cailiao
+                    chargeItemTypeName: $chargeItemName_cailiao
+                    chargePriceId: ''
+                    columnData:
+                    -   label: 手术套餐
+                        value: '3'
+                    costColumn: '3'
+                    costColumnName: 手术套餐
+                    costType: '2'
+                    costTypeName: 手术材料
+                    doctorId: 1
+                    doctorName: 樊蕊蕊
+                    drugsType: null
+                    editPrice: false
+                    enableState: null
+                    executeDeptId: $locationId_shoushu
+                    executeDeptName: $surgeryDeptName
+                    executorId: 1
+                    executorName: 樊蕊蕊
+                    frequencyId: null
+                    frequencyName: null
+                    frequencyScope: null
+                    itemNumber: null
+                    largePackagingUnit: null
+                    largePrice: null
+                    largeUnitName: null
+                    manufacturer: null
+                    occurDate: ${get_date(number=1)}
+                    operatorId: $operatorId
+                    operatorLocationId: $locationId_shoushu
+                    operatorLocationName: $surgeryDeptName
+                    operatorName: $operator
+                    price: $price_cailiao
+                    priceId: ''
+                    pricesCode: null
+                    proportion: '1.0'
+                    smallLargePackageRatio: null
+                    specification: null
+                    supplementNumber: '1'
+                    typeDesc: $typeDesc_cailiao
+                    unitName: $unitName_cailiao
+                -   addNumber: ''
+                    amounts: null
+                    amountss: $price_yaopin
+                    baseItemId: $baseItemId_yaopin
+                    baseItemName: $baseItemName_yaopin
+                    billingDeptId: $locationId_keshi
+                    billingDeptName: $hospitalizedDeptName
+                    chargeItemId: $chargeItemId_yaopin
+                    chargeItemName: $chargeItemName_yaopin
+                    chargeItemNameOther: null
+                    chargeItemType: $chargeItemType_yaopin
+                    chargeItemTypeName: $chargeItemTypeName_yaopin
+                    chargePriceId: ''
+                    columnData:
+                    -   label: 手术套餐
+                        value: '3'
+                    costColumn: '3'
+                    costColumnName: 手术套餐
+                    costType: '5'
+                    costTypeName: 科室药品
+                    doctorId: 1
+                    doctorName: 樊蕊蕊
+                    drugsType: null
+                    editPrice: false
+                    enableState: true
+                    executeDeptId: $locationId_shoushu
+                    executeDeptName: $surgeryDeptName
+                    executorId: 1
+                    executorName: 樊蕊蕊
+                    frequencyId: null
+                    frequencyName: null
+                    frequencyScope: null
+                    itemNumber: null
+                    largePackagingUnit: $largePackagingUnit_yaopin
+                    largePrice: $largePrice_yaopin
+                    largeUnitName: $largeUnitName_yaopin
+                    manufacturer: $manufacturer_yaopin
+                    occurDate: ${get_date(number=1)}
+                    operatorId: $operatorId
+                    operatorLocationId: $locationId_shoushu
+                    operatorLocationName: $surgeryDeptName
+                    operatorName: $operator
+                    price: $price_cailiao
+                    priceId: ''
+                    pricesCode: null
+                    proportion: '1.0'
+                    smallLargePackageRatio: $smallLargePackageRatio_yaopin
+                    specification: $specification_yaopin
+                    supplementNumber: '1'
+                    typeDesc: $typeDesc_yaopin
+                    unitName: $unitName_yaopin
+                inPatientId: ${get_result_dicts(inhospital_id)}
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                refundChargeList: []
+                sourceId: $sourceId
+                supplementType: '3'
+            method: POST
+            url: /app-billing/inPatient/charge/supplement
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 按不同条件查询费用列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                birthDate: $birthDate
+                cardType: FH0121.01
+                cardTypeCode: FH0121.01
+                costTypeCode: '1'
+                executorId: 1
+                executorName: 樊蕊蕊
+                feeSource: FH0253.05
+                inPatientId: ${get_result_dicts(inhospital_id)}
+                isEdit: true
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                patientRegisterId: ${get_result_dicts(patient_id)}
+                queryType: '3'
+                sourceId: $sourceId
+                surgeryType: 2
+            method: POST
+            url: /app-billing/inPatient/charge/list
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        teardown_hooks:
+            - ${reload_dict()}

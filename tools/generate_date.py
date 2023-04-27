@@ -7,7 +7,7 @@ def getdate(number=0, add_date=None, delete_date=None):
     "%Y-%m-%d"
     "%Y-%m-%dT%H:%M:%S.000Z"
     """
-    string_list = ["%Y-%m-%d", '%Y-%m-%d %H:%M:%S', "%Y-%m-%dT%H:%M:%S.000Z"]
+    string_list = ["%Y-%m-%d", '%Y-%m-%d %H:%M:%S', "%Y-%m-%dT%H:%M:%S.000Z", '%Y-%m-%d %H:%M']
     strings = string_list[number]
     now_time = datetime.datetime.now()
     if add_date:

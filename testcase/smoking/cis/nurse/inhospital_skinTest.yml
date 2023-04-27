@@ -1,0 +1,79 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 皮试登记
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(in_k2)}
+            orgId: ${ENV(orgId)}
+            areaId: ${ENV(in_k3)}
+            locationId: 99897828609
+
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        api: api/user_info.yml
+        name: 切换登录院区部门
+
+-   test:
+        name: 获取皮试模板
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                k1: $k1
+                k2: $k2
+            method: GET
+            url: /app-nurse-station/order/skinTest/template
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 皮试医嘱列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                beginDate: ${get_date()} 00:00
+                deptType: 1
+                endDate: ${get_date()} 23:59
+                recordStatus: ''
+            method: POST
+            url: /app-nurse-station/order/skinTest/list
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询床位及患者信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $areaId
+            method: GET
+            url: /app-nurse-station/bedPatient/findAll
+        validate:
+        -   eq:
+            - content.message
+            - success
+        - eq:
+            - content.code
+            - 2000
+        teardown_hooks:
+          - ${reload_dict()}

@@ -1,0 +1,357 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 新增队列-排班-排班规则-生成号源-号源验证
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(inspect_k2)}
+            applyHospitalDistrictId: ${ENV(applyHospitalDistrictId)}
+            inspect_k2_name: ${ENV(inspect_k2_name)}
+            applyHospitalDistrictName: ${ENV(applyHospitalDistrictName)}
+            applyAdmissionDeptId: ${ENV(applyAdmissionDeptId)}
+            applyAdmissionDeptName: ${ENV(applyAdmissionDeptName)}
+            applyAdmissionAreaId: ${ENV(applyAdmissionAreaId)}
+            applyAdmissionAreaName: ${ENV(applyAdmissionAreaId)}
+            quenueName: ${get_random_string(6)}
+
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        name: 新增队列
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                quenueName: $quenueName
+                campusId: $applyHospitalDistrictId
+                deptId: $k2
+                inspectTypeName: "内镜室"
+                "executiveLocationId": ""
+                "scheduleMode": "FH0173.01"
+                "scheduleModeName": "号源排班"
+                "registerMode": 3
+                "registerModeName": "预约自动登记"
+                "occupationMode": "FH0171.01"
+                "occupationModeName": "项目明细模式"
+                "quenueNoMode": 1
+                "quenueNoModeName": "仅登记生成"
+                "reservationNumberMode": "FH0178.01"
+                "reservationNumberModeName": "按号源"
+                "scheduleCompatibleMode": "FH0179.02"
+                "scheduleCompatibleModeName": "时间互斥"
+                "inspectTypeCode": "内镜室"
+                "showReservationNum": 1
+                "queueName": $quenueName
+                "deptName": $inspect_k2_name
+
+            method: POST
+            url: /app-schedule-manage/medical/technology/quenue/operation/save
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 查询新增队列的id
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                "keyWords": ""
+                "deptId": ""
+                "campusId": ""
+                "deptIds": [$k2]
+            method: POST
+            url: /app-schedule-manage/medical/technology/quenue/operation/selectInspectQuenueInfo
+        extract:
+            - inspectQuenues: content.body.0.deptQuenues.0.inspectQuenues
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+
+
+-   test:
+        name: 新增排班计划
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                 "hospitalDistrictId": $applyHospitalDistrictId
+                 "queueId": ${get_list_dict_value($inspectQuenues, quenueName, $quenueName, id)}
+                 "queueName": $quenueName
+                 "planName": "当月排班"
+                 "startDate": ${get_date(number=0)}
+                 "endDate": ${last_day_of_month()}
+                 "patientTypes":
+                 -
+                     "valueName": "预入院"
+                     "valueCode": "FH0175.01"
+                 -
+                     "valueName": "门诊"
+                     "valueCode": "FH0175.02"
+                 -
+                     "valueName": "住院"
+                     "valueCode": "FH0175.03"
+                 -
+                     "valueName": "体检"
+                     "valueCode": "FH0175.04"
+                 -
+                     "valueName": "绿通"
+                     "valueCode": "FH0175.05"
+                 -
+                     "valueName": "急诊"
+                     "valueCode": "FH0175.06"
+                 "models":
+                 -
+                     "valueName": "共享"
+                     "valueCode": "FH0176.01"
+                 "reservationPassages":
+                 -
+                     "valueName": "检查预约科室"
+                     "valueCode": "FH0177.01"
+                 -
+                     "valueName": "入院服务中心"
+                     "valueCode": "FH0177.02"
+                 -
+                      "valueName": "诊间"
+                      "valueCode": "FH0177.03"
+                 -
+                      "valueName": "检查科室"
+                      "valueCode": "FH0177.04"
+                 -
+                      "valueName": "自助机"
+                      "valueCode": "FH0177.05"
+                 -
+                      "valueName": "小程序"
+                      "valueCode": "FH0177.06"
+                 -
+                      "valueName": "其他机构"
+                      "valueCode": "FH0177.07"
+                 "devices":
+                 -
+                      "valueName": "CT1"
+                      "valueCode": 1194
+                 -
+                      "valueName": "CT2"
+                      "valueCode": 1195
+                 -
+                    "valueName": "CT8"
+                    "valueCode": 99897827812
+                 "campus":
+                 -
+                      "valueName": $applyHospitalDistrictName
+                      "valueCode": $applyHospitalDistrictId
+                 "id": ""
+
+            method: POST
+            url: /app-schedule-manage/inspect/schedule/rule/insertInspectScheduleRulePlan
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 查询新增排班的id
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                "keyWords": ""
+                "paging": true
+                "queueId": ${get_list_dict_value($inspectQuenues, quenueName, $quenueName, id)}
+                "keyWords": ""
+                "startDate":  ${get_date()}
+                "endDate": ""
+                "pageNum": 1
+                "pageCount": 50
+            method: POST
+            url: /app-schedule-manage/inspect/schedule/rule/pageSchedulePlan
+        extract:
+            - schedulePlanId: content.body.data.0.id
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+
+-   test:
+        name: 新增排班规则
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                "keyWords": ""
+                "inspectScheduleRuleInsertDTOs":
+                -
+                    "shiftCode": "FH0406.03"
+                    "shiftName": "晚上"
+                    "limitNumber": 50
+                    "limitNumberMax": 100
+                    "beginTime": "20:00"
+                    "endTime": "22:00"
+                    "period": "30"
+                    "campus":
+                    -
+                          "valueCode": $applyHospitalDistrictId
+                          "valueName": $applyHospitalDistrictName
+                    "devices":
+                    -
+                        "valueCode": "1194"
+                        "valueName": "CT1"
+                    -
+                        "valueCode": "1195"
+                        "valueName": "CT2"
+                    -
+                        "valueCode": "99897827812"
+                        "valueName": "CT8"
+                    "doctors": null
+                    "models":
+                    -
+                        "valueCode": "FH0176.01"
+                        "valueName": "共享"
+                    "patientTypes":
+                    -
+                        "valueCode": "FH0175.01"
+                        "valueName": "预入院"
+                    -
+                        "valueCode": "FH0175.02"
+                        "valueName": "门诊"
+                    -
+                        "valueCode": "FH0175.03"
+                        "valueName": "住院"
+                    -
+                        "valueCode": "FH0175.04"
+                        "valueName": "体检"
+                    -
+                        "valueCode": "FH0175.05"
+                        "valueName": "绿通"
+                    -
+                        "valueCode": "FH0175.06"
+                        "valueName": "急诊"
+                    "reservationPassages":
+                    -
+                        "valueCode": "FH0177.01"
+                        "valueName": "检查预约科室"
+                    -
+                        "valueCode": "FH0177.02"
+                        "valueName": "入院服务中心"
+                    -
+                        "valueCode": "FH0177.03"
+                        "valueName": "诊间"
+                    -
+                        "valueCode": "FH0177.04"
+                        "valueName": "检查科室"
+                    -
+                        "valueCode": "FH0177.05"
+                        "valueName": "自助机"
+                    -
+                        "valueCode": "FH0177.06"
+                        "valueName": "小程序"
+                    -
+                        "valueCode": "FH0177.07"
+                        "valueName": "其他机构"
+                "quenueId": ${get_list_dict_value($inspectQuenues, quenueName, $quenueName, id)}
+                "weekDaysRequestList":
+                -
+                    "dayofweekCode": "FH0035.01"
+                    "dayofweekName": "星期一"
+                    "dayofweekValue": 1
+                -
+                    "dayofweekCode": "FH0035.02"
+                    "dayofweekName": "星期二"
+                    "dayofweekValue": 2
+                -
+                    "dayofweekCode": "FH0035.03"
+                    "dayofweekName": "星期三"
+                    "dayofweekValue": 3
+                -
+                    "dayofweekCode": "FH0035.04"
+                    "dayofweekName": "星期四"
+                    "dayofweekValue": 4
+                -
+                    "dayofweekCode": "FH0035.05"
+                    "dayofweekName": "星期五"
+                    "dayofweekValue": 5
+                "schedulePlanId": $schedulePlanId
+            method: POST
+            url: /app-schedule-manage/inspect/schedule/rule/insertInspectScheduleRule
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+
+-   test:
+        name: 生成号源
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                schedulePlanIds: [$schedulePlanId]
+            method: POST
+            url: /app-schedule-manage/inspect/resource/generationByPlan
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 验证是否生成号源
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                "beginDate": ${get_date()}
+                "endDate": ${get_date()}
+                "expire": ""
+                "paging": true
+                "pageNum": 1
+                "pageCount": 20
+                "quenueId": ${get_list_dict_value($inspectQuenues, quenueName, $quenueName, id)}
+                "shiftCodes": null
+            method: POST
+            url: /app-schedule-manage/inspect/resource/page
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   ge:
+            - content.body.total
+            - 4

@@ -19,4 +19,6 @@ htmlcov/
 .csv
 reports
 *.env
-config/config.conf
+venv
+autocase
+run.py

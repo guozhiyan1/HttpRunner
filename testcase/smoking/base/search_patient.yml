@@ -1,0 +1,47 @@
+- config:
+    base_url: ${ENV(host)}
+    name: 员工查询
+    variables:
+      k1: ${ENV(out_k1)}
+      k2: ${ENV(in_k2)}
+      orgId: ${ENV(orgId)}
+      areaId: ${ENV(in_k3)}
+
+- test:
+    api: api/token.yml
+    name: 登录获取token
+
+- test:
+    api: api/setting.yml
+    name: 登录设置
+
+- test:
+    name: 员工查询
+    request:
+      headers:
+        Authorization: ${get_token($token)}
+        Content-Type: application/json; charset=UTF-8
+        k1: $k1
+        k2: $k2
+        webUrl: http://gmc-test.cfuture.shop/basis/userManage?k=1-224-XN3142
+      json:
+        affiliatedDept: ''
+        businessDeptId: ''
+        enabledState: ''
+        orderKey: 'gmtCreate'
+        orderType: 'desc'
+        pageCount: 20
+        pageNum: 1
+        personnelDeptId: ''
+        practiceType: ''
+        queryKey: '多肉'
+        userType: ''
+      method: POST
+      url: /app-sys-manage/staff/get/page
+    validate:
+      - eq:
+          - content.code
+          - 2000
+      - eq:
+          - content.message
+          - success

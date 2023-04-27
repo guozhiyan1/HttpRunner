@@ -1,0 +1,93 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 患者查档
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(out_k2)}
+            orgId: ${ENV(orgId)}
+
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        api: api/user_info.yml
+        name: 切换登录院区部门
+
+-   test:
+        name: 读卡解析
+        setup_hooks:
+          - ${gmc_run_mysql(patient_info)}
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                cardContentOri: ${get_result_dicts(medicare_card)}
+                cardTypeCode: FH0121.01
+                felog: seenew-front-util-post
+                medicareRecordsFlag: false
+            method: POST
+            url: /app-medicare-platform-manage/parser
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询患者档案列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                cardNumber: ${get_result_dicts(medicare_card)}
+                cardTypeCode: FH0121.01
+                felog: seenew-front-util-post
+                flag: '0'
+                pageCount: 20
+                pageNum: 1
+            method: POST
+            url: /app-patient-manage/register/queryPatientArchivalMsg
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 根据 就诊凭据类型, 就诊凭据号, 查询患者信息[注:当就诊凭据类型为空时, 则查询 就诊凭据号,病历号和身份证号 精确查询,当有就诊凭据信息时,则关联返回对应就诊凭据信息,否则仅返回患者信息]
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                cardNo: ${get_result_dicts(medicare_card)}
+                cardType: FH0121.01
+                felog: seenew-front-util-post
+                orgId: $orgId
+                updateOrgPatientFlag: true
+            method: POST
+            url: /app-patient-manage/register/queryForCommonByVoucherNo
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        teardown_hooks:
+          - ${reload_dict()}

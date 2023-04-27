@@ -1,0 +1,404 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 麻醉会诊管理
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(out_k2)}
+            orgId: ${ENV(orgId)}
+            loginCampus: 城站院区
+            loginCampusCode: 2
+            locationId_menzhen: ${ENV(districtId)}   #城站自动化测试门诊
+            locationId_shoushu: 99897829060 #城战自动化手术室
+            locationId_mazui: 99897829061  #城战自动化麻醉室
+            hospitalizedArea: 99897828630
+            hospitalizedDeptName: 城站自动化测试门诊
+            surgeryDeptName: 城战自动化手术室
+            anesthesiaDept: 城战自动化麻醉室
+            hospitalizedAreaName: 自动化诊区
+            operator: 医快一7
+            operatorId: 3142
+            jobNumber: 99009
+
+
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        api: api/user_info.yml
+        name: 切换登录院区部门
+
+
+-   test:
+        name: 通过条件查询患者列表
+        setup_hooks:
+          - ${gmc_run_mysql(patient_info,outpatient_encounter,anaesthesia_consult)}
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                encounterType: 1
+                listQuery: 1
+                patientId: ${get_result_dicts(patientId)}
+            method: POST
+            url: /app-station-manage/doctorstation/list/patient
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 麻醉会诊初始化
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                patientId: ${get_result_dicts(patientId)}
+                patientMasterIndex: ${get_result_dicts(master_patient_index)}
+                patientRegisterId: ${get_result_dicts(patient_id)}
+            method: POST
+            url: /surgery-station-manage/surgery/anesthesia/consultation/MZ/query/init
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询所有员工
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                userType: GB/T8561.230
+            method: POST
+            url: /surgery-station-manage/surgery/anesthesia/consultation/query/staff
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询所有科室
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                filterDept: 0
+                isLocalDistrict: true
+            method: POST
+            url: /surgery-station-manage/surgery/anesthesia/consultation/query/dept
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取麻醉会诊详情
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                id: ${get_result_dicts(anaesthesia_id)}
+            method: POST
+            url: /surgery-station-manage/surgery/anesthesia/consultation/query/detail
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取手术员工
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /surgery-station-manage/surgeryApply/list/surgeryStaff
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          - surgery_doctor_id: content.body.0.id
+          - surgery_doctor_name: content.body.0.userName
+-   test:
+        name: 查询患者麻醉会诊来源
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                consultationApplyId: ${get_result_dicts(diagnosis_id)}
+            method: POST
+            url: /surgery-station-manage/surgery/anesthesia/consultation/MZ/query/visitForm
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 诊断查询
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                searchText: ''
+            method: POST
+            url: /app-station-manage/surgeryApplyManage/list/diagnosis
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          - diagnosisList_dataCode: content.body.0.icdCode
+          - diagnosisList_dataId: content.body.0.id
+          - diagnosisList_dataName: content.body.0.diagnosisName
+-   test:
+        name: 手术名称查询
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                orderKey: ''
+                orderType: ''
+                pageCount: 9
+                pageNum: 1
+                paging: true
+                searchText: ''
+                surgeryType: 1
+            method: POST
+            url: /surgery-station-manage/surgeryApplyManage/list/page/surgeryName
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          - suregeryList_dataId: content.body.data.1.id
+          - suregeryList_dataName: content.body.data.1.surgeryName
+
+-   test:
+        name: 创建麻醉会诊评论
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                applyId: ${get_result_dicts(diagnosis_id)}
+                applyResultDesc: test
+                applyStatus: '5'
+                consultationTime: ${get_millisecond_stamp()}
+                deptList:
+                -   valueId: $locationId_mazui
+                    valueName: $anesthesiaDept
+                doctorList:
+                -   valueId: $operatorId
+                    valueName: $operator
+                remark: ''
+            method: POST
+            url: /surgery-station-manage/surgery/anesthesia/consultation/opt/createContent
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - true
+-   test:
+        name: 保存门诊麻醉会诊文书
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                airway_mallmapati_level: I
+                airway_open_level: I
+                allergenRecord: ''
+                anaesthesiaSign: ''
+                anestheticEffectDrugs: ''
+                apply_id: ${get_result_dicts(anaesthesia_id)}
+                asa: '1'
+                blood_nerve: ''
+                breathing: ''
+                bregnant: 0
+                cardiovascular: ''
+                diagnosisList:
+                -   dataCode: $diagnosisList_dataCode
+                    dataId: $diagnosisList_dataId
+                    dataName: $diagnosisList_dataName
+                digestion: ''
+                eeg: ''
+                endocrine: ''
+                feedABaby: 0
+                genitourinary: ''
+                hasAllergenRecord: 0
+                isUnusualAnaesthesiaSign: 0
+                isUnusualBlood_nerve: 0
+                isUnusualBreathing: 0
+                isUnusualCardiovascular: 0
+                isUnusualDigestion: 0
+                isUnusualEeg: 0
+                isUnusualEndocrine: 0
+                isUnusualGenitourinary: 0
+                isUnusualPositive_sign: 0
+                isUnusualTest: 0
+                isUnusualTooth: 0
+                jk: ''
+                lifeInfo: {}
+                positive_sign: ''
+                suregeryList:
+                -   dataId: $suregeryList_dataId
+                    dataName: $suregeryList_dataName
+                surgery_doctor_id: $surgery_doctor_id
+                surgery_doctor_name: $surgery_doctor_name
+                test: ''
+                tooth: ''
+                trachea: 'no'
+            method: POST
+            url: /surgery-station-manage/surgery/anesthesia/consultation/MZ/opt/saveVisitForm
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取麻醉会诊列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                applyDeptId: ''
+                applyDeptName: ''
+                applyDoctorId: ''
+                applyDoctorName: ''
+                applyNo: ''
+                applySourceType: ''
+                applyStatus: 0
+                districtId: 2
+                encounterType: ''
+                endApplyDate: ${get_date()}
+                endConsultationDate: ''
+                medicalCardNo: ''
+                orderKey: applyDate
+                orderType: desc
+                pageCount: 20
+                pageNum: 1
+                startApplyDate: ${get_date()}
+                startConsultationDate: ''
+            method: POST
+            url: /surgery-station-manage/surgery/anesthesia/consultation/query/page
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 诊疗日志病人列表查询
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                medicalRecordNo: ${get_result_dicts(medical_record_no)}
+            method: POST
+            url: /app-station-manage/doctorstation/list/listOutpatientByOrg
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 批量查询用户打印模板
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                bussType:
+                - FH0142.504
+                isNewTemplate: 1
+                macAddress: 00-FF-98-ED-7A-9A
+            method: POST
+            url: /app-sys-manage/print/template/customer/queryPrintResultTemplateList
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        teardown_hooks:
+          - ${reload_dict()}

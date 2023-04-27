@@ -1,0 +1,898 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 门诊结算和退费
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(out_k2)}
+            orgId: ${ENV(orgId)}
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        api: api/user_info.yml
+        name: 切换登录院区部门
+
+-   test:
+        name: 查询费用类别
+        setup_hooks:
+          - ${gmc_run_mysql(patient_info,add_outcharge_detail)}
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Proxy-Connection: keep-alive
+                k1: $k1
+                k2: $k2
+            json:
+                mainCode: "FH0115"
+            method: POST
+            url: /app-outpatient-charge/outpatient/newcharge/listCostType
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 不退费用的退费结算所需系统参数
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Proxy-Connection: keep-alive
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-outpatient-charge/outpatient/newcharge/refundSettleSystemParam
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取票据
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Proxy-Connection: keep-alive
+                k1: $k1
+                k2: $k2
+            json:
+                invoiceStates: ["FH0232.02"]
+                invoiceType: "FH0062.01"
+                paging: false
+            method: POST
+            url: /app-invoice/invoiceGiveOut/listPersonalInvoiceGiveOutByParameters
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          - invoiceGiveId: content.body.data.0.id
+          - currentNumber: content.body.data.0.currentNumber
+          - numberPrefix: content.body.data.0.numberPrefix
+
+-   test:
+        name: 基础
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Proxy-Connection: keep-alive
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-sys-manage/personality/table/getStyle/10101/charge-1612341235786
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - null
+
+-   test:
+        name: 查询结算页面信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Proxy-Connection: keep-alive
+                k1: $k1
+                k2: $k2
+            json:
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                patientRegisterId: ${get_result_dicts(patient_id)}
+            method: POST
+            url: /app-outpatient-charge/outpatient/newcharge/queryPatientSettleInfo
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            - outpatientId: content.body.id
+
+-   test:
+        name: 查询优惠规则
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Proxy-Connection: keep-alive
+                k1: $k1
+                k2: $k2
+            json:
+                costTypeCode: "1"
+                enable: 1
+                outpatientEnable: true
+            method: POST
+            url: /app-billing/discount/rule/list
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询默认优惠规则
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Proxy-Connection: keep-alive
+                k1: $k1
+                k2: $k2
+            json:
+                costDetailDTOList: []
+                costTypeCode: "1"
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                medicalCertificateNo: ${get_result_dicts(medicare_card)}
+            method: POST
+            url: /app-outpatient-charge/outpatient/newcharge/defaultDiscountRuleNew
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 公卫接口
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Proxy-Connection: keep-alive
+                k1: $k1
+                k2: $k2
+            json:
+                indexId: ${get_result_dicts(master_patient_index)}
+            method: POST
+            url: /app-publichealth/familySicianServer/hisSicianInfoAndCrowdByIndexOrIdCard
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询就诊信息列表(天台)
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Proxy-Connection: keep-alive
+                k1: $k1
+                k2: $k2
+            json:
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                patientRegisterId: ${get_result_dicts(patient_id)}
+            method: POST
+            url: /app-outpatient-charge/outpatient/newcharge/listCostEncounterByPatientId
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          - outpatientId: content.body.0.outpatientId
+
+-   test:
+        name: 服务器时间
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Proxy-Connection: keep-alive
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-portal/service/time
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+
+
+-   test:
+        name: 根据就诊ID查询处方列表(天台)
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Proxy-Connection: keep-alive
+                k1: $k1
+                k2: $k2
+            json:
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                outpatientIds: [$outpatientId]
+                patientRegisterId: ${get_result_dicts(patient_id)}
+            method: POST
+            url: /app-outpatient-charge/outpatient/newcharge/listOrderDetailByOutPatientId
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            - categoryList: content.body
+-   test:
+        name: 查询费用list(天台)
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Proxy-Connection: keep-alive
+                k1: $k1
+                k2: $k2
+            json:
+                categoryList: $categoryList
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                patientRegisterId: ${get_result_dicts(patient_id)}
+            method: POST
+            url: /app-outpatient-charge/outpatient/newcharge/listCostDetailTTByParam
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 查询门诊的医疗类别和结算类别
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Proxy-Connection: keep-alive
+                k1: $k1
+                k2: $k2
+            json:
+                costCategory: "1"
+            method: POST
+            url: /app-medicare-platform-manage/weishan/queryMedicalAndSettleType
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 收费结果
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Proxy-Connection: keep-alive
+                k1: $k1
+                k2: $k2
+            json:
+                hospitalDistrictId: ${ENV(departmentId)}
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                orgId: 1
+                patientRegisterId: ${get_result_dicts(patient_id)}
+            method: POST
+            url: /app-outpatient-charge/outpatient/newcharge/queryReservationResult
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 毒麻精是否审批
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Proxy-Connection: keep-alive
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-outpatient-charge/outpatient/newcharge/approvalMedicationSystemParameter
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - true
+-   test:
+        name: 药房医嘱
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Proxy-Connection: keep-alive
+                k1: $k1
+                k2: $k2
+            json:
+                orderIds:
+                -   ${get_result_dicts(order_id1)}
+            method: POST
+            url: /app-medication-manage/provide/special/prescription/waitaudit/speccard/order
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 预结算
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Proxy-Connection: keep-alive
+                k1: $k1
+                k2: $k2
+            json:
+                cardNo: ${get_result_dicts(medicare_card)}
+                cardType: "FH0121.01"
+                categoryList: $categoryList
+                costCategoryCode: "1"
+                costNatureCode: "0"
+                diagnosis: []
+                discountRuleDTO: []
+                diseasesCode: 0
+                forceSelfPayFlag: false
+                insertDTOList: []
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                outpatientId: $outpatientId
+                patientRegisterId: ${get_result_dicts(patient_id)}
+            method: POST
+            url: /app-outpatient-charge/outpatient/newcharge/prepareSettle
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            - selfPay: content.body.selfPay
+            - totalMoney: content.body.totalMoney
+            - costList: content.body.detailsDTOList
+-   test:
+        name: 计算舍入金额
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Proxy-Connection: keep-alive
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            params:
+                selfPay: $selfPay
+            url: /app-outpatient-charge/outpatient/newcharge/reckonRound
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            - rounding: content.body
+
+-   test:
+        name: 根据 就诊凭据类型返回患者信息]
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                cardNo: ${get_result_dicts(medicare_card)}
+                cardType: "FH0121.01"
+                felog:  "seenew-front-util-post"
+                orgId: 1
+                updateOrgPatientFlag: true
+            method: POST
+            url: /app-patient-manage/register/queryForCommonByVoucherNo
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          - ageText: content.body.0.ageText
+          - gender: content.body.0.gender
+
+-   test:
+        name: 结算中心结算信息初始化
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Proxy-Connection: keep-alive
+                k1: $k1
+                k2: $k2
+            json:
+                costCategoryCode: "1"
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                patientName: ${get_result_dicts(patient_name)}
+                payType: "FH0085.01"
+                transactionCardNumber: ${get_result_dicts(master_patient_index)}
+            method: POST
+            url: /app-outpatient-charge/outpatient/newcharge/initSettle
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            - settleCenterSerialNumber: content.body.settleCenterSerialNumber
+            - subsequenceNumber: content.body.transactionType.0.subsequenceNumber
+
+
+-   test:
+        name: 结算确认
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Proxy-Connection: keep-alive
+                k1: $k1
+                k2: $k2
+            json:
+                ageText: $ageText
+                cardNo: ${get_result_dicts(medicare_card)}
+                cardType: "FH0121.01"
+                categoryList: $categoryList
+                costCategoryCode: "1"
+                costCategoryName: "现金"
+                costList: $costList
+                costNatureCode: "0"
+                costNatureName: "自费"
+                discountRuleDTO: []
+                gender: $gender
+                info: null
+                invoiceGiveId: $invoiceGiveId
+                invoiceNo: $currentNumber$numberPrefix
+                invoiceVersionNo: 144
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                medicalRecordNo: ${get_result_dicts(medicare_number)}
+                patientName: ${get_result_dicts(patient_name)}
+                patientRegisterId: ${get_result_dicts(patient_id)}
+                payType: "FH0085.01"
+                posType: 2
+                preferential: 0
+                reimbursement: 0
+                remark: null
+                rounding: $rounding
+                selfPay: ${sum_subtraction($selfPay,$rounding)}
+                settleCenterSerialNumber: $settleCenterSerialNumber
+                subsequenceNumber: $subsequenceNumber
+                totalMoney: $totalMoney
+                tradeCardNumber: ''
+                tradeIdentifyCode: ''
+                transactionSortNo: 1
+            method: POST
+            url: /app-outpatient-charge/outpatient/newcharge/confirmSettle
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            - settleId: content.body.settleId
+
+-   test:
+        name: 查询待退费信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                settleEndDate: ${get_date()}
+                settleStartDate: ${get_date()}
+                patientName: ${get_result_dicts(patient_name)}
+            method: POST
+            url: /app-outpatient-charge/outpatient/newcharge/queryRefundSettleByParam
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          - totalAmount: content.body.0.settleAmount
+          - newrounding: content.body.0.rounding
+          - newselfPay: content.body.0.selfPay
+          - newsettleAmount: content.body.0.settleAmount
+-   test:
+        name: 根据结算ID查询门诊待退费申请信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                masterPatientIndex:  ${get_result_dicts(master_patient_index)}
+                patientRegisterId: ${get_result_dicts(patient_id)}
+                settleId: $settleId
+            method: POST
+            url: /app-outpatient-charge/outpatient/newcharge/listRefundDetailBySettleId
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 根据结算ID查询门诊收费信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                masterPatientIndex:  ${get_result_dicts(master_patient_index)}
+                patientRegisterId: ${get_result_dicts(patient_id)}
+                settleId: $settleId
+            method: POST
+            url: /app-outpatient-charge/outpatient/newcharge/listChargeDetailBySettleId
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            - detailId: content.body.0.detailId
+-   test:
+        name: 查询电子票据状态信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                settleId: $settleId
+            method: POST
+            url: /app-outpatient-charge/outpatient/electronic/queryInvoiceInfo
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 结算中心退费信息初始化
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                costCategoryCode: "1"
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                oldSerialNumber: $settleCenterSerialNumber
+                patientName: ${get_result_dicts(patient_name)}
+                payType: "FH0085.01"
+                refundComplete: null
+                refundStatus: 1
+                settleId: $settleId
+                transactionCardNumber: ${get_result_dicts(medicare_card)}
+            method: POST
+            url: /app-outpatient-charge/outpatient/newcharge/initSettleRefund
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            - handlesettleCenterSerialNumber: content.body.settleCenterSerialNumber
+            - handlesubsequenceNumber: content.body.transactionType.0.subsequenceNumber
+-   test:
+        name: 获取票据
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Proxy-Connection: keep-alive
+                k1: $k1
+                k2: $k2
+            json:
+                invoiceStates: ["FH0232.02"]
+                invoiceType: "FH0062.01"
+                paging: false
+            method: POST
+            url: /app-invoice/invoiceGiveOut/listPersonalInvoiceGiveOutByParameters
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            - invoiceGiveId_1: content.body.data.0.id
+            - currentNumbe_1r: content.body.data.0.currentNumber
+            - numberPrefix_1: content.body.data.0.numberPrefix
+-   test:
+        name: 退费时作废门诊结算
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                cardNo: ${get_result_dicts(medicare_card)}
+                cardType: "FH0121.01"
+                costCategoryCode: "1"
+                costDTOList: []
+                costNatureCode: "0"
+                discountId: []
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                medicareOutCancelSettleDTO: null
+                oldSerialNumber: $settleCenterSerialNumber
+                patientRegisterId: ${get_result_dicts(patient_id)}
+                payType: "FH0085.01"
+                preferential: 0
+                reimbursement: 0
+                returnDTOList: [{"detailId":$detailId,"returnNumber":1}]
+                rounding: $newrounding
+                selfPay: $newselfPay
+                settleAmount: $newsettleAmount
+                settleCenterSerialNumber: $handlesettleCenterSerialNumber
+                settleId: $settleId
+                subsequenceNumber: $handlesubsequenceNumber
+                transactionSortNo: 1
+                versionNo: 1
+            method: POST
+            url: /app-outpatient-charge/outpatient/newcharge/cancelReSettle
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - true
+-   test:
+        name: 退费预结算
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                ageText: $ageText
+                cardNo: ${get_result_dicts(medicare_card)}
+                cardType: "FH0121.01"
+                costCategoryCode:  "1"
+                costCategoryName: "现金"
+                costDTOList: []
+                costNatureCode: "0"
+                costNatureName: "自费"
+                discountId: []
+                gender: $gender
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                medicalRecordNo: ${get_result_dicts(medicare_number)}
+                medicareOutCancelSettleDTO: null
+                oldSerialNumber: $settleCenterSerialNumber
+                patientName: ${get_result_dicts(patient_name)}
+                patientRegisterId: ${get_result_dicts(patient_id)}
+                payType: "FH0085.01"
+                preferential: 0
+                reimbursement: 0
+                returnDTOList: [{"detailId":$detailId,"returnNumber":1}]
+                rounding: $newrounding
+                selfPay: $newselfPay
+                settleAmount: $newsettleAmount
+                settleCenterSerialNumber: $handlesettleCenterSerialNumber
+                settleId: $settleId
+                versionNo: 1
+            method: POST
+            url: /app-outpatient-charge/outpatient/newcharge/prepareRefund
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            - reFundAmount: content.body.reFundAmount
+            - selfPay: content.body.selfPay
+            - totalMoney: content.body.totalMoney
+-   test:
+        name: 修改支付方式
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                costCategoryCode: "1"
+                fullRetreat: false
+                oldCostCategoryCode: "1"
+                oldPayType: "FH0085.01"
+                payType: "FH0085.01"
+                reSettle: true
+                refundComplete: null
+                refundStatus: 1
+                settleCenterSerialNumber: $handlesettleCenterSerialNumber
+            method: POST
+            url: /app-outpatient-charge/outpatient/newcharge/updateInitSettleRefund
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            - newsubsequenceNumber: content.body.transactionType.1.subsequenceNumber
+-   test:
+        name: 退费结算
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                ageText: $ageText
+                cardNo: ${get_result_dicts(medicare_card)}
+                cardType:  "FH0121.01"
+                costCategoryCode: "1"
+                costCategoryName: "现金"
+                costDTOList: []
+                costNatureCode: "0"
+                costNatureName: "自费"
+                discountId: []
+                discountRuleDTO: []
+                fullRetreat: false
+                gender: $gender
+                invoiceGiveId: $invoiceGiveId_1
+                invoiceNo: $currentNumber$numberPrefix
+                invoiceVersion: 155
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                medicalRecordNo: ${get_result_dicts(medicare_number)}
+                oldSerialNumber: $settleCenterSerialNumber
+                patientName: ${get_result_dicts(patient_name)}
+                patientRegisterId: ${get_result_dicts(patient_id)}
+                payType: "FH0085.01"
+                posType: 2
+                preferential: 0
+                reFundAmount: $reFundAmount
+                refundPayType: "FH0085.01"
+                reimbursement: 0
+                returnDTOList: [{"detailId":$detailId,"returnNumber":1}]
+                rounding: 0
+                selfPay: $selfPay
+                settleCenterSerialNumber: $handlesettleCenterSerialNumber
+                settleId: $settleId
+                subsequenceNumber: $newsubsequenceNumber
+                ticketNumber: null
+                totalMoney: $totalMoney
+                tradeCardNumber: ''
+                tradeIdentifyCode: ''
+                transactionSortNo: 2
+                versionNo: 1
+            method: POST
+            url: /app-outpatient-charge/outpatient/newcharge/reSettleConfirm
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          - NewsettleId: content.body.settleId
+
+-   test:
+        name: 门诊结算打印
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                flag: 1
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                patientRegisterId: ${get_result_dicts(patient_id)}
+                returnSettleFlag: 1
+                settleId: $NewsettleId
+            method: POST
+            url: /app-outpatient-charge/settle/print
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        teardown_hooks:
+          - ${reload_dict()}

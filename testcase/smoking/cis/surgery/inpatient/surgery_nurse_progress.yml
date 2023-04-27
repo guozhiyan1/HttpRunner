@@ -1,0 +1,414 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 手术护士站-手术进展
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(in_k2)}
+            orgId: ${ENV(orgId)}
+            loginCampus: 城站院区
+            loginCampusCode: 2
+            locationId_keshi: 99897828605  #城战自动化消化血液科
+            locationId_shoushu: 99897829060 #城战自动化手术室
+            locationId_mazui: 99897829061  #城战自动化麻醉室
+            locationId_bingqu: 99897828607 #城站消化血液科自动化病区
+            locationId_shoushujian: 1210   #手术间C1
+            hospitalizedAreaName: 城站消化血液科自动化病区
+            hospitalizedDeptName: 城战自动化消化血液科
+            surgeryDeptName: 城战自动化手术室
+            anesthesiaDept: 城战自动化麻醉室
+            operator: 医快一7
+            operatorId: 3142
+
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        api: api/user_info.yml
+        name: 切换登录院区部门
+
+-   test:
+        name: 查询所有的手术间
+        setup_hooks:
+          - ${gmc_run_mysql(patient_info, inhospital_register, add_bed,patient_add_bed,surgery_manage, register_surgery)}
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /surgery-station-manage/surgeryNurse/listLocation
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 查询手术进展所有节点
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /surgery-station-manage/surgeryNurse/listDictData
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          - recordState_01: content.body.0.code
+          - recordState_02: content.body.1.code
+          - recordState_03: content.body.2.code
+          - recordState_04: content.body.3.code
+          - recordState_05: content.body.4.code
+          - recordState_06: content.body.5.code
+          - recordState_07: content.body.6.code
+          - recordState_08: content.body.7.code
+          - recordState_09: content.body.8.code
+          - recordState_10: content.body.9.code
+          - recordState_11: content.body.10.code
+
+-   test:
+        name: 手术护士站根据手术间地点查询手术患者
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                arrangeDate: ${get_date(add_date=1)}
+                bsAsc: 1
+                locationId: $locationId_shoushujian
+                ssjAsc: 1
+            method: POST
+            url: /surgery-station-manage/surgeryNurse/listSurgeryByLocation
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 手术护士站查询患者详细手术信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                id: ${get_result_dicts(surgery_id)}
+            method: POST
+            url: /surgery-station-manage/surgeryNurse/listSurgeryInfo
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 手术进展-已发通知病区未确认
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                operateDate: ${get_date(number=1)}
+                recordRemark: ''
+                recordState: $recordState_01
+                surgeryApplyId: ${get_result_dicts(surgery_id)}
+            method: POST
+            url: /surgery-station-manage/surgeryNurse/saveSurgeryRecord
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - true
+
+-   test:
+        name: 手术进展-送手术途中
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                operateDate: ${get_date(number=1)}
+                recordRemark: ''
+                recordState: $recordState_02
+                surgeryApplyId: ${get_result_dicts(surgery_id)}
+            method: POST
+            url: /surgery-station-manage/surgeryNurse/saveSurgeryRecord
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - true
+
+-   test:
+        name: 手术进展-手术等候
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                operateDate: ${get_date(number=1)}
+                recordRemark: ''
+                recordState: $recordState_03
+                surgeryApplyId: ${get_result_dicts(surgery_id)}
+            method: POST
+            url: /surgery-station-manage/surgeryNurse/saveSurgeryRecord
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - true
+
+-   test:
+        name: 手术进展-手术间准备
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                operateDate: ${get_date(number=1)}
+                recordRemark: ''
+                recordState: $recordState_04
+                surgeryApplyId: ${get_result_dicts(surgery_id)}
+            method: POST
+            url: /surgery-station-manage/surgeryNurse/saveSurgeryRecord
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - true
+
+-   test:
+        name: 手术进展-手术进行中
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                operateDate: ${get_date(number=1)}
+                recordRemark: ''
+                recordState: $recordState_05
+                surgeryApplyId: ${get_result_dicts(surgery_id)}
+            method: POST
+            url: /surgery-station-manage/surgeryNurse/saveSurgeryRecord
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - true
+
+-   test:
+        name: 手术进展-手术结束
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                operateDate: ${get_date(number=1)}
+                recordRemark: ''
+                recordState: $recordState_06
+                surgeryApplyId: ${get_result_dicts(surgery_id)}
+            method: POST
+            url: /surgery-station-manage/surgeryNurse/saveSurgeryRecord
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - true
+
+-   test:
+        name: 手术进展-出手术室
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                operateDate: ${get_date(number=1)}
+                recordRemark: ''
+                recordState: $recordState_07
+                surgeryApplyId: ${get_result_dicts(surgery_id)}
+            method: POST
+            url: /surgery-station-manage/surgeryNurse/saveSurgeryRecord
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - true
+
+-   test:
+        name: 手术进展-复苏中
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                operateDate: ${get_date(number=1)}
+                recordRemark: ''
+                recordState: $recordState_08
+                surgeryApplyId: ${get_result_dicts(surgery_id)}
+            method: POST
+            url: /surgery-station-manage/surgeryNurse/saveSurgeryRecord
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - true
+
+-   test:
+        name: 手术进展-送病区途中
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                operateDate: ${get_date(number=1)}
+                recordRemark: ''
+                recordState: $recordState_09
+                surgeryApplyId: ${get_result_dicts(surgery_id)}
+            method: POST
+            url: /surgery-station-manage/surgeryNurse/saveSurgeryRecord
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - true
+
+-   test:
+        name: 手术进展-患者安全到达病区
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                operateDate: ${get_date(number=1)}
+                recordRemark: ''
+                recordState: $recordState_10
+                surgeryApplyId: ${get_result_dicts(surgery_id)}
+            method: POST
+            url: /surgery-station-manage/surgeryNurse/saveSurgeryRecord
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - true
+-   test:
+        name: 手术进展-复苏结束
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                operateDate: ${get_date(number=1)}
+                recordRemark: ''
+                recordState: $recordState_11
+                surgeryApplyId: ${get_result_dicts(surgery_id)}
+            method: POST
+            url: /surgery-station-manage/surgeryNurse/saveSurgeryRecord
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - true
+        teardown_hooks:
+          - ${reload_dict()}

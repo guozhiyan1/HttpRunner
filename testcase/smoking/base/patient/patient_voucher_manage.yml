@@ -1,0 +1,179 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 患者就诊凭据管理
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(out_k2)}
+            orgId: ${ENV(orgId)}
+
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        api: api/user_info.yml
+        name: 切换登录院区部门
+
+-   test:
+        name: 根据参数查询患者登记的信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                beginDate: ${get_date(delete_date=7)}
+                endDate: ${get_date()}
+                felog: seenew-front-util-post
+                keywords:
+                orderKey: registerTime
+                orderType: desc
+                pageCount: 20
+                pageNum: 1
+            method: POST
+            url: /app-patient-manage/register/listPageRegisterInfoByParam
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+        - register_id: content.body.data.0.id
+
+
+-   test:
+        name: 根据患者登记ID获取患者登记全部信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                felog: seenew-front-util-post
+                id: $register_id
+            method: POST
+            url: /app-patient-manage/register/getRegisterAllInfoById
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 查询就诊凭据列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                felog: seenew-front-util-post
+                patientRegisterId: $register_id
+            method: POST
+            url: /app-patient-manage/voucher/queryMedicalVoucherList
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          - voucher_id: content.body.0.id
+
+-   test:
+        name: 新增患者就诊凭据类型
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                cardNumber: ${get_result_dicts(medical_record_no)}
+                cardType: 就诊卡
+                cardTypeCode: FH0121.01
+                costProperty: 自费
+                costPropertyCode: '0'
+                costPropertyId: 1
+                costType: 自费
+                costTypeCode: '1'
+                costTypeId: 1
+                felog: seenew-front-util-post
+                operatorName:
+                patientRegisterId: $register_id
+                periodEnd: ${get_date(add_date=1)}
+                periodStart: ${get_date()}
+            method: POST
+            url: /app-patient-manage/voucher/saveMedicalVoucher
+        validate:
+          - contained_by:
+              - content.code
+              - [2000,4007,4001]
+          - contained_by:
+              - content.message
+              - [success,"就诊凭据已经存在!","有效期结束日期必须在开始日期之后"]
+
+-   test:
+        name: 禁用就诊凭据
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                enableStatus: 1
+                felog: seenew-front-util-post
+                id: $voucher_id
+            method: POST
+            url: /app-patient-manage/voucher/disableMedicalVoucher
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - true
+
+-   test:
+        name: 启用就诊凭据
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                enableStatus: 0
+                felog: seenew-front-util-post
+                id: $voucher_id
+            method: POST
+            url: /app-patient-manage/voucher/disableMedicalVoucher
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - true
+        teardown_hooks:
+          - ${reload_dict()}
+

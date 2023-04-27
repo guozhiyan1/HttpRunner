@@ -1,0 +1,309 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 口服卡打印
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(in_k2)}
+            orgId: ${ENV(orgId)}
+            areaId: ${ENV(in_k3)}
+            locationId: 99897828609
+            medicationUsageTypes: FH0041.01
+            usageName: 口服
+            usageId: 1
+
+
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        api: api/user_info.yml
+        name: 切换登录院区部门
+
+
+-   test:
+        name: 查询某个病区的待安床病人列表
+        setup_hooks:
+          - ${gmc_run_mysql(patient_info, inhospital_register, add_bed,patient_add_bed, inhospital_patient_doctor_order,patient_name=$usageName,usageId=$usageId)}
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                k1: $k1
+                k2: $areaId
+            method: GET
+            url: /app-nurse-station/patient/wait/list
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+
+-   test:
+        name: 查询医嘱执行列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $areaId
+            json:
+                orderCategoryList: []
+                orderExecutionDate: ${get_date()}
+                orderSignStatus: 0
+                patientIdList:
+                - ${get_result_dicts(inhospital_id)}
+                usageType:
+                - 0: "1"
+                - 1: "2"
+            method: POST
+            url: /app-nurse-station/order/execution/list
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          - order_id: content.body.0.id
+
+
+
+-   test:
+        name: 医嘱执行
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $areaId
+            json:
+                executeDate: ${get_date()}
+                orderIdList:
+                - $order_id
+            method: POST
+            url: /app-nurse-station/order/execution/execute
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body.message
+            - 操作成功,请稍后查看结果
+
+
+-   test:
+        name: 药品标签打印获取用法打印分类
+        setup_hooks:
+        -   ${sleep_time(2)}
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                cnMedicine: true
+                endDate: ${get_date(add_date=2)} 07:59
+                medicationUsageTypes:
+                  - $medicationUsageTypes
+                oralMedicationType: ''
+                orderFeeType: ''
+                orderType: ''
+                paging: true
+                patientIdList:
+                  - ${get_result_dicts(inhospital_id)}
+                startDate: ${get_date(add_date=1)} 08:00
+                staticConfigType: ''
+                surgeryContainsSign: 2
+                tagPrintStatus: 0
+                tagPrintStatusPatrol: null
+                tagPrintType: 0
+            method: POST
+            url: /app-nurse-station/order/tag/print/drop/usage/printtype
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+
+-   test:
+        name: 滴液药
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                endDate: ${get_date(add_date=2)} 07:59
+                medicationUsagePrintTypeList: []
+                medicationUsageTypes:
+                  -   $medicationUsageTypes
+                oralMedicationType: ''
+                orderFeeType: ''
+                orderType: ''
+                paging: true
+                patientIdList:
+                  - ${get_result_dicts(inhospital_id)}
+                startDate: ${get_date(add_date=1)} 08:00
+                staticConfigType: ''
+                surgeryContainsSign: 2
+                tagPrintStatus: 0
+                tagPrintStatusPatrol: null
+                tagPrintType: 0
+            method: POST
+            url: /app-nurse-station/order/tag/print/drop/list
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body.0.tagPrintStatusName
+            - 未打印
+        extract:
+        -  print_id: content.body
+
+-   test:
+        name: 滴液服药卡/打印内容
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                idList: ${get_id_list($print_id)}
+                medicationUsageType: $medicationUsageTypes
+                tagPrintStatusPatrol: ''
+                tagPrintType: 0
+            method: POST
+            url: /app-nurse-station/order/tag/print/drop/card/list
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body.0.orderId
+            - ${get_result_dicts(order_id)}
+-   test:
+        name: 批量查询用户打印模板
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                bussType:
+                  - FH0142.15
+                  - FH0142.16
+                  - FH0142.120
+                macAddress: 00-FF-A8-6B-8D-4A
+            method: POST
+            url: /app-sys-manage/print/template/customer/queryPrintResultTemplateList
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        - len_gt:
+            - content.body
+            - 0
+-   test:
+        name: 药品标签打印获取用法打印分类
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                cnMedicine: true
+                endDate: ${get_date(add_date=2)} 07:59
+                medicationUsageTypes:
+                  -   $medicationUsageTypes
+                oralMedicationType: ''
+                orderFeeType: ''
+                orderType: ''
+                paging: true
+                patientIdList:
+                  - ${get_result_dicts(inhospital_id)}
+                startDate: ${get_date(add_date=1)} 08:00
+                staticConfigType: ''
+                surgeryContainsSign: 2
+                tagPrintStatus: 0
+                tagPrintStatusPatrol: null
+                tagPrintType: 0
+            method: POST
+            url: /app-nurse-station/order/tag/print/drop/usage/printtype
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - []
+-   test:
+        name: 滴液药
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                endDate: ${get_date(add_date=2)} 07:59
+                medicationUsagePrintTypeList: []
+                medicationUsageTypes:
+                  -   $medicationUsageTypes
+                oralMedicationType: ''
+                orderFeeType: ''
+                orderType: ''
+                paging: true
+                patientIdList:
+                  - ${get_result_dicts(inhospital_id)}
+                startDate: ${get_date(add_date=1)} 08:00
+                staticConfigType: ''
+                surgeryContainsSign: 2
+                tagPrintStatus: 0
+                tagPrintStatusPatrol: null
+                tagPrintType: 0
+            method: POST
+            url: /app-nurse-station/order/tag/print/drop/list
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        - eq:
+            - content.body
+            - []
+        teardown_hooks:
+          - ${reload_dict()}

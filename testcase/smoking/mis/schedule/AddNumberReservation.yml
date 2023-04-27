@@ -1,0 +1,199 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 加号预约
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(departmentId)}
+            orgId: ${ENV(orgId)}
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        name: 1.根据机构和院区查询科室
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Proxy-Connection: keep-alive
+                k1: $k1
+                k2: $k2
+            json:
+                keywords: ''
+            method: POST
+            url: /app-schedule-manage/outpatient/number/resource/queryDeptByToday
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 首页显示模板列表查询
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Proxy-Connection: keep-alive
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-portal/stationmanage/stationConfig/list/getHomepage
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 2.根据科室查询医生
+        setup_hooks:
+          - ${gmc_run_mysql(patient_info,add_today_resource)}
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Proxy-Connection: keep-alive
+                k1: $k1
+                k2: $k2
+            json:
+                deptId: ${ENV(departmentId)}
+                keywords: ''
+            method: POST
+            url: /app-schedule-manage/outpatient/number/resource/queryDoctorByToday
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 3.根据科室医生查询班次的号源
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Proxy-Connection: keep-alive
+                k1: $k1
+                k2: $k2
+            json:
+                deptId: ${ENV(departmentId)}
+                keywords: ''
+            method: POST
+            url: /app-schedule-manage/outpatient/number/resource/queryShiftByToday
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 2.查询加号预约
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Proxy-Connection: keep-alive
+                k1: $k1
+                k2: $k2
+            json:
+                reservationNumberResourceId: ${get_result_dicts(resource_id)}
+            method: POST
+            url: /app-schedule-manage/new/reservation/queryAddNumberReservatiion
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 1.加号预约到人
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Proxy-Connection: keep-alive
+                k1: $k1
+                k2: $k2
+            json:
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                masterPatientIndexVersion: "mpi_version_1"
+                reservationNumberResourceId: ${get_result_dicts(resource_id)}
+            method: POST
+            url: /app-schedule-manage/new/reservation/addNumberToPeopleForReservation
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - true
+-   test:
+        name: 2.查询加号预约
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Proxy-Connection: keep-alive
+                k1: $k1
+                k2: $k2
+            json:
+                reservationNumberResourceId: ${get_result_dicts(resource_id)}
+            method: POST
+            url: /app-schedule-manage/new/reservation/queryAddNumberReservatiion
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            - id: content.body.0.id
+
+-   test:
+        name: 取消加号
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Proxy-Connection: keep-alive
+                k1: $k1
+                k2: $k2
+            json:
+                id: $id
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+            method: POST
+            url: /app-schedule-manage/tradition/reservation/cancelReservationById
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询某个病区的待安床病人列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                k1: $k1
+                k2: $k2
+            method: GET
+            url: /app-nurse-station/patient/wait/list
+        teardown_hooks:
+          - ${reload_dict()}

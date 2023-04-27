@@ -1,0 +1,396 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 护士站补退费
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(out_k2)}
+            areaId: ${ENV(in_k3)}
+            areaName: ${ENV(in_k3_name)}
+            orgId: ${ENV(orgId)}
+            deptId: ${ENV(in_k2)}
+            deptName: ${ENV(in_k2_name)}
+#            就诊卡
+            cardType: "FH0121.01"
+
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        api: api/user_info.yml
+        name: 切换登录院区部门
+
+#查询出住院登记详细信息[组件调用]/app-hospitalized-register/hospitalizedRegister/query/hospitalizedRegisterInfo
+-   test:
+        name: 查询出住院登记详细信息[组件调用]
+#        患者建档、入院登记、新增床位、安床
+        setup_hooks:
+          - ${gmc_run_mysql(patient_info, inhospital_register, add_bed,patient_add_bed)}
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $areaId
+            json:
+                inhospitalPatientId: ${get_result_dicts(inhospital_id)}
+#                inhospitalPatientId: "6341792581"
+            method: POST
+            url: /app-hospitalized-register/hospitalizedRegister/query/hospitalizedRegisterInfo
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          - inhospitalPatientId: content.body.0.id
+          - masterPatientIndex: content.body.0.masterPatientIndex
+          - birthDate: content.body.0.birthdate
+#分页查询账页信息/app-billing/AccoutQuery/queryAccoutByPage
+-   test:
+        name: 分页查询账页信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $areaId
+            json:
+                endDate: ''
+                inhospitalPatientId: $inhospitalPatientId
+                pageCount: 0
+                pageNum: 0
+                paging: false
+                startDate: ''
+            method: POST
+            url: /app-billing/AccoutQuery/queryAccoutByPage
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+#根据住院id查询住院病人[组件调用] /app-hospitalized-register/hospitalizedRegister/query/patientAccoutFeeInfo
+-   test:
+        name: 根据住院id查询住院病人[组件调用]
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $areaId
+            json:
+                inhospitalPatientId: $inhospitalPatientId
+                masterPatientIndex: $masterPatientIndex
+                settleState: 0
+            method: POST
+            url: /app-hospitalized-register/hospitalizedRegister/query/patientAccoutFeeInfo
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+#根据住院患者id查询在住院患者信息/app-billing/inPatient/detail
+-   test:
+        name: 根据住院患者id查询在住院患者信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $areaId
+            json:
+                inPatientId: $inhospitalPatientId
+            method: POST
+            url: /app-billing/inPatient/detail
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+#按不同条件查询费用列表/app-billing/inPatient/charge/list
+-   test:
+        name: 按不同条件查询费用列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $areaId
+            json:
+                birthDate: ${get_date_change($birthDate)}
+                cardType: $cardType
+                chargeItemName: ''
+                inPatientId: $inhospitalPatientId
+                masterPatientIndex: $masterPatientIndex
+                queryType: "1"
+                recordBeginTime: ${get_date(number=1, delete_date=1)}
+                recordEndTime: ${get_date(number=1, add_date=1)}
+            method: POST
+            url: /app-billing/inPatient/charge/list
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+#查询收费项目列表/app-billing/chargeItem/query/list
+-   test:
+        name: 查询收费项目列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $areaId
+            json:
+                birthDate: ${get_date_change($birthDate)}
+                cardType: $cardType
+                occurDate: ${get_date(number=1)}
+                queryParam: ''
+                queryType: "4"
+            method: POST
+            url: /app-billing/chargeItem/query/list
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+#       换项目时，换body之后的数字即可，1代表第二个数组数据
+        extract:
+          - chargeItemList: content.body.1.chargeItemList.0
+
+#费用补退-药品库存校验/app-billing/inPatient/charge/supplementMedicine/valid
+-   test:
+        name: 费用补退-药品库存校验
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $areaId
+            json:
+                cardType: $cardType
+                chargeDetailList:
+                  - amounts: null
+#                   获取接口返回为数组时的内容，通过key返回对应value（key表示字段名称）
+                    amountss: ${get_content_json_value($chargeItemList,price)}
+                    baseItemId: ${get_content_json_value($chargeItemList,baseItemId)}
+                    baseItemName: ${get_content_json_value($chargeItemList,baseItemName)}
+                    billingDeptId: $deptId
+                    billingDeptName: $deptName
+                    chargeItemId: ${get_content_json_value($chargeItemList,chargeItemId)}
+                    chargeItemName: ${get_content_json_value($chargeItemList,chargeItemName)}
+                    chargeItemNameOther: null
+                    chargeItemType: ${get_content_json_value($chargeItemList,chargeItemType)}
+                    chargeItemTypeName: {get_content_json_value($chargeItemList,chargeItemTypeName)}
+                    chargePriceId: ""
+                    doctorId: 10101
+                    doctorName: "扁鹊"
+                    drugsType: null
+                    editPrice: false
+                    enableState: null
+                    executeDeptId: $areaId
+                    executeDeptName: $areaName
+                    frequencyId: null
+                    frequencyName: null
+                    frequencyScope: null
+                    itemNumber: null
+                    largePackagingUnit: null
+                    largePrice: null
+                    manufacturer: ""
+                    occurDate: ${get_date(number=1)}
+                    operatorId: 10182
+                    operatorLocationId: ${get_content_json_value($chargeItemList,operatorLocationId)}
+                    operatorLocationName: ${get_content_json_value($chargeItemList,operatorLocationName)}
+                    operatorName: ${get_content_json_value($chargeItemList,operatorName)}
+                    price: ${get_content_json_value($chargeItemList,price)}
+                    priceId: ""
+                    pricesCode: ${get_content_json_value($chargeItemList,pricesCode)}
+                    smallLargePackageRatio: null
+                    specification: null
+                    supplementNumber: 1
+                    typeDesc: ${get_content_json_value($chargeItemList,typeDesc)}
+                    unitName: ${get_content_json_value($chargeItemList,unitName)}
+                inPatientId: $inhospitalPatientId
+                masterPatientIndex: $masterPatientIndex
+                refundChargeList: []
+                sourceId: ''
+                supplementType: "1"
+            method: POST
+            url: /app-billing/inPatient/charge/supplementMedicine/valid
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+#费用补退-可补可退/app-billing/inPatient/charge/supplement
+-   test:
+        name: 费用补退-补费
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $areaId
+            json:
+                cardType: $cardType
+                chargeDetailList:
+                  - amounts: null
+                    amountss: ${get_content_json_value($chargeItemList,price)}
+                    baseItemId: ${get_content_json_value($chargeItemList,baseItemId)}
+                    baseItemName: ${get_content_json_value($chargeItemList,baseItemName)}
+                    billingDeptId: $deptId
+                    billingDeptName: $deptName
+                    chargeItemId: ${get_content_json_value($chargeItemList,chargeItemId)}
+                    chargeItemName: ${get_content_json_value($chargeItemList,chargeItemName)}
+                    chargeItemNameOther: null
+                    chargeItemType: ${get_content_json_value($chargeItemList,chargeItemType)}
+                    chargeItemTypeName: {get_content_json_value($chargeItemList,chargeItemTypeName)}
+                    chargePriceId: ""
+                    doctorId: 10101
+                    doctorName: "扁鹊"
+                    drugsType: null
+                    editPrice: false
+                    enableState: null
+                    executeDeptId: $areaId
+                    executeDeptName: $areaName
+                    frequencyId: null
+                    frequencyName: null
+                    frequencyScope: null
+                    itemNumber: null
+                    largePackagingUnit: null
+                    largePrice: null
+                    manufacturer: ""
+                    occurDate: ${get_date(number=1)}
+                    operatorId: 10182
+                    operatorLocationId: ${get_content_json_value($chargeItemList,operatorLocationId)}
+                    operatorLocationName: ${get_content_json_value($chargeItemList,operatorLocationName)}
+                    operatorName: ${get_content_json_value($chargeItemList,operatorName)}
+                    price: ${get_content_json_value($chargeItemList,price)}
+                    priceId: ""
+                    pricesCode: ${get_content_json_value($chargeItemList,pricesCode)}
+                    smallLargePackageRatio: null
+                    specification: null
+                    supplementNumber: 2
+                    typeDesc: ${get_content_json_value($chargeItemList,typeDesc)}
+                    unitName: ${get_content_json_value($chargeItemList,unitName)}
+                inPatientId: $inhospitalPatientId
+                masterPatientIndex: $masterPatientIndex
+                refundChargeList: []
+                sourceId: ''
+                supplementType: "1"
+            method: POST
+            url: /app-billing/inPatient/charge/supplement
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - true
+#查询退费费用列表/app-billing/inPatient/area/refund/charge/list
+-   test:
+        name: 查询退费费用列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $areaId
+            json:
+                chargeItemId: ''
+                inPatientId: $inhospitalPatientId
+            method: POST
+            url: /app-billing/inPatient/area/refund/charge/list
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          - chargeItemId: content.body.0.chargeItemId
+          - chargeItemType: content.body.0.chargeItemType
+#查询退费费用明细列表/app-billing/inPatient/area/refund/charge/detail/list
+-   test:
+        name: 查询退费费用明细列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $areaId
+            json:
+                chargeItemId: $chargeItemId
+                chargeItemType: $chargeItemType
+                inPatientId: $inhospitalPatientId
+                occurBeginTime: ''
+                occurEndTime: ''
+                wardAreaCouldRefundState: 1
+            method: POST
+            url: /app-billing/inPatient/area/refund/charge/detail/list
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+#批量退收费项目接口/app-billing/inPatient/area/refund/refundChargeItem
+-   test:
+        name: 批量退收费项目接口
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                chargeItemId: $chargeItemId
+                chargeItemType: $chargeItemType
+                inPatientId: $inhospitalPatientId
+                masterPatientIndex: $masterPatientIndex
+                returnedNumber: 1
+            method: POST
+            url: /app-billing/inPatient/area/refund/refundChargeItem
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 查询某个病区的待安床病人列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                k1: $k1
+                k2: $k2
+            method: GET
+            url: /app-nurse-station/patient/wait/list
+        teardown_hooks:
+          - ${reload_dict()}

@@ -1,0 +1,234 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 票据管理
+        variables:
+            k1: ${ENV(out_k1)}
+#            k2: ${ENV(out_k2)}
+            k2: "99897828447"
+            orgId: ${ENV(orgId)}
+            invoiceType: "FH0062.03"
+            invoiceTypeName: "住院预交金收据"
+            pageCount: 20
+            pageNum: 1
+            paging: true
+
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        api: api/user_info.yml
+        name: 切换登录院区部门
+
+#验证段号是否与数据库重复/app-hospitalized-register/invoiceRegister/checkRegisterData
+-   test:
+        name: 验证段号是否与数据库重复
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                invoiceType: $invoiceType
+                registerNumberBegin: "Test0001"
+            method: POST
+            url: /app-hospitalized-register/invoiceRegister/checkRegisterData
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+##新增票据内容/app-hospitalized-register/invoiceRegister/saveInvoiceRegister
+#-   test:
+#        name: 新增票据内容
+#        request:
+#            headers:
+#                Authorization: ${get_token($token)}
+#                Content-Type: application/json; charset=UTF-8
+#                k1: $k1
+#                k2: $k2
+##            入参为数组时,使用-不支持使用
+#            json:
+#              - invoiceType: $invoiceType
+#                invoiceTypeName: $invoiceTypeName
+#                registerNumber: 1000
+#                registerNumberEnd: "Test1000"
+#                registerNumberStart: "Test0001"
+#            method: POST
+#            url: /app-hospitalized-register/invoiceRegister/saveInvoiceRegister
+#        validate:
+#        -   eq:
+#            - content.code
+#            - 2000
+#        -   eq:
+#            - content.message
+#            - success
+#根据条件查询票据入库记录/app-hospitalized-register/invoiceRegister/listInvoiceQueryByParameters
+-   test:
+        name: 根据条件查询票据入库记录
+        setup_hooks:
+          - ${gmc_run_mysql(add_invoice)}
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                invoiceState: 0
+                invoiceType: $invoiceType
+                orderKey: "registerNumberParagraph"
+                orderType: "asc"
+                pageCount: $pageCount
+                pageNum: $pageNum
+                paging: $paging
+                registerDateBegin: ${get_date()}
+                registerDateEnd: ''
+                registerType: ''
+            method: POST
+            url: /app-hospitalized-register/invoiceRegister/listInvoiceQueryByParameters
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            invoiceRegisterId: content.body.data.0.id
+            numberPrefix: content.body.data.0.numberPrefix
+            registerDate: content.body.data.0.registerDate
+#            registerNumber: content.body.0.registerNumber
+#            registerNumberEnd: content.body.0.registerNumberEnd
+            registerNumberParagraph: content.body.data.0.registerNumberParagraph
+            registerNumberStart: content.body.data.0.registerNumberStart
+
+#分页查询票据分发记录/app-hospitalized-register/invoiceGiveOut/listInvoiceGiveOutByParameters
+-   test:
+        name: 分页查询票据分发记录
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                giveOutDateBegin: ''
+                giveOutDateEnd: ''
+                invoiceNumber: ''
+                invoiceStates: []
+                invoiceType: ''
+                orderKey: "giveOutDate"
+                orderType: "desc"
+                pageCount: $pageCount
+                pageNum: $pageNum
+                paging: $paging
+            method: POST
+            url: /app-hospitalized-register/invoiceGiveOut/listInvoiceGiveOutByParameters
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+#根据票据入库id查询票据分发详情/app-hospitalized-register/invoiceRegister/listInvoiceGiveOutByRegisterId
+-   test:
+        name: 根据票据入库id查询票据分发详情
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                invoiceRegisterId: $invoiceRegisterId
+            method: POST
+            url: /app-hospitalized-register/invoiceRegister/listInvoiceGiveOutByRegisterId
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+#修改票据入库/app-hospitalized-register/invoiceRegister/updateInvoiceRegister
+-   test:
+        name: 修改票据入库
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                id: $invoiceRegisterId
+                index: 1
+                invoiceState: 0
+                invoiceType: $invoiceType
+                invoiceTypeName: $invoiceTypeName
+                numberPrefix: $numberPrefix
+                numberSuffix: null
+                orgId: $orgId
+                registerDate: $registerDate
+                registerNumber: "1001"
+                registerNumberEnd: "Test1001"
+                registerNumberParagraph: $registerNumberParagraph
+                registerNumberStart: $numberPrefix$registerNumberStart
+                registerType: 1
+                registerTypeName: null
+                userId: ${get_result_dicts(user_id)}
+                userName: ${get_result_dicts(user_name)}
+                validNumber: 1000
+                validNumberEnd: "1000"
+                validNumberParagraph: $registerNumberParagraph
+                validNumberStart: $registerNumberStart
+            method: POST
+            url: /app-hospitalized-register/invoiceRegister/updateInvoiceRegister
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 通过ID删除票据入库数据
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                id: $invoiceRegisterId
+            method: POST
+            url: /app-hospitalized-register/invoiceRegister/deleteInvoiceRegister
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - true
+-   test:
+        name: 查询某个病区的待安床病人列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                k1: $k1
+                k2: $k2
+            method: GET
+            url: /app-nurse-station/patient/wait/list
+        teardown_hooks:
+          - ${reload_dict()}

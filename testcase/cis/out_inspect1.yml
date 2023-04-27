@@ -1,0 +1,875 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 门诊检查开立及收费退费
+        variables:
+          k1: ${ENV(out_k1)}
+          k2: ${ENV(inspect_k2)}
+          applyHospitalDistrictId: ${ENV(applyHospitalDistrictId)}
+          inspect_k2_name: ${ENV(inspect_k2_name)}
+          applyHospitalDistrictName: ${ENV(applyHospitalDistrictName)}
+          applyAdmissionDeptId: ${ENV(applyAdmissionDeptId)}
+          applyAdmissionDeptName: ${ENV(applyAdmissionDeptName)}
+          applyAdmissionAreaId: ${ENV(applyAdmissionAreaId)}
+          applyAdmissionAreaName: ${ENV(applyAdmissionAreaId)}
+          acId: ${ENV(acId)}
+          userNam: ${ENV(userNam)}
+          patientId: 98627168
+          masterPatientIndex: "5c59be03b7b5483e970c74c04383e643"
+          patientRegisterId: 13847
+#          orderIds:9867242
+
+
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        name: 新增检查
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                 "orderStartDate": ${get_date(number=1)}
+                 "orderStopDate": ${get_date(number=1)}
+                 "frequencyName": "ONCE"
+                 "frequencyId": "3"
+                 "frequencyUseScope": "FH0032.02"
+                 "frequencyRatio": 1
+                 "enableenddate": 0
+                 "costSign": 1
+                 "filmCategory": "FH0219.04"
+                 "filmCategoryName": "全需要"
+                 "clinicPerformance": "测试"
+                 "transshipmentType": "FH0276.01"
+                 "transshipmentTypeName": "步行"
+                 "escortType": "0"
+                 "status": true
+                 "deptList":
+                 -   "medicationId": null
+                     "medicationName": null
+                     "locationId": $k2
+                     "locationName": $inspect_k2_name
+                     "availableNum": 0
+                     "stogeNum1": null
+                     "subNum": null
+                     "unit": null
+                     "splitType": 2
+                     "managingDistrictId": 2
+                     "enabledState": null
+                     "retailUnitPrice": null
+                     "isFree": null
+                     "hospitalizedSplitFlag": null
+                     "outpatientSplitFlag": null
+                     "emergencySplitFlag": null
+                     "keepHospitalizedSplitFlag": null
+                 -   "medicationId": null
+                     "medicationName": null
+                     "locationId": 99897825996
+                     "locationName": "赵佳慧检查部门"
+                     "availableNum": 0
+                     "stogeNum1": null
+                     "subNum": null
+                     "unit": null
+                     "splitType": 2
+                     "managingDistrictId": 99897825977
+                     "enabledState": null
+                     "retailUnitPrice": null
+                     "isFree": null
+                     "hospitalizedSplitFlag": null
+                     "outpatientSplitFlag": null
+                     "emergencySplitFlag": null
+                     "keepHospitalizedSplitFlag": null
+                 -   "medicationId": null
+                     "medicationName": null
+                     "locationId": 99897826148
+                     "locationName": "之江CT"
+                     "availableNum": 0
+                     "stogeNum1": null
+                     "subNum": null
+                     "unit": null
+                     "splitType": 2
+                     "managingDistrictId": 99897825909
+                     "enabledState": null
+                     "retailUnitPrice": null
+                     "isFree": null
+                     "hospitalizedSplitFlag": null
+                     "outpatientSplitFlag": null
+                     "emergencySplitFlag": null
+                     "keepHospitalizedSplitFlag": null
+                 -   "medicationId": null
+                     "medicationName": null
+                     "locationId": 99897827126
+                     "locationName": "J-城站CT室"
+                     "availableNum": 0
+                     "stogeNum1": null
+                     "subNum": null
+                     "unit": null
+                     "splitType": 2
+                     "managingDistrictId": 2
+                     "enabledState": null
+                     "retailUnitPrice": null
+                     "isFree": null
+                     "hospitalizedSplitFlag": null
+                     "outpatientSplitFlag": null
+                     "emergencySplitFlag": null
+                     "keepHospitalizedSplitFlag": null
+                 -   "medicationId": null
+                     "medicationName": null
+                     "locationId": 267
+                     "locationName": "内镜室"
+                     "availableNum": 0
+                     "stogeNum1": null
+                     "subNum": null
+                     "unit": null
+                     "splitType": 2
+                     "managingDistrictId": 2
+                     "enabledState": null
+                     "retailUnitPrice": null
+                     "isFree": null
+                     "hospitalizedSplitFlag": null
+                     "outpatientSplitFlag": null
+                     "emergencySplitFlag": null
+                     "keepHospitalizedSplitFlag": null
+                 "itemId": 13456
+                 "itemName": "CT平扫-咋"
+                 "itemType": "FH0049.02"
+                 "price": 932.532
+                 "arrearsFlag": 0
+                 "antimicrobialFlag": true
+                 "canbeUrgent": 0
+                 "enableStatus": 1
+                 "dictVersion": "FH0263.02"
+                 diagTreatTechnologyDTOList:
+                 -   "id": 28
+                     "orgId": null
+                     "diagnosisTreatmentId": 13456
+                     "partsId": 4
+                     "partsName": "上肢"
+                     "itemCode": "4"
+                     "filmNum": null
+                     "remark": null
+                     "createBy": null
+                     "gmtCreate": null
+                     "modifyBy": null
+                     "gmtModify": null
+                     "active": null
+                     "enableStatus": null
+                     "sortNo": 1
+                     "partEnableStatus": null
+                     techDetailList:
+                     -   "id": 41
+                         "orgId": null
+                         "diagnosisTreatmentId": null
+                         "techId": 28
+                         "itemCode": "12345"
+                         "itemName": "三十个字啊三十个字啊三十个字啊三十个字啊三十个字啊三十个字啊"
+                         "itemId": 16
+                         "clinicStatus": 1
+                         "emergencyStatus": 1
+                         "hospitalizationStatus": 1
+                         "emergencyKeepStatus": 1
+                         "remark": null
+                         "createBy": null
+                         "gmtCreate": null
+                         "modifyBy": null
+                         "gmtModify": null
+                         "active": null
+                         "enableStatus": null
+                         "sortNo": 1
+                         "genderCodeLimit": null
+                         "pathologyApplyIs": null
+                         "pathologyApplyNameFrom": null
+                         "pathologyApplyName": null
+                         "pathologyApplyType": null
+                         "medicalTechnologyConfirm": null
+                         "filmNum": null
+                         "partsChargeId": 11
+                 -   "id": 84
+                     "orgId": null
+                     "diagnosisTreatmentId": 13456
+                     "partsId": 7
+                     "partsName": "床边摄影"
+                     "itemCode": "7"
+                     "filmNum": null
+                     "remark": null
+                     "createBy": null
+                     "gmtCreate": null
+                     "modifyBy": null
+                     "gmtModify": null
+                     "active": null
+                     "enableStatus": null
+                     "sortNo": 2
+                     "partEnableStatus": null
+                     techDetailList:
+                     -   "id": 114
+                         "orgId": null
+                         "diagnosisTreatmentId": null
+                         "techId": 84
+                         "itemCode": "1223"
+                         "itemName": "四十已"
+                         "itemId": 61
+                         "clinicStatus": 1
+                         "emergencyStatus": 1
+                         "hospitalizationStatus": 1
+                         "emergencyKeepStatus": 1
+                         "remark": null
+                         "createBy": null
+                         "gmtCreate": null
+                         "modifyBy": null
+                         "gmtModify": null
+                         "active": null
+                         "enableStatus": null
+                         "sortNo": 1
+                         "genderCodeLimit": "GB/T2261.1.1"
+                         "pathologyApplyIs": null
+                         "pathologyApplyNameFrom": null
+                         "pathologyApplyName": null
+                         "pathologyApplyType": null
+                         "medicalTechnologyConfirm": null
+                         "filmNum": null
+                         "partsChargeId": 28
+                 "inhospitalAvailable": 1
+                 "showParts": 1
+                 "inspectCategoryId": 5
+                 "inspectCategoryName": "胸腔镜XQ"
+                 "pathologyApplyIs": 1
+                 pathologyApplyList:
+                 -   "pathologyApplyId": 257
+                     "diagnosisTreatmentId": 13456
+                     "pathologyApplyNameFrom": 0
+                     "pathologyApplyName": "CT平扫-咋"
+                     "pathologyApplyType": "FH0106.05"
+                     "disabled": false
+                 "executiveDeptId": $k2
+                 "executiveDeptName": $inspect_k2_name
+                 "executiveDeptCampusId": 2
+                 PathologicalData:
+                 -   "pathologyApplyId": 257
+                     "diagnosisTreatmentId": 13456
+                     "pathologyApplyNameFrom": 0
+                     "pathologyApplyName": "CT平扫-咋"
+                     "pathologyApplyType": "FH0106.05"
+                     "disabled": false
+                 techList:
+                 -   "itemCode": "4"
+                     "partsId": 4
+                     "partsName": "上肢"
+                     "techId": 28
+                     techDetailDTOS:
+                     -   "itemCode": "12345"
+                         "itemName": "三十个字啊三十个字啊三十个字啊三十个字啊三十个字啊三十个字啊"
+                         "techDetailId": 41
+                         "itemId": 16
+                         "partsChargeId": 11
+                 -   "itemCode": "7"
+                     "partsId": 7
+                     "partsName": "床边摄影"
+                     "techId": 84
+                     techDetailDTOS:
+                     -   "itemCode": "1223"
+                         "itemName": "四十已"
+                         "techDetailId": 114
+                         "itemId": 61
+                         "partsChargeId": 28
+                 "orderItemVersion": "FH0263.02"
+                 "id": null
+                 "orderCategory": "FH0049.02"
+                 "orderName": "CT平扫-咋"
+                 "inhospitalPatientId": $patientId
+                 "masterPatientIndex": $masterPatientIndex
+                 "patientId": $patientId
+                 "patientRegisterId": $patientRegisterId
+                 "encounterType": 1
+                 "orderSubcategory": null
+                 "versionNo": null
+                 "costControlFlag": true
+                 "pathologySave": null
+                 "orderGroupInsideNo": null
+                 "felog": "seenew-front-util-ajax"
+            method: POST
+            url: /app-station-manage/doctorstation/save/orderRecordSave
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 保存门诊病历
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                contentDTOList:
+                -   "dataContent": "西医"
+                    "dataType": "0"
+                    "masterPatientIndex": $masterPatientIndex
+                    "patientId": $patientId
+                    "patientRegisterId": $patientRegisterId
+                -   "dataContent": "1"
+                    "dataType": "10"
+                    "masterPatientIndex": $masterPatientIndex
+                    "patientId": $patientId
+                    "patientRegisterId": $patientRegisterId
+                -    "dataContent": "1"
+                     "dataType": "20"
+                     "masterPatientIndex": $masterPatientIndex
+                     "patientId": $patientId
+                     "patientRegisterId": $patientRegisterId
+                -    "dataContent": "1"
+                     "dataType": "30"
+                     "masterPatientIndex": $masterPatientIndex
+                     "patientId": $patientId
+                     "patientRegisterId": $patientRegisterId
+                -    "dataContent": ""
+                     "dataType": "40"
+                     "masterPatientIndex": $masterPatientIndex
+                     "patientId": $patientId
+                     "patientRegisterId": $patientRegisterId
+                -    "dataContent": "{\"bloodPressureStart\":null,\"bloodPressureEnd\":null,\"pulse\":null,\"breath\":null,\"height\":null,\"weight\":null,\"temperature\":36,\"bloodOxygen\":null,\"vitalsignskey\":[],\"vitalsignskeyinput\":\"\",\"inMedical\":\"0\"}"
+                     "dataType": "50"
+                     "masterPatientIndex": $masterPatientIndex
+                     "patientId": $patientId
+                     "patientRegisterId": $patientRegisterId
+                -    "dataContent": ""
+                     "dataType": "60"
+                     "masterPatientIndex": $masterPatientIndex
+                     "patientId": $patientId
+                     "patientRegisterId": $patientRegisterId
+                -    "dataContent": ""
+                     "dataType": "70"
+                     "masterPatientIndex": $masterPatientIndex
+                     "patientId": $patientId
+                     "patientRegisterId": $patientRegisterId
+                -    "dataContent": ""
+                     "dataType": "80"
+                     "masterPatientIndex": $masterPatientIndex
+                     "patientId": $patientId
+                     "patientRegisterId": $patientRegisterId
+                -    "dataContent": ""
+                     "dataType": "90"
+                     "masterPatientIndex": $masterPatientIndex
+                     "patientId": $patientId
+                     "patientRegisterId": $patientRegisterId
+                -    "dataContent": ""
+                     "dataType": "100"
+                     "masterPatientIndex": $masterPatientIndex
+                     "patientId": $patientId
+                     "patientRegisterId": $patientRegisterId
+                -    "dataContent": ""
+                     "dataType": "110"
+                     "masterPatientIndex": $masterPatientIndex
+                     "patientId": $patientId
+                     "patientRegisterId": $patientRegisterId
+                -    "dataContent": ""
+                     "dataType": "120"
+                     "masterPatientIndex": $masterPatientIndex
+                     "patientId": $patientId
+                     "patientRegisterId": $patientRegisterId
+                -    "dataContent": ""
+                     "dataType": "130"
+                     "masterPatientIndex": $masterPatientIndex
+                     "patientId": $patientId
+                     "patientRegisterId": $patientRegisterId
+                "masterPatientIndex": $masterPatientIndex
+                outDiagnosisDTOList:
+                -   "masterPatientIndex": $masterPatientIndex
+                    "patientId": $patientId
+                    "patientRegisterId": $patientRegisterId
+                    "diagnosisName": "PD"
+                    "diagnosisNote": ""
+                    "diagnosisId": 48389
+                    "diagnosisType": 1
+                    "icdCode": "G20.x00"
+                "patientId": $patientId
+                "patientRegisterId": $patientRegisterId
+                "felog": "seenew-front-util-ajax"
+            method: POST
+            url: /app-station-manage/medicalrecordwrite/save
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+
+-   test:
+        name: 订单提交
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                "orderCategory": "3"
+                "encounterType": 1
+                "masterPatientIndex": $masterPatientIndex
+                "patientId": $patientId
+                "needExamMed": 1
+                "needMedRec": 1
+                "controlList": []
+                "orderStopReqList": []
+                "noticeWhenNoOrder": 1
+                "felog": "seenew-front-util-ajax"
+            method: POST
+            url: /app-station-manage/doctorstation/orderSubmit
+        extract:
+           - orderId: content.body.customMap.sheetOrderIdList255
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 肾功能保存
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                "encounterType": 1
+                orderIdList: $orderId
+                sheetDTOList:
+                -   "code": "no255-1"
+                    "name": "1无既往肾病病史或肾功能损害病史"
+                    "value": 0
+                -   "code": "no255-2"
+                    "name": "2六周内在本院或外院检查过肾功能，且Cr<133umol/L"
+                    "value": 0
+                -   "code": "no255-3"
+                    "name": "3虽然有肾功能异常，但病情需要进行增强检查并有后续水化治疗方案"
+                    "value": 0
+                -   "code": "need255-4"
+                    "name": "既往有肾脏病史或肾功能损害病史"
+                    "value": 1
+                "orgId": 1
+                "patientId": $patientId
+                "patientRegisterId": $patientRegisterId
+                "type": "FH0142.255"
+            method: POST
+            url: /app-station-manage/orderQuery/renalfunctionevaluation/save
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 订单提交
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                "orderCategory": "3"
+                "encounterType": 1
+                "masterPatientIndex": $masterPatientIndex
+                "patientId": $patientId
+                "needExamMed": 1
+                "needMedRec": 1
+#                "key": 0.05601132415006527
+                "controlList": []
+                "orderStopReqList": []
+                "noticeWhenNoOrder": 1
+                "felog": "seenew-front-util-ajax"
+            method: POST
+            url: /app-station-manage/doctorstation/orderSubmit
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+            
+-   test:
+        name: 完成接诊
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                  "feverFlag": 0
+                  "icterusFlag": 0
+                  "diarrheaFlag": 0
+                  "erythraFlag": 0
+                  "nerveSysSymptomFlag": 0
+                  "coughFlag": 0
+                  "leukocyte": 4
+                  "chestImage": 3
+                  "whereabouts": "FH0207.01"
+                  "reportCard": 0
+                  "contagionFlag": 0
+                  "dtiagnosisFlag": 1
+                  "occurDate": ${get_date()}
+                  "masterPatientIndex": $masterPatientIndex
+                  "patientId": $patientId
+                  "felog": "seenew-front-util-ajax"
+            method: POST
+            url: /app-station-manage/doctorstation/outpatient/finishEncounter
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 查询费用条目
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                  "costCode": "1"
+                  "masterPatientIndex": $masterPatientIndex
+                  "outpatientId": $patientId
+                  "patientRegisterId": $patientRegisterId
+            method: POST
+            url: /app-outpatient-charge/outpatient/newcharge/outPatientDoctorSettleValid
+        extract:
+           - label: content.body.categoryList.0.label
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 预结算
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                  "payType": "FH0085.01"
+                  "medicalCategory": ""
+                  "settleType": ""
+                  "itemCode": ""
+                  "cardNo": "9810"
+                  "cardType": "FH0121.01"
+                  "categoryList":
+                  -   "label": $label
+                      "costCategory": "1"
+                      "specialDiseaseFlag": "FH0065.02"
+                      "seriousDiseaseFlag": null
+                      "abroadFlag": null
+                      "abroadAuditStatus": null
+                      "specialApprovalFlag": null
+                      "specialApprovalStatus": null
+                      "orderIds": [$orderId]
+                      "outpatientId": $patientId
+                      "skinTest": null
+                      "skinTestResult": null
+                      "operateOpinion": null
+                      "encounterStatus": 3
+                      "patientType": 1
+                      "prescription": null
+                      "doctorName": null
+                      "cnMedicationNum": null
+                      "totalAmount": null
+                      "feeSource": null
+                  "costCategoryCode": "1"
+                  "costNatureCode": "0"
+                  "discountRuleDTO": []
+                  "diseasesCode": 0
+                  "masterPatientIndex": $masterPatientIndex
+                  "patientRegisterId": $patientRegisterId
+                  "stepCode": "02"
+                  "thisOutpatientId": $patientId
+                  "outpatientId": $patientId
+            method: POST
+            url: /app-outpatient-charge/outpatient/newcharge/prepareSettle
+        extract:
+           - DTOListid: content.body.detailsDTOList.0.id
+           - businessNo: content.body.detailsDTOList.0.businessNo
+           - subBusinessNo: content.body.detailsDTOList.0.subBusinessNo
+           - insuranceCode: content.body.detailsDTOList.0.insuranceCode
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+            
+-   test:
+        name: 初始化计费
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                  "costCategoryCode": "1"
+                  "masterPatientIndex": $masterPatientIndex
+                  "patientName": "***"
+                  "payType": "FH0085.01"
+                  "transactionCardNumber": "9810"
+                  "stepCode": "02"
+            method: POST
+            url: /app-outpatient-charge/outpatient/newcharge/initSettle
+        extract:
+           - settleCenterSerialNumber: content.body.settleCenterSerialNumber
+           - subsequenceNumber: content.body.transactionType.0.subsequenceNumber
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+            
+-   test:
+        name: 收费确认
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                  "outpatientId": $patientId
+                  "stepCode": "02"
+                  "settleCenterSerialNumber": $settleCenterSerialNumber
+                  "payType": "FH0085.01"
+                  "tradeIdentifyCode": ""
+                  "tradeCardNumber": ""
+                  "ageText": "30岁"
+                  "cardNo": "9810"
+                  "cardType": "FH0121.01"
+                  "costCategoryCode": "1"
+                  "costTypeCode": "1"
+                  "costCategoryName": "自费"
+                  "costNatureCode": "0"
+                  "costNatureName": "自费"
+                  "gender": "男"
+                  "masterPatientIndex": $masterPatientIndex
+                  "medicalRecordNo": "2000005918"
+                  "patientName": "***"
+                  "patientRegisterId": $patientRegisterId
+                  "categoryList":
+                  -   "label": $label
+                      "costCategory": "1"
+                      "specialDiseaseFlag": "FH0065.02"
+                      "seriousDiseaseFlag": null
+                      "abroadFlag": null
+                      "abroadAuditStatus": null
+                      "specialApprovalFlag": null
+                      "specialApprovalStatus": null
+                      "orderIds": [$orderId]
+                      "outpatientId": $patientId
+                      "skinTest": null
+                      "skinTestResult": null
+                      "operateOpinion": null
+                      "encounterStatus": 3
+                      "patientType": 1
+                      "prescription": null
+                      "doctorName": null
+                      "cnMedicationNum": null
+                      "totalAmount": null
+                      "feeSource": nul
+                  costList:
+                  -   "id": $DTOListid
+                      "orgId": $k1
+                      "orgCode": "1001"
+                      "orgName": "天台县人民医院(测试)"
+                      "hospitalDistrictId": $applyHospitalDistrictId
+                      "hospitalDistrictName": $applyHospitalDistrictName
+                      "patientDistrictId": $applyHospitalDistrictId
+                      "patientDistrictName": $applyHospitalDistrictName
+                      "patientRegisterId": $patientRegisterId
+                      "masterPatientIndex": $masterPatientIndex
+                      "outpatientId": $patientId
+                      "patientName": "***"
+                      "medicalRecordNo": "2000005918"
+                      "mainItemId": 13456
+                      "mainItemName": "CT平扫-咋"
+                      "mainItemType": "FH0055.04"
+                      "mainItemNumber": 1
+                      "chargeItemId": 14855
+                      "chargeItemName": "挑治"
+                      "chargeItemType": "FH0055.02"
+                      "chargeItemSubtype": null
+                      "medicareChargeType": 1
+                      "baseItemName": "治疗费"
+                      "baseItemId": 7
+                      "specifications": null
+                      "recordNumber": 1
+                      "itemNumber": 1
+                      "returnedNumber": null
+                      "itemPrice": 20
+                      "price": 20
+                      "largeItemPrice": null
+                      "chargeProportion": 1
+                      "unitName": "人次"
+                      "medicationUnitType": null
+                      "largeItemNumber": null
+                      "largeItemNumberUnit": null
+                      "splitType": null
+                      "smallLargePackageRatio": null
+                      "amounts": 20
+                      "occurDate": ${get_millisecond_stamp()}
+                      "recordDate": ${get_millisecond_stamp()}
+                      "billingDeptId": 224
+                      "billingDeptName": "城站普内科门诊"
+                      "doctorId": $acId
+                      "doctorName": $userNam
+                      "executeDeptId": $k2
+                      "currentBlockId": null,
+                      "currentBlockName": null,
+                      "executorId": null,
+                      "operatorId": $acId
+                      "operatorName": $userNam
+                      "operationDept": "城站普内科门诊"
+                      "operationDeptId": 224
+                      "operationDate": ${get_millisecond_stamp()}
+                      "feeSource": "FH0253.15"
+                      "feeSourceType": "FH0254.1501"
+                      "orderId": $orderId
+                      "businessNo": $businessNo
+                      "chargeSerialNumber": null
+                      "ruleId": null,
+                      "strikeId": null
+                      "billsState": "01"
+                      "settleId": null
+                      "oldSettleId": null
+                      "settleQueryMark": null
+                      "settleQueryTime": null
+                      "recordNo": null
+                      "selfExpenseState": 0
+                      "selfExpenseProportion": 1
+                      "selfCareAmount": 0
+                      "empSelfCareAmount": null
+                      "selfPayAmount": 20
+                      "insuranceCode": $insuranceCode
+                      "medicareGrade": "1"
+                      "insuranceUnitPriceLimit": null
+                      "insuranceNumberLimit": null
+                      "insuranceApprovalCode": null
+                      "uploadSign": 0
+                      "uploadSerialId": null
+                      "uploadSerialNumber": null
+                      "uploadDate": null
+                      "priceId": null
+                      "priceName": null
+                      "indicationCode": null
+                      "indicationName": null
+                      "indicationPublicFeeLimit": null
+                      "medicareSettleStatus": null
+                      "syncFlag": 0
+                      "achievementsSyncId": null
+                      "remark": null
+                      "createBy": $acId
+                      "gmtCreate": ${get_millisecond_stamp()}
+                      "modifyBy": $acId
+                      "gmtModify": ${get_millisecond_stamp()}
+                      "active": 1
+                      "versionNo": 1
+                      "prescriptionId": null
+                      "prescriptionDetailId": null
+                      "prescriptionNo": null
+                      "formulation": null
+                      "onceDosage": null
+                      "dosageUnit": null
+                      "days": null
+                      "usageId": null
+                      "usageName": null
+                      "frequencyId": null
+                      "frequencyName": null
+                      "approvalCode": null
+                      "selfProvidedAble": 0
+                      "discountId": null
+                      "discountMethodCode": null
+                      "discountMethodAmount": null
+                      "afterDiscountAmount": null
+                      "discountAmount": null
+                      "eachTimeDosage": null
+                      "eachTimeDosageUnit": null
+                      "billId": null
+                      "patientType": 1
+                      "sugeryChargeType": null
+                      "orderType": null
+                      "subBusinessNo": $subBusinessNo
+                      "parentId": null
+                      "medDoctorId": $acId
+                      "medDoctorName": $userNam
+                  "preferential": 0
+                  "reimbursement": 0
+                  "rounding": 0
+                  "selfPay": 20
+                  "totalMoney": 20
+                  "remark": null
+                  "discountRuleDTO": []
+                  "subsequenceNumber": $subsequenceNumber
+                  "transactionSortNo": 1
+                  "posType": 2
+                  "medicalCategory": ""
+                  "settleType": ""
+                  "itemCode": ""
+            method: POST
+            url: /app-outpatient-charge/outpatient/newcharge/confirmSettle
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 完成
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                  "type": 1
+                  "triggerPoint": "3102"
+                  "patientId": $patientId
+                  "treatType": 1
+                  "reportType": 2
+                  "icdList": ["G20.x00"]
+                  "masterPatientIndex": $masterPatientIndex
+                  "diagFlag": 1
+            method: POST
+            url: /app-patient-manage/disease/report/code/convert
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success

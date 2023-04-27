@@ -1,0 +1,1065 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 住院开立病理医嘱-提交
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(in_k2)}
+            orgId: ${ENV(orgId)}
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        api: api/user_info.yml
+        name: 切换登录院区部门
+
+-   test:
+        name: 验证没有诊断是否能开立医嘱
+        setup_hooks:
+            - ${gmc_run_mysql(patient_info, inhospital_register, add_bed,patient_add_bed)}
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Sec-Fetch-Dest: empty
+                Sec-Fetch-Mode: cors
+                Sec-Fetch-Site: same-origin
+                k1: $k1
+                k2: $k2
+            json:
+                felog: seenew-front-util-ajax
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                patientId: ${get_result_dicts(inhospital_id)}
+            method: POST
+            url: /app-station-manage/orderQuery/checkNonDiagnosisCanModify
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询医嘱标识 1、门诊，2、住院，3、急诊，4、留观
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Sec-Fetch-Dest: empty
+                Sec-Fetch-Mode: cors
+                Sec-Fetch-Site: same-origin
+                k1: $k1
+                k2: $k2
+            json:
+                encounterType: 2
+                felog: seenew-front-util-ajax
+                orderCategory: FH0049.12
+            method: POST
+            url: /app-station-manage/orderCommon/listOrderSign
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取患者主诉与查体信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Sec-Fetch-Dest: empty
+                Sec-Fetch-Mode: cors
+                Sec-Fetch-Site: same-origin
+                k1: $k1
+                k2: $k2
+            json:
+                encounterType: 2
+                felog: seenew-front-util-ajax
+                patientId: ${get_result_dicts(inhospital_id)}
+                registerId: ${get_result_dicts(patient_id)}
+                visitId: 1
+            method: POST
+            url: /app-station-manage/orderQuery/getChiefComplaint
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询病理类别与项目明细
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Sec-Fetch-Dest: empty
+                Sec-Fetch-Mode: cors
+                Sec-Fetch-Site: same-origin
+                k1: $k1
+                k2: $k2
+            json:
+                encounterSubType: null
+                encounterType: 2
+                felog: seenew-front-util-ajax
+            method: POST
+            url: /app-station-manage/orderQuery/pathologyConfigAndTreatment
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            itemId: content.body.0.detailList.0.itemId
+            itemName: content.body.0.detailList.0.itemName
+-   test:
+        name: 查看医嘱内容配置
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Sec-Fetch-Dest: empty
+                Sec-Fetch-Mode: cors
+                Sec-Fetch-Site: same-origin
+                k1: $k1
+                k2: $k2
+            json:
+                encounterType: 2
+                felog: seenew-front-util-ajax
+            method: POST
+            url: /app-station-manage/orderCommon/queryOrderValConfig
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 未停重复医嘱查询
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Sec-Fetch-Dest: empty
+                Sec-Fetch-Mode: cors
+                Sec-Fetch-Site: same-origin
+                k1: $k1
+                k2: $k2
+            json:
+                __callSpecial__:
+                    cover: true
+                encounterType: 2
+                felog: seenew-front-util-ajax
+                itemId: $itemId
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                patientId: ${get_result_dicts(inhospital_id)}
+            method: POST
+            url: /app-station-manage/doctorstation/checkRepeatOrder
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body.orderRepeat
+            - false
+-   test:
+        name: 查询路径外医嘱是否属于患者路径中未勾选项目
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Sec-Fetch-Dest: empty
+                Sec-Fetch-Mode: cors
+                Sec-Fetch-Site: same-origin
+                k1: $k1
+                k2: $k2
+            json:
+                __callSpecial__:
+                    cover: true
+                encounterType: 2
+                felog: seenew-front-util-ajax
+                itemReqList:
+                -   itemId: $itemId
+                    orderCategory: FH0049.12
+                    orderName: $itemName
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                patientId: ${get_result_dicts(inhospital_id)}
+                patientRegisterId: ${get_result_dicts(patient_id)}
+            method: POST
+            url: /app-station-manage/clinicPathOrder/query/queryClinicItemExist
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 根据项目ID 项目类型查询属性详情
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Sec-Fetch-Dest: empty
+                Sec-Fetch-Mode: cors
+                Sec-Fetch-Site: same-origin
+                k1: $k1
+                k2: $k2
+            json:
+                __callSpecial__:
+                    cover: true
+                currentBlockId: ${get_result_dicts(area_id)}
+                deptId: ${get_result_dicts(department_id)}
+                felog: seenew-front-util-ajax
+                inhospitalPatientId: ${get_result_dicts(inhospital_id)}
+                itemId: $itemId
+                itemSubType: ''
+                itemType: FH0049.12
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+            method: POST
+            url: /app-station-manage/orderCommon/list/queryOrderAttrByID
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            antimicrobialFlag: content.body.antimicrobialFlag
+            arrearsFlag: content.body.arrearsFlag
+            canbeUrgent: content.body.canbeUrgent
+            costSign: content.body.costSign
+            deptList: content.body.deptList
+            locationId: content.body.deptList.0.locationId
+            locationName: content.body.deptList.0.locationName
+            dictVersion: content.body.dictVersion
+            enableStatus: content.body.enableStatus
+            pathologyApplyIs: content.body.pathologyApplyIs
+            pathologyApplyList: content.body.pathologyApplyList
+            pathologyApplyId: content.body.pathologyApplyList.0.pathologyApplyId
+            pathologyApplyType: content.body.pathologyApplyList.0.pathologyApplyType
+
+-   test:
+        name: 根据条件查询医嘱频率(带模糊查询)
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Sec-Fetch-Dest: empty
+                Sec-Fetch-Mode: cors
+                Sec-Fetch-Site: same-origin
+                k1: $k1
+                k2: $k2
+            json:
+                encounterType: 2
+                felog: seenew-front-util-ajax
+                medicationId: $itemId
+                orderType: FH0049.12
+                searchText: ''
+            method: POST
+            url: /app-station-manage/orderCommon/list/dictFrequencyByParam
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 医嘱录入保存操作(批量)
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Sec-Fetch-Dest: empty
+                Sec-Fetch-Mode: cors
+                Sec-Fetch-Site: same-origin
+                k1: $k1
+                k2: $k2
+            json:
+                applyId: ''
+                costControlFlag: true
+                felog: seenew-front-util-ajax
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                orderGroupNoUuid: ''
+                patientId: ${get_result_dicts(inhospital_id)}
+                patientRegisterId: ${get_result_dicts(patient_id)}
+                saveList:
+                -   PathologicalData: $pathologyApplyList
+                    antimicrobialFlag: true
+                    antimicrobialGrade: null
+                    antimicrobialGradeDesc: null
+                    antimicrobialUseDTOS: null
+                    antimicrobialUseHours: null
+                    antimicrobialUseId: null
+                    antimicrobialUsePurpose: null
+                    arrearsFlag: 0
+                    attentionMatter: ''
+                    basicMedicationType: null
+                    canModify: '1'
+                    canbeUrgent: 1
+                    clinicPerformance: null
+                    commodityInstructions: null
+                    controlType: null
+                    controlTypeDesc: null
+                    costControlInfo: null
+                    costSign: 1
+                    currentNum: null
+                    currentNumUnit: null
+                    customMap: null
+                    data: null
+                    days: null
+                    defaultEntrust: null
+                    deptList:
+                    -   availableNum: 0
+                        emergencySplitFlag: null
+                        enabledState: null
+                        hospitalizedSplitFlag: null
+                        isFree: null
+                        keepHospitalizedSplitFlag: null
+                        label: 病理科
+                        locationId: 974
+                        locationName: 病理科
+                        managingDistrictId: ${get_result_dicts(districtId)}
+                        medicationId: null
+                        medicationName: null
+                        outpatientSplitFlag: null
+                        retailUnitPrice: null
+                        splitType: null
+                        stogeNum1: null
+                        subNum: null
+                        unit: null
+                        value: '974'
+                    diagTreatTechnologyDTOList: null
+                    dictVersion: FH0263.01
+                    dosageUnit: null
+                    dosageUnitRatio: ''
+                    dosageUnitType: null
+                    dosageUnitTypeSpec: null
+                    doseSmallPackageRatio: null
+                    doseUnit: null
+                    dropletNum: null
+                    dropletNumDescribe: null
+                    dropletNumRate: null
+                    dropletNumUnit: null
+                    dropletNumUnitList: null
+                    dropletNumUnitName: null
+                    dropletTimeUnit: 分
+                    effectivePartsNum: null
+                    emergencyIsnoSplit: null
+                    enableStatus: 1
+                    enableenddate: 0
+                    encounterType: 2
+                    excludeItemClassify: ''
+                    excludeSecondaryClassify: ''
+                    excludeType: null
+                    executiveDeptCampusId: ${get_result_dicts(districtId)}
+                    executiveDeptId: 974
+                    executiveDeptName: 病理科
+                    filmCategory: ''
+                    filmCategoryName: ''
+                    firstDayTimes: null
+                    firstDayTimesCalculate: null
+                    frequency: null
+                    frequencyId: 3
+                    frequencyName: ONCE
+                    frequencyRatio: 1
+                    frequencyUseScope: FH0032.02
+                    genderCodeLimit: ''
+                    globalCode: null
+                    hasDeathOrder: null
+                    highRiskLevel: null
+                    hospitalizedIsnoSplit: null
+                    id: null
+                    identifier: null
+                    inhospitalAvailable: 0
+                    inhospitalPatientId: ${get_result_dicts(inhospital_id)}
+                    injectionsTimes: null
+                    inspectCategoryId: null
+                    inspectCategoryName: ''
+                    instructions: null
+                    instructionsUrl: null
+                    itemId: $itemId
+                    itemName: $itemName
+                    itemSubType: ''
+                    itemType: FH0049.12
+                    lisOrderStartDate: ${get_result_dicts(today_date)} 21:08
+                    masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                    msgList: null
+                    onceDosage: ''
+                    onceDosageDefault: null
+                    onceDosageDefaultRatio: null
+                    onceDosageDefaultRatioSpec: null
+                    oneNum: null
+                    oneNumMax: null
+                    oneNumMaxTip: null
+                    orderCategory: FH0049.12
+                    orderComment: ''
+                    orderFlagRespList: null
+                    orderName: $itemName
+                    orderNum: '1.00'
+                    orderNumUnit: ''
+                    orderNumUnitType: ''
+                    orderRemark: null
+                    orderSign: ''
+                    orderStartDate: ${get_result_dicts(today_date)} 21:08
+                    orderStopDate: ${get_result_dicts(today_date)} 21:08
+                    orderSubcategory: ''
+                    outpatientId: ''
+                    outpatientIsnoSplit: null
+                    outtakeDaysRestrict: null
+                    parentOrderId: ''
+                    parentOrderText: ''
+                    pathologyApplyIs: 1
+                    pathologyApplyList: $pathologyApplyList
+                    pathologySave: []
+                    patientId: ${get_result_dicts(inhospital_id)}
+                    patientRegisterId: ${get_result_dicts(patient_id)}
+                    prescriptionDaysRestrict: null
+                    price: 86
+                    protocolPackageValue: null
+                    relationType: null
+                    requencyData:
+                    -   frequency: 1
+                        frequencyId: 3
+                        frequencyName: ONCE
+                        frequencyUseScope: FH0032.02
+                        identifier: ONCE
+                        label: ONCE
+                        pinyin: ONCE^once
+                        useTimes: 5218
+                        value: '3'
+                    roundingMethodHospitalized: null
+                    roundingMethodOutpatient: null
+                    sampleCode: null
+                    sampleEnable: 0
+                    sampleName: null
+                    selfPreparation: null
+                    showParts: null
+                    skinOptionId: null
+                    skinOptionName: null
+                    skinTest: null
+                    skinTestMark: null
+                    skinTestShow: null
+                    specMedCardDayMax: null
+                    specMedNoCardDayMax: null
+                    specMedNumLimit: null
+                    specMedOneDayMax: null
+                    specMedOneNumMax: null
+                    specMedTimeLimit: null
+                    specialDrugsConsultationFlag: null
+                    status: true
+                    stopDate: ${get_result_dicts(today_date)} 21:08
+                    totalAmount: null
+                    totalNum: null
+                    totalNumUnit: null
+                    totalNumUnitType: null
+                    unitList: null
+                    usageId: null
+                    usageName: null
+                    useageClassification: null
+            method: POST
+            url: /app-station-manage/doctorstation/save/orderRecordSaveBatch
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            order_id: content.body.data
+-   test:
+        name: 验证没有诊断是否能开立医嘱
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Sec-Fetch-Dest: empty
+                Sec-Fetch-Mode: cors
+                Sec-Fetch-Site: same-origin
+                k1: $k1
+                k2: $k2
+            json:
+                felog: seenew-front-util-ajax
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                patientId: ${get_result_dicts(inhospital_id)}
+            method: POST
+            url: /app-station-manage/orderQuery/checkNonDiagnosisCanModify
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: /app-station-manage/orderQuery/query/queryOrderListByPatientForStation
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Sec-Fetch-Dest: empty
+                Sec-Fetch-Mode: cors
+                Sec-Fetch-Site: same-origin
+                k1: $k1
+                k2: $k2
+            json:
+                encounterType: 2
+                felog: seenew-front-util-ajax
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                needExamMed: 1
+                needMedRec: 1
+                orderCategory: '3'
+                orderStatus: '1'
+                orderType: '3'
+                orderedPlaceSign: 1
+                patientId: ${get_result_dicts(inhospital_id)}
+            method: POST
+            url: /app-station-manage/orderQuery/query/queryOrderListByPatientForStation
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body.0.orderStatusName
+            - 新增
+-   test:
+        name: queryOrgSystemParam
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Sec-Fetch-Dest: empty
+                Sec-Fetch-Mode: cors
+                Sec-Fetch-Site: same-origin
+                k1: $k1
+                k2: $k2
+            json:
+                codeList:
+                - '10000078'
+                - '10000102'
+                - '10000113'
+                felog: seenew-front-util-ajax
+            method: POST
+            url: /app-station-manage/orderQuery/queryOrgSystemParam
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询打印类型list
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Sec-Fetch-Dest: empty
+                Sec-Fetch-Mode: cors
+                Sec-Fetch-Site: same-origin
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-sys-manage/print/template/queryPrintTypeList
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查看医嘱内容配置
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Sec-Fetch-Dest: empty
+                Sec-Fetch-Mode: cors
+                Sec-Fetch-Site: same-origin
+                k1: $k1
+                k2: $k2
+            json:
+                encounterType: 2
+                felog: seenew-front-util-ajax
+            method: POST
+            url: /app-station-manage/orderCommon/queryOrderValConfig
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 根据当前院区ID查询次分类列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Sec-Fetch-Dest: empty
+                Sec-Fetch-Mode: cors
+                Sec-Fetch-Site: same-origin
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-station-manage/orderTest/queryTestCategoryByDistrictId
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取AI质检结果
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Sec-Fetch-Dest: empty
+                Sec-Fetch-Mode: cors
+                Sec-Fetch-Site: same-origin
+                k1: $k1
+                k2: $k2
+            json:
+                inpatientId: '21000184'
+                type: 1
+            method: POST
+            url: /app-station-manage/medicare_history/getAIQcResult
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - null
+-   test:
+        name: 查询医嘱详情
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Sec-Fetch-Dest: empty
+                Sec-Fetch-Mode: cors
+                Sec-Fetch-Site: same-origin
+                k1: $k1
+                k2: $k2
+            json:
+                encounterType: 2
+                felog: seenew-front-util-ajax
+                inhospitalPatientId: ${get_result_dicts(inhospital_id)}
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                orderCategory: FH0049.12
+                orderGroupNoUuid: null
+                orderId: $order_id
+                orderedPlaceSign: 1
+                patientRegisterId: ${get_result_dicts(patient_id)}
+            method: POST
+            url: /app-station-manage/orderQuery/query/queryOrderDetailByID
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body.0.orderId
+            - $order_id
+-   test:
+        name: 查询打印类型list
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Sec-Fetch-Dest: empty
+                Sec-Fetch-Mode: cors
+                Sec-Fetch-Site: same-origin
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-sys-manage/print/template/queryPrintTypeList
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询诊断信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Sec-Fetch-Dest: empty
+                Sec-Fetch-Mode: cors
+                Sec-Fetch-Site: same-origin
+                k1: $k1
+                k2: $k2
+            json:
+                encounterType: 2
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                orderCategory: FH0049.12
+                patientId: ${get_result_dicts(inhospital_id)}
+                patientRegisterId: ${get_result_dicts(patient_id)}
+            method: POST
+            url: /app-station-manage/orderQuery/query/queryTestMessage
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取患者主诉与查体信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Sec-Fetch-Dest: empty
+                Sec-Fetch-Mode: cors
+                Sec-Fetch-Site: same-origin
+                k1: $k1
+                k2: $k2
+            json:
+                encounterType: 2
+                patientId: ${get_result_dicts(inhospital_id)}
+                registerId: ${get_result_dicts(patient_id)}
+                visitId: 1
+            method: POST
+            url: /app-station-manage/orderQuery/getChiefComplaint
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询用户列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Sec-Fetch-Dest: empty
+                Sec-Fetch-Mode: cors
+                Sec-Fetch-Site: same-origin
+                k1: $k1
+                k2: $k2
+            json:
+                queryStr: ''
+            method: POST
+            url: /app-station-manage/pathology/listUser
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            user_id1: content.body.userList.0.id
+            user_name1: content.body.userList.0.userName
+            job_num1: content.body.userList.0.jobNumber
+-   test:
+        name: 查询用户列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Sec-Fetch-Dest: empty
+                Sec-Fetch-Mode: cors
+                Sec-Fetch-Site: same-origin
+                k1: $k1
+                k2: $k2
+            json:
+                practiceType: GB/T8561.250
+                queryStr: ''
+            method: POST
+            url: /app-station-manage/pathology/listUser
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            user_id2: content.body.userList.0.id
+            user_name2: content.body.userList.0.userName
+            job_num2: content.body.userList.0.jobNumber
+-   test:
+        name: 查询科室列表、当前登录、机构名称
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Sec-Fetch-Dest: empty
+                Sec-Fetch-Mode: cors
+                Sec-Fetch-Site: same-origin
+                k1: $k1
+                k2: $k2
+            json:
+                queryStr: ''
+            method: POST
+            url: /app-station-manage/pathology/listDept
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            sample_deptId: content.body.deptList.0.deptId
+            sample_deptName: content.body.deptList.0.deptName
+-   test:
+        name: 查询用户列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Sec-Fetch-Dest: empty
+                Sec-Fetch-Mode: cors
+                Sec-Fetch-Site: same-origin
+                k1: $k1
+                k2: $k2
+            json:
+                queryStr: ''
+            method: POST
+            url: /app-station-manage/pathology/listUser
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询用户列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Sec-Fetch-Dest: empty
+                Sec-Fetch-Mode: cors
+                Sec-Fetch-Site: same-origin
+                k1: $k1
+                k2: $k2
+            json:
+                practiceType: GB/T8561.250
+                queryStr: ''
+            method: POST
+            url: /app-station-manage/pathology/listUser
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 病理申请保存
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Sec-Fetch-Dest: empty
+                Sec-Fetch-Mode: cors
+                Sec-Fetch-Site: same-origin
+                k1: $k1
+                k2: $k2
+            json:
+                encounterType: 2
+                felog: seenew-front-util-ajax
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                orderId: $order_id
+                orderedPlaceSign: 1
+                pathologySave:
+                -   applyDeptId: $sample_deptId
+                    applyDeptName: $sample_deptName
+                    applyDoctorId: $user_id1
+                    applyDoctorJobNumber: $job_num1
+                    applyDoctorName: $user_name1
+                    checkNurseId: $user_id2
+                    checkNurseJobNumber: $job_num2
+                    checkNurseName: $user_name2
+                    costSign: 1
+                    deleteSpecimenIds: []
+                    diagText: ''
+                    duration: ''
+                    encounterType: 2
+                    externalInspectList: []
+                    id: ''
+                    itemId: $order_id
+                    lastMenstrualDate: ''
+                    masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                    menopause: ''
+                    orderName: $itemName
+                    orderSubcategory: $pathologyApplyType
+                    pathologyApplyId: $pathologyApplyId
+                    pathologySpecimenList:
+                    -   leaveBodyDate: ${get_result_dicts(today_date)} 21:09
+                        specimenName: test标本
+                        takePart: test部位
+                    patientId: ${get_result_dicts(inhospital_id)}
+                    patientRegisterId: ${get_result_dicts(patient_id)}
+                    period: ''
+                    specialDescription: ''
+                    summary: 测试病理
+                    testHBC: '2'
+                    testHBS: '1'
+                    testHIV: '4'
+                    testLUES: '3'
+                    testTB: '1'
+                    uterineCurettageDate: ''
+                    versionNo: ''
+                patientId: ${get_result_dicts(inhospital_id)}
+                patientRegisterId: ${get_result_dicts(patient_id)}
+            method: POST
+            url: /app-station-manage/pathology/pathologySave
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: /app-station-manage/orderQuery/query/queryOrderListByPatientForStation
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                Sec-Fetch-Dest: empty
+                Sec-Fetch-Mode: cors
+                Sec-Fetch-Site: same-origin
+                k1: $k1
+                k2: $k2
+            json:
+                encounterType: 2
+                felog: seenew-front-util-ajax
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                needExamMed: 1
+                needMedRec: 1
+                orderCategory: '3'
+                orderStatus: '1'
+                orderType: '3'
+                orderedPlaceSign: 1
+                patientId: ${get_result_dicts(inhospital_id)}
+            method: POST
+            url: /app-station-manage/orderQuery/query/queryOrderListByPatientForStation
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        - eq:
+            - content.body.0.orderStatusName
+            - 新增
+-   test:
+        name: 提交医嘱
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                controlList: []
+                encounterType: 2
+                felog: seenew-front-util-ajax
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                needExamMed: 1
+                needMedRec: 1
+                orderCategory: '3'
+                orderStatus: '1'
+                orderStopReqList: []
+                orderType: '3'
+                patientId: ${get_result_dicts(inhospital_id)}
+            method: POST
+            url: /app-station-manage/doctorstation/orderSubmit
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body.status
+            - true
+-   test:
+        name: /app-station-manage/orderQuery/query/queryOrderListByPatientForStation
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                encounterType: 2
+                felog: seenew-front-util-ajax
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                needExamMed: 1
+                needMedRec: 1
+                orderCategory: '3'
+                orderStatus: '1'
+                orderType: '3'
+                orderedPlaceSign: 1
+                patientId: ${get_result_dicts(inhospital_id)}
+            method: POST
+            url: /app-station-manage/orderQuery/query/queryOrderListByPatientForStation
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body.0.orderStatusName
+            - 提交
+
+-   test:
+        name: 查询审方待处理列表通知
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-station-manage/prescriptioncheck/selectByDoctorNotice
+        teardown_hooks:
+            - ${reload_dict()}

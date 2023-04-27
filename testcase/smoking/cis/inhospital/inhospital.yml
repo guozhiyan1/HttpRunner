@@ -1,0 +1,516 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 预住院患者（琬丽猴）入院申请单新增-审核-预约虚拟床-入院登记-取消入院
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(inspect_k2)}
+            applyHospitalDistrictId: ${ENV(applyHospitalDistrictId)}
+            inspect_k2: ${ENV(inspect_k2)}
+            inspect_k2_name: ${ENV(inspect_k2_name)}
+            applyHospitalDistrictName: ${ENV(applyHospitalDistrictName)}
+            applyAdmissionDeptId: ${ENV(applyAdmissionDeptId)}
+            applyAdmissionDeptName: ${ENV(applyAdmissionDeptName)}
+            applyAdmissionAreaId: ${ENV(applyAdmissionAreaId)}
+            applyAdmissionAreaName: ${ENV(applyAdmissionAreaId)}
+            acId: ${ENV(acId)}
+            userNam: ${ENV(userNam)}
+
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        name: 查询诊断信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                searchText: ""
+            method: POST
+            url: /app-station-manage/admission/list/queryDiagnosisComboBox
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          diagnosisId: content.body.0.id
+          diagnosisName: content.body.0.diagnosisName
+          icdCode: content.body.0.icdCode
+
+-   test:
+        name: 新增入院申请单
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                acrossDep: 0
+                emergencyDegree: 0
+                isPreAdmitted: 1
+                isDaytimeChemotherapy: 0
+                needAnesthesiaConsultation: 0
+                allowAcrossDept: 0
+                diagnosisList:
+                -   diagnosisId: $diagnosisId
+                    diagnosisName: $diagnosisName
+                    diagnosisContent: $diagnosisName
+                    icdCode: $icdCode
+                    sortNumber: 1
+                "hospitalizedTypeCode": ""
+                "hospitalizedTypeName": ""
+                "hospitalizedWayCode": ""
+                "hospitalizedWayName": ""
+                "hospitalizedPurposesId": ""
+                "hospitalizedPurposesName": ""
+                "hospitalizedPurposesIdList": []
+                "hospitalizedPurposesNameList": []
+                "applyHospitalDistrictId": $applyHospitalDistrictId
+                "applyHospitalDistrictName": $applyHospitalDistrictName
+                "applyAdmissionDeptName": $applyAdmissionDeptName
+                "applyAdmissionDeptId": $applyAdmissionDeptId
+                "applyAdmissionAreaName": $applyAdmissionAreaName
+                "applyAdmissionAreaId": $applyAdmissionAreaId
+                "applySpareHospitalDistrictId": ""
+                "applySpareHospitalDistrictName": ""
+                "alternativeDepttId": ""
+                "alternativeDeptName": ""
+                "alternativeDistrictId": ""
+                "alternativeDistrictName": ""
+                "groupName": ""
+                "groupId": -1
+                "bedPriceRangeCode": ""
+                "bedPriceRangeName": ""
+                "advancePayment": ""
+                "useAnticoagulant": 0
+                "hospitalizedIsolation": 0
+                "costTypeName": "现金"
+                "costTypeCode": "1"
+                "costPropertyName": "自费"
+                "costPropertyCode": "0"
+                "patientRegisterId": "9851176454"
+                "masterPatientIndex": "48863b4d26e94e67b2ebbda9517b37e5"
+                "medicalRecordNo": "2100000437"
+                "outpatientId": 0
+                "bizAdmissionOrderConfigDTOList": []
+                "applyDeptId": $inspect_k2
+                "applyDeptName": $inspect_k2_name
+            method: POST
+            url: /app-station-manage/admission/save/admission
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          ApplyId: content.body.id
+
+-   test:
+        name: 审核入院申请单
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                "admissionStatusCode": "FH0245.01"
+                "bedPriceRangeCode": ""
+                "bedPriceRangeName": ""
+                "cancelReason": null
+                "cancelReasonCode": null
+                "checkinTime": null
+                "communication": null
+                "communicationCode": null
+                "drivingDistance": null
+                "otherCancelReason": null
+                "id": $ApplyId
+                "isDaytimeOperation": null
+                "notifyTime": null
+                "orderedTime": ${get_date(number=1)}
+                "patientRegisterId": "9851176454"
+                "remark": null
+                "reserveRemark": null
+                "weekdays": null
+                "telecomOne": ""
+                "telecomTwo": null
+                "address": null
+                "isPreAdmitted": 1
+                "aroundHospital": 0
+                "ifRegister": false
+                "assignorRelName": null
+                "assignorRelCode": null
+                "assignReason": null
+                "assignorId": null
+                "assignorName": null
+                "assignorDeptId": null
+                "assignorDeptName": null
+                "preInhospitalAgreement": null
+                "contrastAgentAgreement": null
+                "waitBedWay": null
+                "noticeRemark": null
+                "focus": 0
+                "operateType": "approve"
+                "highRisk": null
+                "highRiskCode": null
+                "highRiskDesc": null
+                "checkinDeptId": ${applyAdmissionDeptId}
+                "checkinDeptName": ${applyAdmissionDeptName}
+                "checkinAreaId": ${applyAdmissionAreaId}
+                "checkinAreaName": ${applyAdmissionAreaName}
+                "temperature": ""
+                "isEpidemiologicalAbnormality": 0
+                "epidemiologicalAbnormalityContent": null
+            method: POST
+            url: /app-station-manage/admission/am/updateAdmission
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+#-   test:
+#        name: 查询可用虚拟床
+#        request:
+#            headers:
+#                Authorization: ${get_token($token)}
+#                Content-Type: application/json; charset=UTF-8
+#                k1: $k1
+#                k2: $k2
+#            json:
+#                "wardId": $applyAdmissionAreaId
+#                "virtualBedId": ""
+#                "virtualBed": 1
+#            method: POST
+#            url: /app-nurse-station/bed/admissionservice/list
+#        validate:
+#        -   eq:
+#            - content.code
+#            - 2000
+#        -   eq:
+#            - content.message
+#            - success
+#        extract:
+#          vbedId: content.body[?(@.isReservationBed==0)].bedId
+
+
+-   test:
+        name: 入院申请单查询
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                id: $ApplyId
+            method: POST
+            url: /app-station-manage/admission/queryAdmissionDataById
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          patientId: content.body.inhospitalPatientId
+
+-   test:
+        name: 查询医生组
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                applyHospitalDistrictId: ""
+                queryKey: ""
+            method: POST
+            url: /app-station-manage/admission/queryAdmissionGroupListByDept
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          groupId: content.body.1.id
+          groupName: content.body.1.groupName
+
+-   test:
+        name: 预约虚拟床
+#        setup_hooks:
+#            - ${gmc_run_mysql(patient_info, outpatient_encounter)}
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                  "operateFrom": 0
+                  "applyFormId": $ApplyId
+                  "bedId": 10391
+                  "wardId": ${applyAdmissionAreaId}
+                  "patientId": $patientId
+                  "reserveDate": ${get_date(number=1)}
+                  "chiefDoctorId": $acId
+                  "chiefDoctorName": $userNam
+                  "virtualBed": 1
+                  "campusId": $applyHospitalDistrictId
+                  "wardName": $applyAdmissionAreaName
+                  "deptId": $applyAdmissionDeptId
+                  "deptName": $applyAdmissionDeptName
+                  "groupName": $groupName
+                  "groupId": $groupId
+
+            method: POST
+            url: /app-nurse-station/bed/admissionservice/reserve/bed
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 查询inpatientNo
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                masterPatientIndex: "48863b4d26e94e67b2ebbda9517b37e5"
+            method: POST
+            url: /app-hospitalized-register/hospitalizedRegister/query/patientInfoByIndex
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          inpatientNo: content.body.inpatientNo
+
+-   test:
+        name: 入院登记
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                "patientRegisterId": "9851176454"
+                "masterPatientIndex": "48863b4d26e94e67b2ebbda9517b37e5"
+                "masterPatientIndexVersion": "mpi_version_1"
+                "patientName": "琬丽猴"
+                "patientNameBefore": null
+                "genderCode": "GB/T2261.1.2"
+                "gender": "女"
+                "nation": "汉族"
+                "nationCode": "GB/T3304.01"
+                "maritalStatus": "未婚"
+                "maritalStatusCode": "GB/T2261.2.10"
+                "ageText": "28岁"
+                "medicalRecordNo": "2100000437"
+                "patientIdentificationNumber": ""
+                "idCard": "520120199209194799"
+                "idCardTypeCode": "FH0066.01"
+                "idCardTypeName": "居民身份证"
+                "birthdate": 697824000000
+                "greenChannel": 0
+                "profession": "工人"
+                "professionCode": "FH0063.01"
+                "company": ""
+                "companyTelecom": ""
+                "workingAddress": ""
+                "workingAddressPostCode": ""
+                "permanentAddress": "山西省长治市沁县1"
+                "contactAddress": "山西省长治市沁县1"
+                "telecom": "16789665467"
+                "contactPeopleName": null
+                "contactPeopleTelecom": null
+                "contactPeopleAddress": null
+                "contactCardType": ""
+                "contactCardNum": ""
+                "contactRelationTypeCode": null
+                "contactRelationType": ""
+                "weight": null
+                "height": null
+                "discount": null
+                "nationality": "中国"
+                "nationalityCode": "GB/T2659.156"
+                "voucherCardTypeCode": "FH0121.01"
+                "voucherCardTypeName": null
+                "voucherCardNumber": "0634"
+                "costTypeId": 3
+                "costTypeCode": "1"
+                "costType": "自费"
+                "costPropertyCode": "0"
+                "costProperty": "自费"
+                "specialNo": null
+                "publicExpenseNo": null
+                "expenseCompanyId": null
+                "expenseCompanyName": null
+                "specialDiseaseFlag": null
+                "specialDiseaseCode": null
+                "medicareCardInfo": "{\"cardNumberOri\":\"0634\",\"cardTypeOri\":\"FH0121.01\",\"cardTypeList\":[{\"createBy\":0,\"gmtCreate\":\"2018-11-20 11:40:56\",\"modifyBy\":0,\"gmtModify\":\"2018-11-20 11:40:56\",\"active\":1,\"id\":1007610,\"mainCode\":\"FH0121\",\"subCode\":\"FH0121.01\",\"codeNo\":\"\",\"sortNo\":1,\"typeDesc\":\"就诊卡\",\"version\":null,\"dictType\":\"\",\"parentCode\":null,\"pinyinCode\":null,\"dictExplain\":null,\"fastKey\":\"\",\"label\":\"就诊卡\"},{\"createBy\":0,\"gmtCreate\":\"2018-11-20 11:40:56\",\"modifyBy\":0,\"gmtModify\":\"2018-11-20 11:40:56\",\"active\":1,\"id\":1007606,\"mainCode\":\"FH0121\",\"subCode\":\"FH0121.02\",\"codeNo\":\"96\",\"sortNo\":2,\"typeDesc\":\"省医保S\",\"version\":null,\"dictType\":\"\",\"parentCode\":null,\"pinyinCode\":null,\"dictExplain\":null,\"fastKey\":\"S\",\"label\":\"省医保S\"},{\"createBy\":0,\"gmtCreate\":\"2018-11-20 11:40:56\",\"modifyBy\":0,\"gmtModify\":\"2018-11-20 11:40:56\",\"active\":1,\"id\":1007607,\"mainCode\":\"FH0121\",\"subCode\":\"FH0121.03\",\"codeNo\":\"97\",\"sortNo\":3,\"typeDesc\":\"市医保K\",\"version\":null,\"dictType\":\"\",\"parentCode\":null,\"pinyinCode\":null,\"dictExplain\":null,\"fastKey\":\"K\",\"label\":\"市医保K\"},{\"createBy\":0,\"gmtCreate\":\"2018-11-20 11:40:56\",\"modifyBy\":0,\"gmtModify\":\"2018-11-20 11:40:56\",\"active\":1,\"id\":1007608,\"mainCode\":\"FH0121\",\"subCode\":\"FH0121.04\",\"codeNo\":\"98\",\"sortNo\":4,\"typeDesc\":\"省异地D\",\"version\":null,\"dictType\":\"\",\"parentCode\":null,\"pinyinCode\":null,\"dictExplain\":null,\"fastKey\":\"D\",\"label\":\"省异地D\"},{\"createBy\":0,\"gmtCreate\":\"2018-11-20 11:40:56\",\"modifyBy\":0,\"gmtModify\":\"2018-11-20 11:40:56\",\"active\":1,\"id\":1007609,\"mainCode\":\"FH0121\",\"subCode\":\"FH0121.05\",\"codeNo\":\"\",\"sortNo\":5,\"typeDesc\":\"公费卡\",\"version\":null,\"dictType\":\"\",\"parentCode\":null,\"pinyinCode\":null,\"dictExplain\":null,\"fastKey\":\"\",\"label\":\"公费卡\"},{\"createBy\":1,\"gmtCreate\":\"2020-04-02 17:02:53\",\"modifyBy\":1,\"gmtModify\":\"2020-04-02 17:02:53\",\"active\":1,\"id\":100875939,\"mainCode\":\"FH0121\",\"subCode\":\"FH0121.06\",\"codeNo\":\"99\",\"sortNo\":6,\"typeDesc\":\"天台医保卡T\",\"version\":null,\"dictType\":\"\",\"parentCode\":null,\"pinyinCode\":null,\"dictExplain\":null,\"fastKey\":\"T\",\"label\":\"天台医保卡T\"},{\"createBy\":1,\"gmtCreate\":\"2020-04-02 17:02:53\",\"modifyBy\":1,\"gmtModify\":\"2020-04-02 17:02:53\",\"active\":1,\"id\":100875940,\"mainCode\":\"FH0121\",\"subCode\":\"FH0121.07\",\"codeNo\":\"100\",\"sortNo\":7,\"typeDesc\":\"台州医保卡R\",\"version\":null,\"dictType\":\"\",\"parentCode\":null,\"pinyinCode\":null,\"dictExplain\":null,\"fastKey\":\"R\",\"label\":\"台州医保卡R\"},{\"createBy\":1,\"gmtCreate\":\"2019-10-08 16:56:49\",\"modifyBy\":1,\"gmtModify\":\"2019-10-08 16:56:49\",\"active\":1,\"id\":10087307,\"mainCode\":\"FH0121\",\"subCode\":\"FH0121.08\",\"codeNo\":\"\",\"sortNo\":8,\"typeDesc\":\"身份证F\",\"version\":null,\"dictType\":\"\",\"parentCode\":null,\"pinyinCode\":null,\"dictExplain\":null,\"fastKey\":\"F\",\"label\":\"身份证F\"},{\"createBy\":0,\"gmtCreate\":null,\"modifyBy\":0,\"gmtModify\":null,\"active\":1,\"id\":100876215,\"mainCode\":\"FH0121\",\"subCode\":\"FH0121.10\",\"codeNo\":\"101\",\"sortNo\":11,\"typeDesc\":\"市医保K(巍山)\",\"version\":null,\"dictType\":\"\",\"parentCode\":null,\"pinyinCode\":null,\"dictExplain\":null,\"fastKey\":\"K\",\"label\":\"市医保K(巍山)\"},{\"createBy\":1,\"gmtCreate\":\"2020-04-28 11:04:04\",\"modifyBy\":1,\"gmtModify\":\"2020-04-28 11:04:04\",\"active\":1,\"id\":100876079,\"mainCode\":\"FH0121\",\"subCode\":\"FH0121.12\",\"codeNo\":\"\",\"sortNo\":12,\"typeDesc\":\"两卡融合L\",\"version\":null,\"dictType\":\"\",\"parentCode\":null,\"pinyinCode\":null,\"dictExplain\":null,\"fastKey\":\"L\",\"label\":\"两卡融合L\"},{\"createBy\":1,\"gmtCreate\":\"2020-04-28 11:04:04\",\"modifyBy\":1,\"gmtModify\":\"2020-04-28 11:04:04\",\"active\":1,\"id\":100876080,\"mainCode\":\"FH0121\",\"subCode\":\"FH0121.15\",\"codeNo\":\"\",\"sortNo\":15,\"typeDesc\":\"电子健康卡\",\"version\":null,\"dictType\":\"\",\"parentCode\":null,\"pinyinCode\":null,\"dictExplain\":null,\"fastKey\":\"\",\"label\":\"电子健康卡\"}],\"userConfig\":{\"code\":\"\",\"defaultCardType\":\"FH0121.01\",\"getMedicareCenterPatInfo\":true,\"updateOrgPatientFlag\":true,\"patientInfoConfirm\":false,\"leastSearchLength\":2,\"enableCreateDoc\":false,\"scene\":\"patientInfoContentFlow\"},\"env\":\"zheyi\",\"debug\":{\"mode\":0,\"disabledNodes\":[]},\"cardType\":\"FH0121.01\",\"cardNumber\":\"0634\",\"cardNo\":\"0634\",\"registerId\":null,\"cardModel\":{\"origin\":{},\"format\":{}},\"patInfoModel\":{\"origin\":{},\"format\":{}},\"userDetailInfo\":{},\"patientList\":[]}"
+                "medicarePersonInfo": ""
+                "medicarePersonNo": null
+                "enableStatus": 1
+                "idcard": "520120199209194799"
+                "homeAddress": "山西省长治市沁县1"
+                "costTypeName": "自费"
+                "costPropertyName": "自费"
+                "inProvince": null
+                "educationLevelCode": null
+                "educationLevel": null
+                "nativePlaceCode": "130400000000"
+                "nativePlace": "河北省邯郸市"
+                "aboBloodCode": null
+                "aboBloodName": null
+                "rhBloodCode": null
+                "rhBloodName": null
+                "hospitalizationNumber": 1
+                "hospitalizedStatus": 1
+                "hospitalizedStatusCode": "FH0084.10"
+                "hospitalizedRoute": "FH0080.04"
+                "hospitalizedCondition": "FH0081.01"
+                "relationTypeCode": null
+                "contactName": null
+                "contactTelecom": "16789665467"
+                "contactPersonAddress": null
+                "discountPlanName": null
+                "discountType": null
+                "relationTypeHusband": "GB/T4761.1"
+                "relationTypeNameHusband": "配偶"
+                "husbandCardType": null
+                "husbandCardNum": null
+                "familyPlanningCertificationDate": null
+                "planningDate": null
+                "patienflag": []
+                "id": ${patientId}
+                "orgId": $k1
+                "hospitalDistrictId": $applyHospitalDistrictId
+                "inpatientNo": "$inpatientNo"
+                "patientNo": null
+                "hosptalizedStatus": "FH0084.10"
+                "age": "28岁"
+                "outpatientDoctorId": "$acId"
+                "outpatientDoctorName": "$userNam"
+                "chargeDoctorId": null
+                "chargeDoctorName": null
+                "chiefDoctorId": "$acId"
+                "chiefDoctorName": "$userNam"
+                "mainNurseId": null
+                "mainNurseName": null
+                "doctorGroupId": null
+                "nurseGroupId": null
+                "indeptDate": null
+                "hospitalizedInAreaId": "$applyAdmissionAreaId"
+                "hospitalizedInAreaName": "$applyAdmissionAreaName"
+                "hospitalizedInDeptId": "$applyAdmissionDeptId"
+                "hospitalizedInDeptName": "$applyAdmissionDeptName"
+                "applyHospitalizedDate": null
+                "approvalHospitalizedDeptId": $inspect_k2
+                "approvalHospitalizedDeptName": "$inspect_k2_name"
+                "wristbandLocationName": "$applyAdmissionAreaName"
+                "hospitalizedAreaId": "$applyAdmissionAreaId"
+                "hospitalizedAreaName": "$applyAdmissionAreaName"
+                "hospitalizedDeptId": $applyAdmissionDeptId
+                "hospitalizedDeptName": "$applyAdmissionDeptName"
+                "preOuthospitalDate": null
+                "outhospitalSettleDate": null
+                "outDeptId": null
+                "outDeptName": null
+                "roomId": null
+                "roomNumber": null
+                "bedId": null
+                "bedNumber": null
+                "hospitalizedDiagnosisId": 48389
+                "hospitalizedDiagnosisCode": "G20.x00"
+                "hospitalizedDiagnosisName": "PD"
+                "hospitalizedDiagnosisAssistCode": null
+                "outpatientDiagnsisId": null
+                "outpatientDiagnsisCode": null
+                "outpatientDiagnsisName": "0634"
+                "outpatientDiagnsisAssistCode": null
+                "costAccumulation": null
+                "totalRecharge": null
+                "conceitedAccumulation": null
+                "patientSpecFlagRsp": null
+                "discountPlanId": null
+                "appointmentBedStatus": 1
+                "appointmentBedDate": 1612334073000
+                "familyPlanningCardNo": null
+                "fertilityType": null
+                "fetusNumber": null
+                "fertilityTypeName": null
+                "preAdmission": 0
+                "advancePrepayment": null
+                "approvalNo": ""
+                "cardType": "FH0121.01"
+                "socialSecurityNo": null
+                "encounterType": 2
+                "multipleOffersList": []
+                "hospitalizedDiagnosis": "PD"
+                "hospitalizedDept": $applyAdmissionDeptId
+                "hospitalizedArea": $applyAdmissionAreaId
+                "patientSpecFlagAppDTO": []
+                "socialSecurityCardNum": "0634"
+                "prepareFlag": 2
+                "prepareStatusEntery": 1
+                "forceEnter": false
+            method: POST
+            url: /app-hospitalized-register/hospitalizedRegister/update/hospitalizedRegister
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 取消入院
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                id: $patientId
+                isMedicare: 0
+            method: POST
+            url: /app-hospitalized-register/hospitalizedCancel/save/hospitalizedCancel
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success

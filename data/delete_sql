@@ -1,0 +1,9 @@
+delete from inhospital_register_db.biz_bed_info  where area_id = 99897828607 ;
+delete from nurse_station_db.biz_patient_borrow_bed_record where  original_wardarea_name = 99897828607;
+delete from  nurse_station_db.biz_nurse_patient_real_time_status where  ward_area_id = 99897828607;
+delete from nurse_station_db.biz_bed_patient_relation_record where   location_id = 99897828607;
+delete from nurse_station_db.biz_bed_patient_relation where location_id = 99897828607;
+delete from outpatient_order_db.biz_out_medical_record_content where create_by = 3142;
+delete from outpatient_order_db.biz_out_medical_record_info where create_by = 3142;
+delete from outpatient_order_db.biz_outpatient_order where ordered_dept_id = 99897828604;
+delete from outpatient_order_db.biz_out_diagnosis where diagnosis_dept_id = 99897828604;

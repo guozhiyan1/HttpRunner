@@ -1,11 +1,23 @@
 -   config:
         base_url: ${ENV(host)}
-        name: 测试demo
+        name: 新增员工
         variables:
-            k1: ${ENV(out_k1)}
-            k2: ${ENV(in_k2)}
-            orgId: ${ENV(orgId)}
-            areaId: ${ENV(in_k3)}
+          k1: ${ENV(out_k1)}
+          k2: ${ENV(in_k2)}
+          orgId: ${ENV(orgId)}
+          areaId: ${ENV(in_k3)}
+          roomText: "可乐"
+          bedNumber: ${get_number(6)}
+          bedStatus: 1
+          bedUseStatus: 0
+          # 0: 空闲
+          locationType: 0
+          roomLocationId: 0
+          # 1：实体床 2：虚拟床
+          virtualBed: 0
+          nowBedTypeId: 2969
+          nowBedTypeName: "WF"
+          patient_in_bed:
 
 -   test:
         api: api/token.yml
@@ -18,32 +30,3 @@
 -   test:
         api: api/user_info.yml
         name: 切换登录院区部门
-
--   test:
-        name: 根据参数查询患者登记的信息
-        setup_hooks:
-          - ${gmc_run_mysql(patient_info)}
-        request:
-            headers:
-                Authorization: ${get_token($token)}
-                Content-Type: application/json; charset=UTF-8
-                k1: $k1
-                k2: $k2
-            json:
-                beginDate: '2020-12-26'
-                endDate: ${get_date()}
-                felog: seenew-front-util-post
-                keywords: ${get_result_dicts(patient_name)}
-                orderKey: ''
-                orderType: desc
-                pageCount: 20
-                pageNum: 1
-            method: POST
-            url: /app-patient-manage/register/listPageRegisterInfoByParam
-        validate:
-        -   eq:
-            - content.code
-            - 2000
-        -   eq:
-            - content.message
-            - success

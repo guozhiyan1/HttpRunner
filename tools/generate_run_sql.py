@@ -1,5 +1,5 @@
 from tools import gmc_mysql
-from data.sql_dict import *
+from data.run_sql import get_result_list
 from data import basic_dict
 import pymysql
 from config import config
@@ -28,6 +28,7 @@ class RunSql(object):
         result = cursor.fetchall()
         self.db.commit()
         self.db.close()
+
         return result
 
     def get_sql_string(self):
@@ -36,9 +37,8 @@ class RunSql(object):
         """
         new_sql = []
         for i in self.sql_string:
-            i = globals()[i]
+            i = get_result_list(i)
             new_sql += i
-        print(new_sql)
         return new_sql
 
     def replace_sql(self):
@@ -56,14 +56,26 @@ class RunSql(object):
                     j = j.replace(f"[{s}]", f'"{self.dict[s]}"')
             self.sql.append(j)
 
-    def get_sql_result(self):
+    def get_sql_result(self,*args):
         """
         链接数据库，执行sql
         """
         self.replace_sql()
+        print(self.sql_string)
         result_list = []
         for i in self.sql:
+            print(i)
             result_list += gmc_mysql.get_database(i)
+            print(result_list)
+            #/app-medical-technology/inspect/outpatient/cancel接口sql查询获取对应参数结果使用
+            if self.dict.get("return_result_name" ):
+                if self.dict["return_result_name"]=="inspect_id":
+                    result_list = result_list[0][self.dict["return_result_name"]]
+                    result_list=[(result_list)]
+                    print(self.dict["return_result_name"])
+                else:
+                    result_list = result_list[0][self.dict["return_result_name"]]
+                print(self.dict["return_result_name"])
         return result_list
 
     def validation_sql(self):
@@ -80,5 +92,7 @@ class RunSql(object):
 
 if __name__ == '__main__':
     sql_data_dicts = basic_dict.sql_data_dicts
-    s = RunSql(sql_data_dicts, "search_inhospital_patient_bed")
-    print(s.validation_sql())
+    s = RunSql(sql_data_dicts, "query_inspect", order_id=9867276, return_result_name="inspect_id")
+    # print(s.get_sql_string())
+    print(s.get_sql_result())
+    # print(s.validation_sql())

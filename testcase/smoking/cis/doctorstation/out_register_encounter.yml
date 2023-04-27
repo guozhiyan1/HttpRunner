@@ -1,0 +1,735 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 患者挂号接诊
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(out_k2)}
+            orgId: ${ENV(orgId)}
+            areaId: ${ENV(in_k3)}
+
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        api: api/user_info.yml
+        name: 切换登录院区部门
+-   test:
+        name: 小病人列表查询
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                encounterType: 1
+                hospitalizedAreaId: null
+                patientDivision: '1'
+                statusData: '2'
+            method: POST
+            url: /app-station-manage/doctorstation/list/patientList
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   gt:
+            - content.body.count
+            - 1
+-   test:
+        name: 通过条件查询患者列表
+        setup_hooks:
+          - ${gmc_run_mysql(patient_info)}
+          - ${gmc_run_mysql(outpatient_encounter)}
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                cardType: ''
+                encounterType: 1
+                keyName: searchText
+                listQuery: 1
+                patientId: ${get_result_dicts(patientId)}
+                searchText: ''
+            method: POST
+            url: /app-station-manage/doctorstation/list/patient
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取机构系统参数(查不到返回'')
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                parameterCode: '10000323'
+            method: POST
+            url: /app-sys-manage/param/getOrgSystemParam
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 查询就诊类型列表与院区列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-station-manage/outpatient/referral/regTypeAndHospitalArea
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询门诊患者规定病种
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                patientId: ${get_result_dicts(patientId)}
+            method: POST
+            url: /app-station-manage/doctorstation/listSpecialDisease
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - null
+-   test:
+        name: queryCode
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                idCard: ${get_result_dicts(card_number)}
+            method: POST
+            url: /app-station-manage/healthcode/queryCode
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - null
+-   test:
+        name: 查询优惠规则
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                costTypeCode: '1'
+                enable: 1
+                outpatientEnable: true
+            method: POST
+            url: /app-billing/discount/rule/list
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 修改就诊状态（门诊）
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                birthFlag: 0
+                felog: seenew-front-util-ajax
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                patientId: ${get_result_dicts(patientId)}
+                specialDiseaseFlag: 0
+                versionNo: 1
+            method: POST
+            url: /app-station-manage/doctorstation/outpatient/updateEncounterStatus
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+              - content.body.status
+              - true
+-   test:
+        name: 通过条件查询患者列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                encounterType: 1
+                felog: seenew-front-util-ajax
+                patientId: ${get_result_dicts(patientId)}
+            method: POST
+            url: /app-station-manage/doctorstation/list/patient
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取机构系统参数(查不到返回'')
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                parameterCode: '10000323'
+            method: POST
+            url: /app-sys-manage/param/getOrgSystemParam
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: queryCode
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                idCard: ${get_result_dicts(card_number)}
+            method: POST
+            url: /app-station-manage/healthcode/queryCode
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - null
+-   test:
+        name: 查询患者体征信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                patientId: ${get_result_dicts(patientId)}
+                patientRegisterId: ${get_result_dicts(patient_id)}
+            method: POST
+            url: /app-station-manage/medicalrecordwrite/selectAllVitalSign
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询历史医嘱记录
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                felog: seenew-front-util-ajax
+                hospitalDistrictId: ''
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                patientRegisterId: ${get_result_dicts(patient_id)}
+                treatType: 13
+            method: POST
+            url: /app-station-manage/historyOrder/query/listPatientHistoryOrder
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查看医嘱内容配置
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                encounterType: 1
+                felog: seenew-front-util-ajax
+            method: POST
+            url: /app-station-manage/orderCommon/queryOrderValConfig
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 报告
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                dateEnd: '2021-01-28 23:59:59'
+                dateStart: '2020-10-28 00:00:00'
+                order: desc
+                patientId: ${get_result_dicts(patient_id)}
+                patientType: null
+                testStatusList: []
+            method: POST
+            url: /app-medical-technology/order/tag/print/testing/report/list
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询门诊检查报告
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                abnormal: ''
+                applyEndDate: '2021-01-28 23:59:59'
+                applyStartDate: '2020-10-28 00:00:00'
+                felog: seenew-front-util-ajax
+                order: desc
+                patientRegisterIdList:
+                - ${get_result_dicts(patient_id)}
+                patientType: 1
+                reportStatus: ''
+            method: POST
+            url: /app-medical-technology/inspect/outpatient/report/list
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询病理报告列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                abnormal: ''
+                felog: seenew-front-util-ajax
+                order: desc
+                patientRegisterId: ${get_result_dicts(patient_id)}
+                patientType: 1
+                reportEndDate: '2021-01-28 23:59:59'
+                reportStartDate: '2020-10-28 00:00:00'
+                reportStatus: ''
+            method: POST
+            url: /app-medical-technology/inspect/pathologyReport/list
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 验证没有诊断是否能开立医嘱
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                felog: seenew-front-util-ajax
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                patientId: ${get_result_dicts(patientId)}
+            method: POST
+            url: /app-station-manage/orderQuery/checkNonDiagnosisCanModify
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: /app-publichealth/familySicianServer/hisSicianInfoAndCrowdByIndexOrIdCard
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                idCardNum: ${get_result_dicts(card_number)}
+                indexId: 219e835507ea4b719affa6a01b270f7d
+            method: POST
+            url: /app-publichealth/familySicianServer/hisSicianInfoAndCrowdByIndexOrIdCard
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: /app-station-manage/report/remindExamine
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+                sid: B2285BA5D19061B0E05365520A0AF100
+                sign: 5495fb6f4978858a500111c8ff34f85ac3ff02e0280f73f8dbe9037075f6b52d
+                timestamp: '20210128130709'
+            json:
+                body:
+                    idNumber: ${get_result_dicts(card_number)}
+                    name: ${get_result_dicts(patient_name)}
+                    orgCode: '47278091'
+                header:
+                    sid: B2285BA5D19061B0E05365520A0AF100
+                    sign: 5495fb6f4978858a500111c8ff34f85ac3ff02e0280f73f8dbe9037075f6b52d
+                    timestamp: '20210128130709'
+            method: POST
+            url: /app-station-manage/report/remindExamine
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - null
+-   test:
+        name: 小病人列表查询
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                encounterType: 1
+                hospitalizedAreaId: null
+                patientDivision: '1'
+                statusData: '2'
+            method: POST
+            url: /app-station-manage/doctorstation/list/patientList
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 门诊病人详细列表查询
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                beginTime: ${get_date(number=0)}
+                dtiagnosisFlag: ''
+                encounterStatus: '1'
+                endTime: ${get_date(number=0)}
+                hospitalDistrictId: 2
+                orderKey: d
+                orderType: asc
+                pageCount: 20
+                pageNum: 1
+                patientDivision: '1'
+                queryStr: ''
+                signStatus: ''
+                statusData: '1'
+            method: POST
+            url: /app-station-manage/doctorstation/list/outPatientListDetail
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: /app-publichealth/familySicianServer/hisSicianInfoAndCrowdByIndexOrIdCard
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                indexId: 219e835507ea4b719affa6a01b270f7d
+            method: POST
+            url: /app-publichealth/familySicianServer/hisSicianInfoAndCrowdByIndexOrIdCard
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: /app-publichealth/familySicianServer/hisSicianInfoAndCrowdByIndexOrIdCard
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                indexId: 219e835507ea4b719affa6a01b270f7d
+            method: POST
+            url: /app-publichealth/familySicianServer/hisSicianInfoAndCrowdByIndexOrIdCard
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: /app-publichealth/familySicianServer/hisSicianInfoAndCrowdByIndexOrIdCard
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                indexId: 219e835507ea4b719affa6a01b270f7d
+            method: POST
+            url: /app-publichealth/familySicianServer/hisSicianInfoAndCrowdByIndexOrIdCard
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: /app-station-manage/orderQuery/query/queryOrderListByPatientForStation
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                encounterType: 1
+                felog: seenew-front-util-ajax
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                needExamMed: 1
+                needMedRec: 1
+                orderCategory: '3'
+                orderedPlaceSign: 1
+                patientId: ${get_result_dicts(patientId)}
+            method: POST
+            url: /app-station-manage/orderQuery/query/queryOrderListByPatientForStation
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: /app-station-manage/report/remindAssay
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+                sid: B2285BA5D19061B0E05365520A0AF100
+                sign: 5495fb6f4978858a500111c8ff34f85ac3ff02e0280f73f8dbe9037075f6b52d
+                timestamp: '20210128130709'
+            json:
+                body:
+                    idNumber: ${get_result_dicts(card_number)}
+                    name: ${get_result_dicts(patient_name)}
+                    orgCode: '47278091'
+                header:
+                    sid: B2285BA5D19061B0E05365520A0AF100
+                    sign: 5495fb6f4978858a500111c8ff34f85ac3ff02e0280f73f8dbe9037075f6b52d
+                    timestamp: '20210128130709'
+            method: POST
+            url: /app-station-manage/report/remindAssay
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - null
+-   test:
+        name: /app-publichealth/familySicianServer/hisSicianInfoAndCrowdByIndexOrIdCard
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                indexId: 219e835507ea4b719affa6a01b270f7d
+            method: POST
+            url: /app-publichealth/familySicianServer/hisSicianInfoAndCrowdByIndexOrIdCard
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: /app-publichealth/familySicianServer/hisSicianInfoAndCrowdByIndexOrIdCard
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                indexId: 219e835507ea4b719affa6a01b270f7d
+            method: POST
+            url: /app-publichealth/familySicianServer/hisSicianInfoAndCrowdByIndexOrIdCard
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: /app-publichealth/familySicianServer/hisSicianInfoAndCrowdByIndexOrIdCard
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                indexId: 219e835507ea4b719affa6a01b270f7d
+            method: POST
+            url: /app-publichealth/familySicianServer/hisSicianInfoAndCrowdByIndexOrIdCard
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: /app-publichealth/familySicianServer/hisSicianInfoAndCrowdByIndexOrIdCard
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                indexId: 219e835507ea4b719affa6a01b270f7d
+            method: POST
+            url: /app-publichealth/familySicianServer/hisSicianInfoAndCrowdByIndexOrIdCard
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询某个病区的待安床病人列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                k1: $k1
+                k2: $areaId
+            method: GET
+            url: /app-nurse-station/patient/wait/list
+        teardown_hooks:
+          - ${reload_dict()}

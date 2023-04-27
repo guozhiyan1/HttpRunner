@@ -1,0 +1,351 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 麻醉管理
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(in_k2)}
+            orgId: ${ENV(orgId)}
+            loginCampus: 城站院区
+            loginCampusCode: 2
+            locationId_keshi: 99897828605  #城战自动化消化血液科
+            locationId_shoushu: 99897829060 #城战自动化手术室
+            locationId_mazui: 99897829061  #城战自动化麻醉室
+            locationId_bingqu: 99897828607 #城站消化血液科自动化病区
+            locationId_shoushujian: 1210   #手术间C1
+            hospitalizedAreaName: 城站消化血液科自动化病区
+            hospitalizedDeptName: 城战自动化消化血液科
+            surgeryDeptName: 城战自动化手术室
+            anesthesiaDept: 城战自动化麻醉室
+            operator: 医快一7
+            operatorId: 3142
+
+
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        api: api/user_info.yml
+        name: 切换登录院区部门
+
+-   test:
+        name: 根据参数查询手术信息
+        setup_hooks:
+            - ${gmc_run_mysql(patient_info, inhospital_register, add_bed,patient_add_bed,surgery_manage)}
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                anesthesiaMethodIdSets: []
+                applyDeptId: ''
+                doctorId: null
+                endDate: ${get_date(add_date=2)}
+                locationId: ''
+                orderKey: applySubmitDate
+                orderType: desc
+                pageCount: 20
+                pageNum: 1
+                paging: true
+                searchNo: ''
+                searchType: 0
+                startDate: ${get_date(delete_date=2)}
+                status: 4
+                surgeonId:
+                surgeryCategory: 0
+                surgeryDeptId: ''
+                surgeryName: ''
+                surgeryType: 0
+                timeType: 2
+            method: POST
+            url: /surgery-station-manage/surgeryApplyManage/list/pageSurgeryInfo
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 根据手术id查询手术信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                id: ${get_result_dicts(surgery_id)}
+                surgeryType: 2
+            method: POST
+            url: /surgery-station-manage/surgeryApplyManage/get/applicationDetailById
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取麻醉管理打印表头
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                busyType: 10
+            method: POST
+            url: /surgery-station-manage/surgeryApplyManage/common/query/headers
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+
+-   test:
+        name: 下载手术表     #此处参数是手术excel的表头等信息，写死，不做变量了，也没有响应信息，不做断言了
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                anesthesiaMethodIdSets: []
+                applyDeptId: ''
+                endDate: ${get_date(add_date=2)}
+                locationId: ''
+                orderKey: applySubmitDate
+                orderType: desc
+                pageCount: 20
+                pageNum: 1
+                searchNo: ''
+                searchType: 0
+                startDate: ${get_date(delete_date=2)}
+                status: 4
+                surgeonId:
+                surgeryCategory: 0
+                surgeryExportTitleDataList:
+                -   id: 1
+                    orgId: 1
+                    remark: 手术间
+                    sort: null
+                    titleName: locationName
+                    userId: -999
+                -   id: 2
+                    orgId: 1
+                    remark: 台次
+                    sort: null
+                    titleName: stageNumber
+                    userId: -999
+                -   id: 3
+                    orgId: 1
+                    remark: 主刀医师
+                    sort: null
+                    titleName: surgeon
+                    userId: -999
+                -   id: 4
+                    orgId: 1
+                    remark: 第一助手
+                    sort: null
+                    titleName: firstAssistant
+                    userId: -999
+                -   id: 5
+                    orgId: 1
+                    remark: 手术类别
+                    sort: null
+                    titleName: surgeryCategoryName
+                    userId: -999
+                -   id: 6
+                    orgId: 1
+                    remark: 手术名称
+                    sort: null
+                    titleName: surgeryName
+                    userId: -999
+                -   id: 7
+                    orgId: 1
+                    remark: 就诊类型
+                    sort: null
+                    titleName: surgeryType
+                    userId: -999
+                -   id: 8
+                    orgId: 1
+                    remark: 术前备注
+                    sort: null
+                    titleName: preoperativePreparation
+                    userId: -999
+                -   id: 9
+                    orgId: 1
+                    remark: 预计时长
+                    sort: null
+                    titleName: estimatedTime
+                    userId: -999
+                -   id: 10
+                    orgId: 1
+                    remark: 安排时间
+                    sort: null
+                    titleName: arrangeDate
+                    userId: -999
+                -   id: 11
+                    orgId: 1
+                    remark: 拟手术时间
+                    sort: null
+                    titleName: applyDate
+                    userId: -999
+                -   id: 12
+                    orgId: 1
+                    remark: 姓名
+                    sort: null
+                    titleName: patientName
+                    userId: -999
+                -   id: 13
+                    orgId: 1
+                    remark: 性别
+                    sort: null
+                    titleName: gender
+                    userId: -999
+                -   id: 14
+                    orgId: 1
+                    remark: 年龄
+                    sort: null
+                    titleName: age
+                    userId: -999
+                -   id: 15
+                    orgId: 1
+                    remark: 病历号
+                    sort: null
+                    titleName: medicalRecordNo
+                    userId: -999
+                -   id: 16
+                    orgId: 1
+                    remark: 诊区/病区
+                    sort: null
+                    titleName: hospitalizedAreaName
+                    userId: -999
+                -   id: 17
+                    orgId: 1
+                    remark: 床位号
+                    sort: null
+                    titleName: bedNumber
+                    userId: -999
+                -   id: 18
+                    orgId: 1
+                    remark: 手术及操作地点
+                    sort: null
+                    titleName: surgeryDeptName
+                    userId: -999
+                -   id: 19
+                    orgId: 1
+                    remark: 麻醉科室
+                    sort: null
+                    titleName: anesthesiaDept
+                    userId: -999
+                -   id: 20
+                    orgId: 1
+                    remark: 麻醉方法
+                    sort: null
+                    titleName: anesthesiaType
+                    userId: -999
+                -   id: 21
+                    orgId: 1
+                    remark: 申请人
+                    sort: null
+                    titleName: applySubmitDoctor
+                    userId: -999
+                -   id: 22
+                    orgId: 1
+                    remark: 申请科室
+                    sort: null
+                    titleName: hospitalizedDeptName
+                    userId: -999
+                -   id: 23
+                    orgId: 1
+                    remark: 申请时间
+                    sort: null
+                    titleName: applySubmitDate
+                    userId: -999
+                -   id: 24
+                    orgId: 1
+                    remark: 申请单号
+                    sort: null
+                    titleName: applyNo
+                    userId: -999
+                -   id: 25
+                    orgId: 1
+                    remark: 状态
+                    sort: null
+                    titleName: statusAndCancel
+                    userId: -999
+                -   id: 26
+                    orgId: 1
+                    remark: 洗手护士
+                    sort: null
+                    titleName: deviceNurse
+                    userId: -999
+                -   id: 27
+                    orgId: 1
+                    remark: 巡回护士
+                    sort: null
+                    titleName: circuitNurse
+                    userId: -999
+                -   id: 28
+                    orgId: 1
+                    remark: HBS_AG
+                    sort: null
+                    titleName: hbsAg
+                    userId: -999
+                surgeryType: 0
+                timeType: 2
+            method: POST
+            url: /surgery-station-manage/surgeryApplyManage/downloadSurgeryExcel
+        validate: []
+
+-   test:
+        name: 麻醉会诊信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                applyDeptId: ''
+                applyDeptName: ''
+                applyDoctorId: ''
+                applyDoctorName: ''
+                applyNo: ''
+                applySourceType: ''
+                applyStatus: 0
+                districtId: 2
+                encounterType: ''
+                endApplyDate: ${get_date(add_date=2)}
+                endConsultationDate: ''
+                medicalCardNo: ''
+                orderKey: applyDate
+                orderType: desc
+                pageCount: 20
+                pageNum: 1
+                startApplyDate: ${get_date(delete_date=2)}
+                startConsultationDate: ''
+            method: POST
+            url: /surgery-station-manage/surgery/anesthesia/consultation/query/page
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        teardown_hooks:
+            - ${reload_dict()}

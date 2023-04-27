@@ -1,4 +1,3 @@
-import smtplib
 from email.mime.text import MIMEText
 from config import config
 from email.header import Header
@@ -38,7 +37,7 @@ class SendEmail(object):
         msg = MIMEText(mail_content, "html", 'utf-8')
         msg["Subject"] = Header(mail_title, 'utf-8')
         msg["From"] = self.mail_sender
-        msg["To"] = Header("可乐", 'utf-8')  ## 接收者的别名
+        msg["To"] = Header("可乐", 'utf-8')  # 接收者的别名
 
         smtp = SMTP_SSL(self.mail_smtpserver)
         # set_debuglevel()是用来调试的。参数值为1表示开启调试模式，参数值为0关闭调试模式
@@ -49,8 +48,6 @@ class SendEmail(object):
         # 函数：sendmail(self, from_addr, to_addrs, msg, mail_options=[],rcpt_options=[]):
         smtp.sendmail(self.mail_sender, self.mail_receiverList, msg.as_string())
         smtp.quit()
-
-
 
 
 # 调试

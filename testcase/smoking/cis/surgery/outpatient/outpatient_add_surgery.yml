@@ -1,0 +1,646 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 提交手术申请（门诊）
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(out_k2)}
+            orgId: ${ENV(orgId)}
+            loginCampus: 城站院区
+            loginCampusCode: 2
+            locationId_menzhen: ${ENV(districtId)}   #城站自动化测试门诊
+            locationId_shoushu: 99897829060 #城战自动化手术室
+            locationId_mazui: 99897829061  #城战自动化麻醉室
+            hospitalizedArea: 99897828630
+            hospitalizedDeptName: 城站自动化测试门诊
+            surgeryDeptName: 城战自动化手术室
+            anesthesiaDept: 城战自动化麻醉室
+            hospitalizedAreaName: 自动化诊区
+            operator: 医快一7
+            operatorId: 3142
+            jobNumber: 99009
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        api: api/user_info.yml
+        name: 切换登录院区部门
+
+-   test:
+        name: 获取手术位置
+        setup_hooks:
+          - ${gmc_run_mysql(patient_info,outpatient_encounter)}
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                dictType: 手术位置
+                mainCode: FH0170
+            method: POST
+            url: /surgery-station-manage/surgeryApply/list/surgeryPosition
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取手术方式
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /surgery-station-manage/surgeryApply/list/surgeryMethod
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取手术室
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                keyName: searchText
+            method: POST
+            url: /surgery-station-manage/surgeryApply/list/surgeryDept
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取手术类别
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                keyName: queryKey
+            method: POST
+            url: /surgery-station-manage/surgeryApply/list/surgeryCategory
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取手术体位方式
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                keyName: queryKey
+            method: POST
+            url: /surgery-station-manage/surgeryApplyManage/list/position
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取手术级别
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                keyName: queryKey
+            method: POST
+            url: /surgery-station-manage/surgeryApplyManage/list/surgeryLevel
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取手术切口类型
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                keyName: queryKey
+            method: POST
+            url: /surgery-station-manage/surgeryApplyManage/list/incisionType
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取手术麻醉方式
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                keyName: queryKey
+            method: POST
+            url: /surgery-station-manage/surgeryApply/list/anesthesiaMethod
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          - anesthesiaType: content.body.1.dictName
+          - anesthesiaTypeId: content.body.1.id
+-   test:
+        name: 获取手术送检信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                k1: $k1
+                k2: $k2
+            method: GET
+            url: /surgery-station-manage/surgeryApply/dict/surgeryApplyEnum
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取手术相关参数
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                paramCode: 10000253
+            method: POST
+            url: /surgery-station-manage/surgeryApplyManage/get/param/code
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取手术相关参数
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                paramCode: 10000262
+            method: POST
+            url: /surgery-station-manage/surgeryApplyManage/get/param/code
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取手术相关参数
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                paramCode: 104040
+            method: POST
+            url: /surgery-station-manage/surgeryApplyManage/get/param/code
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 手术信息同步给his
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /surgery-station-manage/surgeryNurse/synchronizeMDSDToHis
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - true
+-   test:
+        name: 查询患者主诊断
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                patientId: ${get_result_dicts(patient_id)}
+            method: POST
+            url: /app-station-manage/admission/queryMasterDiagnosis
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 嘉禾信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                deptCode: $locationId_menzhen
+                hospitalNo: $orgId
+                k1: $k1
+                k2: $k2
+            method: GET
+            params:
+                deptCode: $locationId_menzhen
+                hospitalNo: $orgId
+                inhospitalPatientId: ${get_result_dicts(inhospital_id)}
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+            url: /app-emr/temperature/newest-height-and-weight
+        validate:
+        -   eq:
+            - content.code
+            - 200
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取手术检查结果lis
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                patientRegisterId: ${get_result_dicts(patient_id)}
+            method: POST
+            url: /surgery-station-manage/surgeryApply/get/lisTestResult
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取手术名称
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                orderKey: ''
+                orderType: ''
+                pageCount: 9
+                pageNum: 1
+                paging: true
+                searchText: ''
+                surgeryType: 1
+            method: POST
+            url: /surgery-station-manage/surgeryApplyManage/list/page/surgeryName
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          - surgeryId: content.body.data.1.id
+          - surgeryName: content.body.data.1.surgeryName
+          - surgeryLevelId: content.body.data.1.surgeryLevelId
+          - surgeryLevelName: content.body.data.1.surgeryLevelName
+          - surgeryName: content.body.data.1.surgeryName
+-   test:
+        name: 获取手术麻醉科室
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                locationId: $locationId_shoushu
+            method: POST
+            url: /surgery-station-manage/surgeryApply/list/anesthesiaDept
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取手术员工
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                keyName: queryKey
+                queryKey: ''
+            method: POST
+            url: /surgery-station-manage/surgeryApply/list/surgeryStaff
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+          - surgeon: content.body.0.userName
+          - surgeonDeptId: content.body.0.businessDeptId
+          - surgeonDeptName: content.body.0.businessDeptName
+          - surgeonId: content.body.0.id
+          - surgeonJobTitle: content.body.0.jobProfessionalTitle
+-   test:
+        name: 获取历史手术次数
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                deptId: $locationId_menzhen
+                inhospitalPatientId: ${get_result_dicts(inhospital_id)}
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                medicalRecordNo: ${get_result_dicts(medical_record_no)}
+                orgId: $orgId
+                patientName: ${get_result_dicts(patient_name)}
+                surgeryDate: ${get_date(number=1)}
+            method: POST
+            url: /surgery-station-manage/surgeryApplyManage/apply/prompt
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 验证入径手术
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                inhospitalPatientId: ${get_result_dicts(inhospital_id)}
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                surgeryList:
+                -   surgeryId: $surgeryId
+                    surgeryName: $surgeryName
+            method: POST
+            url: /app-station-manage/alreadyInPath/checkSurgery
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 提交手术申请
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                aboBloodTypeDatas:
+                -   codeNo: '01'
+                    dictExplain: null
+                    key: CV04.50.005.01
+                    label: A
+                    mainCode: CV04.50.005
+                    subCode: CV04.50.005.01
+                    typeDesc: A
+                    value: CV04.50.005.01
+                -   codeNo: '02'
+                    dictExplain: null
+                    key: CV04.50.005.02
+                    label: B
+                    mainCode: CV04.50.005
+                    subCode: CV04.50.005.02
+                    typeDesc: B
+                    value: CV04.50.005.02
+                -   codeNo: '03'
+                    dictExplain: null
+                    key: CV04.50.005.03
+                    label: AB
+                    mainCode: CV04.50.005
+                    subCode: CV04.50.005.03
+                    typeDesc: AB
+                    value: CV04.50.005.03
+                -   codeNo: '04'
+                    dictExplain: null
+                    key: CV04.50.005.04
+                    label: O
+                    mainCode: CV04.50.005
+                    subCode: CV04.50.005.04
+                    typeDesc: O
+                    value: CV04.50.005.04
+                -   codeNo: '05'
+                    dictExplain: null
+                    key: CV04.50.005.05
+                    label: 不详
+                    mainCode: CV04.50.005
+                    subCode: CV04.50.005.05
+                    typeDesc: 不详
+                    value: CV04.50.005.05
+                anesthesiaDataList:
+                -   anesthesiaType: $anesthesiaType
+                    anesthesiaTypeId: $anesthesiaTypeId
+                anesthesiaDept: $anesthesiaDept
+                anesthesiaDeptId: $locationId_mazui
+                anesthesiaType: $anesthesiaType
+                antiHcv: null
+                antiHiv: null
+                applyDate: ${get_date(number=1)}
+                applyNo: null
+                bedId: null
+                bedNo: null
+                bedNumber: null
+                beforeDiagnosisRequestList: []
+                birthdate: 932486400000
+                bloodTypeAbo: null
+                bloodTypeAboCode: null
+                bloodTypeRhd: null
+                bloodTypeRhdCode: null
+                costProperty: 自费
+                costPropertyCode: '0'
+                costPropertyName: 自费
+                costType: 自费
+                costTypeCode: '1'
+                costTypeName: 自费
+                diagnosisList: []
+                estimatedTime: ''
+                firstSurgery: 1
+                gender: 男
+                genderCode: GB/T2261.1.1
+                hbsAg: null
+                historyList: []
+                hospitalizedArea: $hospitalizedArea
+                hospitalizedAreaId: $hospitalizedArea
+                hospitalizedAreaName: $hospitalizedAreaName
+                hospitalizedDept: $locationId_menzhen
+                hospitalizedDeptId: $locationId_menzhen
+                hospitalizedDeptName: $hospitalizedDeptName
+                id: null
+                infection: 0
+                infectionReason: null
+                inhospitalPatientId: ${get_result_dicts(patientId)}
+                inpatientNo: null
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                masterPatientIndexVersion: null
+                medicalRecordNo: ${get_result_dicts(medical_record_no)}
+                moldRpr: null
+                outpatientNo: ${get_outpatient_no()}
+                patientAge: null
+                patientHeight: ''
+                patientName: ${get_result_dicts(patient_name)}
+                patientRegisterId: ${get_result_dicts(patient_id)}
+                patientSex: 男
+                patientWeight: ''
+                preStageNumber: ''
+                rhdBloodTypeDatas:
+                -   codeNo: '01'
+                    dictExplain: null
+                    key: CV04.50.020.01
+                    label: 阴性
+                    mainCode: CV04.50.020
+                    subCode: CV04.50.020.01
+                    typeDesc: 阴性
+                    value: CV04.50.020.01
+                -   codeNo: '02'
+                    dictExplain: null
+                    key: CV04.50.020.02
+                    label: 阳性
+                    mainCode: CV04.50.020
+                    subCode: CV04.50.020.02
+                    typeDesc: 阳性
+                    value: CV04.50.020.02
+                -   codeNo: '03'
+                    dictExplain: null
+                    key: CV04.50.020.03
+                    label: 不详
+                    mainCode: CV04.50.020
+                    subCode: CV04.50.020.03
+                    typeDesc: 不详
+                    value: CV04.50.020.03
+                -   codeNo: '04'
+                    dictExplain: null
+                    key: CV04.50.020.04
+                    label: 未查
+                    mainCode: CV04.50.020
+                    subCode: CV04.50.020.04
+                    typeDesc: 未查
+                    value: CV04.50.020.04
+                -   codeNo: '05'
+                    dictExplain: null
+                    key: CV04.50.020.05
+                    label: 弱D
+                    mainCode: CV04.50.020
+                    subCode: CV04.50.020.05
+                    typeDesc: 弱D
+                    value: CV04.50.020.05
+                saveSurgeryNameRequestList:
+                -   icdCode: '99.9209'
+                    sortNumber: 1
+                    surgeryId: $surgeryId
+                    surgeryLevelId: $surgeryLevelId
+                    surgeryLevelName: $surgeryLevelName
+                    surgeryName: $surgeryName
+                surgeon: $surgeon
+                surgeonDeptId: $surgeonDeptId
+                surgeonDeptName: $surgeonDeptName
+                surgeonId: $surgeonId
+                surgeonJobTitle: $surgeonJobTitle
+                surgeryChargeTotalDTO: null
+                surgeryDeptId: $locationId_shoushu
+                surgeryDeptName: $surgeryDeptName
+                surgeryType: 1
+                tbValue: null
+                whetherAnesthesia: 1
+            method: POST
+            url: /surgery-station-manage/surgeryApply/save/application
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        teardown_hooks:
+          - ${reload_dict()}

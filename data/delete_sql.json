@@ -1,0 +1,13 @@
+{
+	"delete_patient_bed": {
+        "comment": "床位相关清理",
+		"delete": [
+			"delete from inhospital_register_db.biz_bed_info  where area_id = 99897828607 ;",
+			"delete from nurse_station_db.biz_patient_borrow_bed_record where  area_id = 99897828607;",
+			"delete from  nurse_station_db.biz_nurse_patient_real_time_status where  ward_area_id = 99897828607;",
+			"delete from nurse_station_db.biz_bed_patient_relation_record where   location_id = 99897828607;",
+			"delete from nurse_station_db.biz_bed_patient_relation where location_id = 99897828607;"
+		]
+	}
+
+}

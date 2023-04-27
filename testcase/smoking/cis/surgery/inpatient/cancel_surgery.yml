@@ -1,0 +1,572 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 术后登记/取消手术/恢复手术
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(in_k2)}
+            orgId: ${ENV(orgId)}
+            loginCampus: 城站院区
+            loginCampusCode: 2
+            locationId_keshi: 99897828605  #城战自动化消化血液科
+            locationId_shoushu: 99897829060 #城战自动化手术室
+            locationId_mazui: 99897829061  #城战自动化麻醉室
+            locationId_bingqu: 99897828607 #城站消化血液科自动化病区
+            locationId_shoushujian: 1210   #手术间C1
+            hospitalizedAreaName: 城站消化血液科自动化病区
+            hospitalizedDeptName: 城战自动化消化血液科
+            surgeryDeptName: 城战自动化手术室
+            anesthesiaDept: 城战自动化麻醉室
+            operator: 医快一7
+            operatorId: 3142
+
+
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        api: api/user_info.yml
+        name: 切换登录院区部门
+
+-   test:
+        name: 根据手术id查询已完成手术的患者信息
+        setup_hooks:
+            - ${gmc_run_mysql(patient_info, inhospital_register, add_bed,patient_add_bed,surgery_manage, register_surgery)}
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                id: ${get_result_dicts(surgery_id)}
+                surgeryType: 2
+            method: POST
+            url: /surgery-station-manage/surgeryApplyManage/get/applicationDetailById
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            - surgeryName: content.body.surgeryName
+            - diagnosisId: content.body.beforeDiagnosisRequestList.0.diagnosisId
+            - diagnosisName: content.body.beforeDiagnosisRequestList.0.diagnosisName
+            - diagnosisType: content.body.beforeDiagnosisRequestList.0.diagnosisType
+            - icdCode: content.body.beforeDiagnosisRequestList.0.icdCode
+            - isMainDiagnosis: content.body.beforeDiagnosisRequestList.0.isMainDiagnosis
+            - birthdate: content.body.birthdate
+            - firstAssistant: content.body.firstAssistant
+            - firstAssistantId: content.body.firstAssistantId
+            - firstAssistantJobTitle: content.body.firstAssistantJobTitle
+            - firstSurgery: content.body.firstSurgery
+            - genderCode: content.body.genderCode
+            - incisionType: content.body.incisionType
+            - incisionTypeId: content.body.incisionTypeId
+            - surgeryLevelId: content.body.surgeryLevelId
+            - surgeryLevelName: content.body.surgeryLevelName
+            - surgeryMethodId: content.body.surgeryMethodId
+            - surgeryMethodName: content.body.surgeryMethodName
+            - surgeryPositionName: content.body.surgeryPositionName
+            - surgeryPositionType: content.body.surgeryPositionType
+            - surgeon: content.body.surgeon
+            - surgeryCategoryId: content.body.surgeryCategoryId
+            - surgeryCategoryName: content.body.surgeryCategoryName
+
+-   test:
+        name: 查询巡视护士总名单
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                keyName: queryKey
+                queryKey: ''
+            method: POST
+            url: /surgery-station-manage/surgeryApply/list/surgeryNurse
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            - circuitNurse: content.body.0.userName
+            - circuitNurseId: content.body.0.id
+-   test:
+        name: 复核患者手术信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                inhospitalPatientId: ${get_result_dicts(inhospital_id)}
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                surgeryApplyId: ${get_result_dicts(surgery_apply_no)}
+                surgeryList:
+                -   surgeryId: ${get_result_dicts(surgery_id)}
+                    surgeryName: $surgeryName
+            method: POST
+            url: /surgery-station-manage/surgeryApplyManage/checkSurgery
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 保存术后登记信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                aboBloodTypeDatas:
+                -   codeNo: '01'
+                    dictExplain: null
+                    key: CV04.50.005.01
+                    label: A
+                    mainCode: CV04.50.005
+                    subCode: CV04.50.005.01
+                    typeDesc: A
+                    value: CV04.50.005.01
+                -   codeNo: '02'
+                    dictExplain: null
+                    key: CV04.50.005.02
+                    label: B
+                    mainCode: CV04.50.005
+                    subCode: CV04.50.005.02
+                    typeDesc: B
+                    value: CV04.50.005.02
+                -   codeNo: '03'
+                    dictExplain: null
+                    key: CV04.50.005.03
+                    label: AB
+                    mainCode: CV04.50.005
+                    subCode: CV04.50.005.03
+                    typeDesc: AB
+                    value: CV04.50.005.03
+                -   codeNo: '04'
+                    dictExplain: null
+                    key: CV04.50.005.04
+                    label: O
+                    mainCode: CV04.50.005
+                    subCode: CV04.50.005.04
+                    typeDesc: O
+                    value: CV04.50.005.04
+                -   codeNo: '05'
+                    dictExplain: null
+                    key: CV04.50.005.05
+                    label: 不详
+                    mainCode: CV04.50.005
+                    subCode: CV04.50.005.05
+                    typeDesc: 不详
+                    value: CV04.50.005.05
+                active: 1
+                adviser: null
+                adviserId: null
+                adviserProfessionalTitle: null
+                afterSurgeryDiagnosis: null
+                afterSurgerySaveFlag: 0
+                age: 27岁
+                anaesthesiaRiskLevel: null
+                anesthesiaData:
+                - 2226
+                anesthesiaDataList:
+                -   anesthesiaDept: $anesthesiaDept
+                    anesthesiaDeptId: $locationId_mazui
+                    anesthesiaType: 全身麻醉
+                    anesthesiaTypeId: 2226
+                anesthesiaDept: $anesthesiaDept
+                anesthesiaDeptId: $locationId_mazui
+                anesthesiaEndDate: null
+                anesthesiaStartDate: null
+                anesthesiaType: 全身麻醉
+                anesthesiaTypeId: 2226
+                antiHcv: null
+                antiHiv: null
+                applyDate: ${get_result_dicts(surgery_apply_date)}
+                applyNo: ${get_result_dicts(surgery_apply_no)}
+                applyStatus: 0
+                applySubmitDate: ${get_date(number=1)}
+                applySubmitDept: $hospitalizedDeptName
+                applySubmitDeptId: $locationId_keshi
+                applySubmitDoctor: $operator
+                applySubmitDoctorId: $operatorId
+                arrangeDate: ${get_result_dicts(surgery_apply_date)}
+                asaGrade: null
+                bedId: ${get_result_dicts(bed_number)}
+                beforeDiagnosisRequestList:
+                -   diagnosisId: $diagnosisId
+                    diagnosisName: $diagnosisName
+                    diagnosisType: $diagnosisType
+                    icdCode: $icdCode
+                    isMainDiagnosis: $isMainDiagnosis
+                    sortNumber: 1
+                birthdate: $birthdate
+                bloodLossed: null
+                bloodTypeAbo: null
+                bloodTypeAboCode: null
+                bloodTypeRhd: null
+                bloodTypeRhdCode: null
+                cancelDate: ${get_millisecond_stamp()}
+                circuitNurse: $circuitNurse
+                circuitNurseDeptId: null
+                circuitNurseDeptName: null
+                circuitNurseId: $circuitNurseId
+                circuitNurseJobTitle: null
+                consultationApplyId: null
+                consultationApplyNo: null
+                consultationApplySource: null
+                consultationApplyStatus: null
+                costPropertyCode: '0'
+                costTypeCode: '1'
+                createBy: $operatorId
+                dailySurgery: 0
+                deviceNurse: null
+                deviceNurseId: null
+                deviceNurseJobTitle: null
+                encounterType: null
+                endDateSyncFlag: 0
+                estimatedTime: 2
+                fall: null
+                fallList: []
+                fallMeasures: null
+                fallMeasuresList: []
+                fallRisk: null
+                firstAnesthesiologist: null
+                firstAnesthesiologistId: null
+                firstAnesthesiologistJobTitle: null
+                firstAssistant: $firstAssistant
+                firstAssistantId: $firstAssistantId
+                firstAssistantJobTitle: $firstAssistantJobTitle
+                firstPlatformSurgery: null
+                firstSurgery: $firstSurgery
+                frozenSection: 0
+                genderCode: $genderCode
+                gmtCreate: ${get_millisecond_stamp()}
+                gmtModify: ${get_millisecond_stamp()}
+                hasConsultation: 0
+                hbsAg: null
+                hospitalizedAreaName: $hospitalizedAreaName
+                hospitalizedDeptName: $hospitalizedDeptName
+                icdCode: null
+                id: ${get_result_dicts(surgery_id)}
+                inOperatingRoomDate: null
+                incisionType: $incisionType
+                incisionTypeId: $incisionTypeId
+                infection: 0
+                infectionReason: ''
+                infectionReasons: []
+                inhospitalPatientId: ${get_result_dicts(inhospital_id)}
+                inpatientNo: null
+                intraoperativeMedicationTime: null
+                isBloodTransfusion: 1
+                isCancel: 1
+                isolationFlag: 0
+                locationId: $locationId_shoushujian
+                locationName: C1
+                locationSortNo: 1
+                loginCampus: $loginCampus
+                loginCampusCode: $loginCampusCode
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                medicalRecordNo: ${get_result_dicts(medical_record_no)}
+                medicalSyncFlag: 0
+                medicineCabinetNo: null
+                medicineSyncFlag: 0
+                modifyBy: $operatorId
+                moldRpr: null
+                nation: null
+                nationCode: null
+                operateDate: ${get_result_dicts(surgery_date)}
+                operator: $operator
+                operatorId: $operatorId
+                orgId: $orgId
+                otherAnesthesiologist: null
+                otherAnesthesiologistId: null
+                otherAnesthesiologistJobTitle: null
+                otherAssistant: null
+                otherAssistantId: null
+                otherAssistantJobTitle: null
+                outOperatingRoomDate: null
+                outpatientNo: null
+                painLocation: null
+                painLocationList: []
+                painNature: null
+                painNatureList: []
+                painScore: null
+                painTime: null
+                painTimeList: []
+                patientHeight: ''
+                patientName: ${get_result_dicts(patient_name)}
+                patientRegisterId: ${get_result_dicts(patient_id)}
+                patientWeight: ''
+                positionId: null
+                positionName: null
+                postoperativeMedicationTime: null
+                preStageNumber: ''
+                preoperativeMedicationTime: null
+                preoperativePreparation: null
+                professionalDepartmentId: null
+                professionalDepartmentName: null
+                receiveDate: ${get_result_dicts(surgery_date)}
+                receiverId: $operatorId
+                receiverName: $operator
+                recordState: null
+                recordStateName: null
+                remark: null
+                resumeDate: null
+                rhdBloodTypeDatas:
+                -   codeNo: '01'
+                    dictExplain: null
+                    key: CV04.50.020.01
+                    label: 阴性
+                    mainCode: CV04.50.020
+                    subCode: CV04.50.020.01
+                    typeDesc: 阴性
+                    value: CV04.50.020.01
+                -   codeNo: '02'
+                    dictExplain: null
+                    key: CV04.50.020.02
+                    label: 阳性
+                    mainCode: CV04.50.020
+                    subCode: CV04.50.020.02
+                    typeDesc: 阳性
+                    value: CV04.50.020.02
+                -   codeNo: '03'
+                    dictExplain: null
+                    key: CV04.50.020.03
+                    label: 不详
+                    mainCode: CV04.50.020
+                    subCode: CV04.50.020.03
+                    typeDesc: 不详
+                    value: CV04.50.020.03
+                -   codeNo: '04'
+                    dictExplain: null
+                    key: CV04.50.020.04
+                    label: 未查
+                    mainCode: CV04.50.020
+                    subCode: CV04.50.020.04
+                    typeDesc: 未查
+                    value: CV04.50.020.04
+                -   codeNo: '05'
+                    dictExplain: null
+                    key: CV04.50.020.05
+                    label: 弱D
+                    mainCode: CV04.50.020
+                    subCode: CV04.50.020.05
+                    typeDesc: 弱D
+                    value: CV04.50.020.05
+                saveSurgeryNameRequestList:
+                -   icdCode: $icdCode
+                    incisionType: $incisionType
+                    incisionTypeId: $incisionTypeId
+                    positionId: null
+                    positionName: null
+                    selectValue: '1008780'
+                    sortNumber: 1
+                    surgeryId: ${get_result_dicts(surgery_id)}
+                    surgeryLevelId: $surgeryLevelId
+                    surgeryLevelName: $surgeryLevelName
+                    surgeryMethodId: $surgeryMethodId
+                    surgeryMethodName: $surgeryMethodName
+                    surgeryName: $surgeryName
+                    surgeryPositionName: $surgeryPositionName
+                    surgeryPositionType: $surgeryPositionType
+                secondAnesthesiologist: null
+                secondAnesthesiologistId: null
+                secondAnesthesiologistJobTitle: null
+                secondAssistant: null
+                secondAssistantId: null
+                secondAssistantJobTitle: null
+                secondSurgeryName1: null
+                secondSurgeryName2: null
+                secondSurgeryName3: null
+                secondsurgeryId1: null
+                secondsurgeryId2: null
+                secondsurgeryId3: null
+                selectCampus: $loginCampus
+                selectCampusCode: $loginCampusCode
+                smoothlyFlag: 1
+                soreness: null
+                sortNo: null
+                stageNumber: 1
+                startDateSyncFlag: 0
+                status: 1
+                successionEquipment: null
+                successionEquipmentId: null
+                successionEquipmentJobTitle: null
+                successionTour: null
+                successionTourId: null
+                successionTourJobTitle: null
+                surgeon: $surgeon
+                surgeonDeptId: null
+                surgeonDeptName: null
+                surgeonId: 1
+                surgeonJobTitle: null
+                surgeryAndCancel: null
+                surgeryCategoryId: $surgeryCategoryId
+                surgeryCategoryName: $surgeryCategoryName
+                surgeryDeptId: $locationId_shoushu
+                surgeryDeptName: $surgeryDeptName
+                surgeryEndDate: null
+                surgeryLevelId: $surgeryLevelId
+                surgeryLevelName: $surgeryLevelName
+                surgeryMethodId: $surgeryMethodId
+                surgeryMethodName: $surgeryMethodName
+                surgeryName: $surgeryName
+                surgeryPositionName: $surgeryPositionName
+                surgeryPositionType: $surgeryPositionType
+                surgeryRemark: null
+                surgeryRiskLevel: null
+                surgeryStartDate: null
+                surgeryStatus: 1
+                surgeryType: 2
+                sysnFlag: 0
+                tbValue: null
+                thirdAnesthesiologist: null
+                thirdAnesthesiologistId: null
+                thirdAnesthesiologistJobTitle: null
+                thirdAssistant: null
+                thirdAssistantId: null
+                thirdAssistantJobTitle: null
+                versionNo: 5
+                visitor: null
+                visitorId: null
+                whetherAnesthesia: 1
+                whetherInvolved: 1
+                whetherIsolation: 0
+                whetherPlaned: 1
+                whetherRespiratory: 0
+            method: POST
+            url: /surgery-station-manage/surgeryApplyManage/save/completeSurgery
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 取消手术
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                surgeryByIdRequestObjList:
+                -   applyNo: ${get_result_dicts(surgery_apply_no)}
+                    cancelCharge: 0
+                    id: ${get_result_dicts(surgery_id)}
+                    surgeryType: 2
+            method: POST
+            url: /surgery-station-manage/surgeryApplyManage/batch/save/cancelStatus
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 根据入参查询所有手术信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                anesthesiaMethodIdSets: []
+                applyDeptId: ''
+                doctorId: null
+                endDate: ${get_date(add_date=5)}
+                locationId: ''
+                orderKey: applySubmitDate
+                orderType: desc
+                pageCount: 20
+                pageNum: 1
+                paging: true
+                searchNo: ''
+                searchType: 0
+                startDate: ${get_date(delete_date=2)}
+                status: 1
+                surgeonId: ''
+                surgeryCategory: 0
+                surgeryDeptId: ''
+                surgeryName: ''
+                surgeryType: 0
+                timeType: 2
+            method: POST
+            url: /surgery-station-manage/surgeryApplyManage/list/pageSurgeryInfo
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+
+-   test:
+        name: 恢复手术
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                surgeryByIdRequestObjList:
+                -   applyNo: ${get_result_dicts(surgery_apply_no)}
+                    id: ${get_result_dicts(surgery_id)}
+                    surgeryType: 2
+            method: POST
+            url: /surgery-station-manage/surgeryApplyManage/batch/save/restoreStatus
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 查看手术闭环详情
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                applicationId: ${get_result_dicts(surgery_id)}
+            method: POST
+            url: /surgery-station-manage/surgeryApplyManage/closeCircle/window
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        teardown_hooks:
+            - ${reload_dict()}
+

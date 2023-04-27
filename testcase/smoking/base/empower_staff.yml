@@ -1,0 +1,106 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 员工授权
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(in_k2)}
+            orgId: ${ENV(orgId)}
+            areaId: ${ENV(in_k3)}
+            bedNumber: ${get_number(6)}
+
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        api: api/user_info.yml
+        name: 切换登录院区部门
+
+-   test:
+        name: 查询机构角色列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                roleScope: 1
+            method: POST
+            url: /app-sys-manage/acl/user/query/organization/role/list
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 查询部门列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                condition: ''
+            method: POST
+            url: /app-sys-manage/acl/user/query/dept/location
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询病区列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                condition: ''
+            method: POST
+            url: /app-sys-manage/acl/user/query/ward/location
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 保存用户基础权限数据
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                dept: [224]
+                menu: [{"applicationId":8,"menuId":200667,"menuIdentifier":"GHSF_MENU_YYGZRL"},{"applicationId":8,"menuId":200610,"menuIdentifier":"GHSF-101"},{"applicationId":8,"menuId":100436,"menuIdentifier":"GHSF_MENU_MZGHRJ"},{"applicationId":8,"menuId":100435,"menuIdentifier":"GHSF_MENU_MZSFZX"},{"applicationId":8,"menuId":100437,"menuIdentifier":"GHSF_MENU_MZSFRJ"},{"applicationId":8,"menuId":200234,"menuIdentifier":"GHSF_MENU_MZTFD"},{"applicationId":8,"menuId":200193,"menuIdentifier":"GHSF_NEW_MENU_GHRJHZ"},{"applicationId":8,"menuId":200204,"menuIdentifier":"GHSF_MENU_MZSFRJHZ"},{"applicationId":8,"menuId":200445,"menuIdentifier":"GHSF_MENU_GHRJHZ"},{"applicationId":8,"menuId":200395,"menuIdentifier":"GHSF_MENU_MZJZHZ1"},{"applicationId":8,"menuId":200406,"menuIdentifier":"GHRJHZ2019"},{"applicationId":8,"menuId":200611,"menuIdentifier":"GHSF-201"},{"applicationId":8,"menuId":200190,"menuIdentifier":"MZGHCX"},{"applicationId":8,"menuId":200783,"menuIdentifier":"GHSF_MENU_MZSRHZ"},{"applicationId":8,"menuId":200191,"menuIdentifier":"MZSFCX"},{"applicationId":8,"menuId":200313,"menuIdentifier":"GHSF_MENU_GHJZHZCX"},{"applicationId":8,"menuId":200405,"menuIdentifier":"GHSF_MENU_ZFCX"},{"applicationId":8,"menuId":200213,"menuIdentifier":"GHSF_MENU_GHKSHZ"},{"applicationId":8,"menuId":200214,"menuIdentifier":"GHSF_MENU_GHYSHZ"},{"applicationId":8,"menuId":200612,"menuIdentifier":"GHSF-301"},{"applicationId":8,"menuId":200201,"menuIdentifier":"MZGGZLTJ"},{"applicationId":8,"menuId":200267,"menuIdentifier":"GHSF_MENU_MZSFTJBB"},{"applicationId":8,"menuId":200216,"menuIdentifier":"SGHSF_MENU_MZCZYSKTJ"},{"applicationId":8,"menuId":200229,"menuIdentifier":"MZSFYGZL"},{"applicationId":8,"menuId":200231,"menuIdentifier":"GHSF_MENU_MZYJAZXKSTJ"},{"applicationId":8,"menuId":200399,"menuIdentifier":"GHSF_MENU_MZKDZXXMMX"},{"applicationId":8,"menuId":200400,"menuIdentifier":"MZSF_MENU_MZKDZXFYTJ"},{"applicationId":8,"menuId":200402,"menuIdentifier":"MZSF_MENU_MZYSKDSLYJETJ"},{"applicationId":8,"menuId":200403,"menuIdentifier":"GHSF_MENU_MZYIJZTJ"},{"applicationId":8,"menuId":200404,"menuIdentifier":"GHSF_MENU_SSTJ"},{"applicationId":8,"menuId":200664,"menuIdentifier":"GHSF_MENU_XMZGHRJ"},{"applicationId":8,"menuId":200674,"menuIdentifier":"MZSFXMMXTJ"},{"applicationId":8,"menuId":200675,"menuIdentifier":"MZSFXMHZTJ"}]
+                role: [130]
+                userId: 10564
+                ward: [3091]
+            method: POST
+            url: /app-sys-manage/acl/user/save/user/menu/permission
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - true

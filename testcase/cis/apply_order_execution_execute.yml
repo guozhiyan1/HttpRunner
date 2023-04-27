@@ -24,7 +24,7 @@
 -   test:
         name: 查询某个病区的待安床病人列表
         setup_hooks:
-          - ${gmc_run_mysql(patient_info, inhospital_register, add_bed,patient_add_bed, apply_order_add)}
+          - ${gmc_run_mysql(patient_info, inhospital_register, add_bed, patient_add_bed, apply_order_add)}
         request:
             headers:
                 Authorization: ${get_token($token)}

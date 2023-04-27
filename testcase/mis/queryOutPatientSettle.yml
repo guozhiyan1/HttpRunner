@@ -1,0 +1,217 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: testcase description
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(out_k2)}
+            orgId: ${ENV(orgId)}
+-   test:
+        name: /newappointmentAndRegister/ChargeQuery
+        request:
+            method: GET
+            params:
+                k: 1-224-XN9305
+            url: /newappointmentAndRegister/ChargeQuery
+        validate: []
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        api: api/user_info.yml
+        name: 切换登录院区部门
+
+
+
+-   test:
+        name: 查询门诊已结算记录
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                checkOut: ''
+                condition: ${get_result_dicts(patient_name)}
+                costSource: 1
+                invoiceNo: ''
+                masterPatientIndex: ''
+                pageCount: 20
+                pageNum: 1
+                paging: true
+                patientName: ''
+                queryOutPatientNo: ''
+                settleBy: ''
+                settleEndDate: ${get_date()}
+                settleName: "全部"
+                settleStartDate: ${get_date()}
+                total: 0
+            method: POST
+            url: /app-outpatient-charge/outpatient/newcharge/queryOutPatientSettle
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取结算员列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-outpatient-charge/outpatient/daily/queryCheckOut
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+-   test:
+        name: 门诊收费版本1城站2天台
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-outpatient-charge/outpatient/newcharge/outPatientEditionSystemParameter
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - '2'
+        extract:
+            - ageText: content.body.data.0.ageText
+            - cardNo: content.body.data.0.cardNo
+            - gender: content.body.data.0.gender
+            - idCard: content.body.data.0.idCard
+            - invoiceNo: content.body.data.0.invoiceNo
+            - telecom: content.body.data.0.telecom
+            - subSettleSerialNo: content.body.data.0.subSettleSerialNo
+            - tradeSources: content.body.data.0.tradeSources
+            - tradeSourcesName: content.body.data.0..tradeSourcesName
+            - medicalRecordNo: content.body.data.0.medicalRecordNo
+            - settleSerialNo: content.body.data.0.settleSerialNo
+            - rounding: content.body.data.0.rounding
+            - selfPay: content.body.data.0.selfPay
+
+
+-   test:
+        name: 收费打印参数
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-outpatient-charge/outpatient/newcharge/receipt/parameters
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+
+-   test:
+        name: 查询收费票据详情
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                ageText: $ageText
+                canceledInvoiceNo: ''
+                cardNo: $cardNo
+                cardType: "FH0121.01"
+                checkOut: 0
+                checkOutName: "未日结"
+                costCategoryCode: "1"
+                costCategoryName: "自费"
+                costNatureCode: "0"
+                costNatureName: "自费"
+                discountId: []
+                electronicBill: 0
+                electronicPrint: 1
+                fileCode: null
+                gender: $gender
+                id: $id
+                idCard: $idCard
+                invoiceNo: $invoiceNo
+                key: 33
+                masterPatientIndex: ${get_result_dicts(master_patient_index)}
+                medicalCategory: null
+                medicalRecordNo: $medicalRecordNo
+                medicareRefundStatus: null
+                oldSettleId: null
+                orgId: 1
+                patientName: ${get_result_dicts(patient_name)}
+                patientRegisterId: ${get_result_dicts(patient_id)}
+                payType: "FH0085.01"
+                payTypeName: "现金"
+                posType: "2"
+                preferential: 0
+                reSettleId: null
+                refundAmount: null
+                refundComplete: null
+                reimbursement: 0
+                remark: null
+                rounding: $rounding
+                selfPay: $selfPay
+                settleAmount: $settleAmount
+                settleBy: $settleBy
+                settleCenterSerialNumber: null
+                settleDate: ${get_date()}
+                settleDeptId: ${ENV(departmentId)}
+                settleId: $settleId
+                settleName: $settleName
+                settleSerialNo: $settleSerialNo
+                settleStatus: "FH0118.01"
+                settleType: null
+                specialDiseaseFlag: "FH0065.02"
+                subSettleSerialNo: $subSettleSerialNo
+                subsequenceNumber: null
+                telecom: $telecom
+                thirdPayStatus: null
+                ticketNumber: null
+                tradeCardNumber: ''
+                tradeIdentifyCode: ''
+                tradeSources: $tradeSources
+                tradeSourcesName: $tradeSourcesName
+                transactionSortNo: null
+                versionNo: 1
+            method: POST
+            url: /app-outpatient-charge/outpatient/newcharge/queryOutPatientSettleDetail
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+

@@ -1,0 +1,451 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 新增当日号源
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(out_k2)}
+            orgId: ${ENV(orgId)}
+
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        api: api/user_info.yml
+        name: 切换登录院区部门
+
+-   test:
+        name: /schedulemanage/SourceNowadaysManagement
+        setup_hooks:
+          - ${gmc_run_mysql(delete_schedule)}
+        request:
+            headers:
+                If-Modified-Since: Wed, 27 Jan 2021 06:16:39 GMT
+                If-None-Match: W/"60110547-2b8e"
+            method: GET
+            params:
+                k: 1-99897828604-XN9305
+            url: /schedulemanage/SourceNowadaysManagement
+        validate: []
+-   test:
+        name: ' 通用查询系统参数'
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                deptSystemParamList: ["900076"]
+            method: POST
+            url: /app-station-manage/orderCommon/listSystemParam
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询挂号类别集合
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-schedule-manage/tradition/pool/manage/listRegisterNumberTypeByParam
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 15.查询科室-列表查询时
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                keywords: ''
+            method: POST
+            url: /app-schedule-manage/tradition/doctor/rule/listWorkDept
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 9.查询传统排班班次集合
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-schedule-manage/tradition/doctor/rule/listTraditionShift
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 21.获取当前机构下默认年龄区间
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-schedule-manage/tradition/doctor/rule/queryAgeLimit
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 23.获取当前机构下院区
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-schedule-manage/tradition/doctor/rule/queryHospital
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取用户信息
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-portal/user/info
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 获取机构系统参数
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                parameterCode: 30000004
+            method: POST
+            url: /app-sys-manage/param/getOrgSystemParam
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - '2'
+-   test:
+        name: 查询用户菜单
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-portal/permission/query/user/menu
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 首页显示模板列表查询
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-portal/stationmanage/stationConfig/list/getHomepage
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: /front/images/favicon.png
+        request:
+            method: GET
+            url: /front/images/favicon.png
+        validate: []
+-   test:
+        name: 14.根据科室查询工作地点
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                workDeptId: ${ENV(departmentId)}
+            method: POST
+            url: /app-schedule-manage/tradition/doctor/rule/listWorkLocationByDept
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 9.查询传统排班班次集合
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                registerNumberTypeId: 64
+            method: POST
+            url: /app-schedule-manage/tradition/doctor/rule/listTraditionShift
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询挂号类别集合
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-schedule-manage/tradition/pool/manage/listRegisterNumberTypeByParam
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询所有门诊可排班的科室
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                hospitalDistrictId: ${ENV(districtId)}
+                keywords: ''
+            method: POST
+            url: /app-schedule-manage/tradition/pool/manage/listDeptForQuery
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 12.查询本机构下所有有效医生-列表查询时
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                keywords: ''
+            method: POST
+            url: /app-schedule-manage/tradition/doctor/rule/listDoctorForQuery
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 根据参数[时间段、班次、挂号类别、科室、医生]查询门诊医生传统号资源列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                endDate: ${get_date()}
+                hospitalId: ${ENV(districtId)}
+                pageCount: 20
+                pageNum: 1
+                startDate: ${get_date()}
+            method: POST
+            url: /app-schedule-manage/tradition/pool/manage/listPageTraditionPoolByParam
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 13.根据科室查询医生
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                keywords: ''
+                workDeptId: ${ENV(departmentId)}
+            method: POST
+            url: /app-schedule-manage/tradition/doctor/rule/listDoctorByDept
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 新增当日排班
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                ageLimitMax: 100
+                ageLimitMin: 0
+                doctorId:
+                doctorName:
+                genderLimitCode: ''
+                limitNumber: 5
+                limitNumberMax: 10
+                ordinarySign: 0
+                registerNumberTypeId: 64
+                registerNumberTypeName: '自动化普通'
+                shiftId: 2555
+                shiftName: '自动化回归班次'
+                workAddress: ''
+                workDeptId: ${ENV(departmentId)}
+                workDeptName: ${ENV(departmentName)}
+            method: POST
+            url: /app-schedule-manage/tradition/doctor/rule/addTodaySchedule
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        -   eq:
+            - content.body
+            - true
+-   test:
+        name: 21.获取当前机构下默认年龄区间
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json: {}
+            method: POST
+            url: /app-schedule-manage/tradition/doctor/rule/queryAgeLimit
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 根据参数[时间段、班次、挂号类别、科室、医生]查询门诊医生传统号资源列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                endDate: ${get_date()}
+                hospitalId: ${ENV(districtId)}
+                pageCount: 20
+                pageNum: 1
+                startDate: ${get_date()}
+            method: POST
+            url: /app-schedule-manage/tradition/pool/manage/listPageTraditionPoolByParam
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 查询某个病区的待安床病人列表
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                k1: $k1
+                k2: $k2
+            method: GET
+            url: /app-nurse-station/patient/wait/list
+        teardown_hooks:
+          - ${reload_dict()}

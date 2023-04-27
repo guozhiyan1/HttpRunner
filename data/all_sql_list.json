@@ -1,0 +1,337 @@
+{
+	"patient_info": {
+        "comment": "患者建档",
+		"insert": [
+			"basic_support_db.biz_patient_register",
+			"basic_support_db.biz_patient_card_info",
+			"basic_support_db.biz_patient_medical_voucher",
+			"basic_support_db.biz_patient_medical_service_card",
+			"global_patient_db.biz_global_patient_basic_info",
+			"global_patient_db.biz_global_patient_address_1",
+			"global_patient_db.biz_global_patient_address_2",
+			"global_patient_db.biz_global_patient_address_3",
+			"global_patient_db.biz_global_patient_address_4",
+			"global_patient_db.biz_global_patient_card_info"
+		]
+	},
+	"inhospital_register": {
+        "comment": "入院登记",
+		"insert": [
+			"inhospital_register_db.biz_inhospital_patient",
+			"inhospital_register_db.biz_inpatient_medical_record_master"
+		]
+	},
+	"add_bed": {
+        "comment": "新增床位",
+		"insert": [
+			"inhospital_register_db.biz_bed_info",
+			"nurse_station_db.biz_bed_patient_relation"
+		]
+	},
+	"search_inhospital_patient_bed": {
+        "comment": "查询新增床位后的结果",
+		"select": [
+			"inhospital_register_db.biz_inhospital_patient"
+		]
+	},
+	"query_inspect": {
+		"comment": "根据订单id查询申请单id和检查id",
+		"select": [
+			"apply.apply_inspect_item_inspect"
+		]
+	},
+	"patient_add_bed": {
+       "comment": "患者安床",
+		"update": [
+			"inhospital_register_db.biz_bed_info",
+			"nurse_station_db.biz_bed_patient_relation",
+			"inhospital_register_db.biz_inhospital_patient"
+		],
+		"insert": [
+			"nurse_station_db.biz_patient_borrow_bed_record",
+			"nurse_station_db.biz_nurse_patient_real_time_status"
+		]
+	},
+	"inhospital_patient_doctor_order": {
+        "comment": "患者药品医嘱：维生素C",
+		"insert": [
+			"inhospital_register_db.biz_inpatient_order",
+			"inhospital_register_db.biz_patient_diagnosis"
+		]
+	},
+	"query_inhospital_order_exec": {
+        "comment": "查询患者医嘱",
+		"select": [
+			"inhospital_register_db.biz_inpatient_order"
+		]
+	},
+	"apply_order_add": {
+        "comment": "新增检查医嘱",
+		"insert": [
+			"inhospital_register_db.biz_examine_order_info",
+			"inhospital_register_db.biz_examine_order_info_bw",
+			"inhospital_register_db.biz_inpatient_apply",
+			"inhospital_register_db.biz_inpatient_apply_content",
+			"inhospital_register_db.biz_inpatient_apply_order",
+			"inhospital_register_db.biz_inpatient_order_chargedetail",
+			"inhospital_register_db.biz_inpatient_order_jc",
+			"inhospital_register_db.biz_nurse_order_change_print_record_type2_jc",
+			"apply.apply",
+			"apply.apply_diagnosis",
+			"apply.apply_inspect_item_order_info",
+			"apply.apply_inspect_item_order_info_bw",
+			"apply.apply_inspect_item",
+			"nurse_station_db.biz_nurse_patient_real_time_status"
+
+		]
+	},
+
+	"add_today_resource": {
+		"comment": "新增当日号源",
+		"insert": [
+			"reservation_center_db.biz_tradition_doctor_schedule_rule",
+			"reservation_center_db.biz_base_number_resource",
+			"reservation_center_db.biz_base_number_resource_detail",
+			"reservation_center_db.biz_resource_passage_group_resource_record_1",
+			"reservation_center_db.biz_resource_passage_group_resource_record_2",
+			"reservation_center_db.biz_resource_passage_group_resource_record_3",
+			"reservation_center_db.biz_resource_passage_group_resource_record_4",
+			"reservation_center_db.biz_resource_passage_group_resource_record_5",
+			"reservation_center_db.biz_resource_passage_group_schedule_rule",
+			"reservation_center_db.biz_resource_passage_group_schedule_rule_record_1",
+			"reservation_center_db.biz_resource_passage_group_schedule_rule_record_2",
+			"reservation_center_db.biz_resource_passage_group_schedule_rule_record_3"
+			]
+		},
+	"add_tomorrow_resource": {
+		 "comment": "新增明日号源",
+		"insert": [
+			"reservation_center_db.biz_tradition_doctor_schedule_rule_1",
+			"reservation_center_db.biz_base_number_resource_1",
+			"reservation_center_db.biz_base_number_resource_detail",
+			"reservation_center_db.biz_resource_passage_group_resource_record_1",
+			"reservation_center_db.biz_resource_passage_group_resource_record_2",
+			"reservation_center_db.biz_resource_passage_group_resource_record_3",
+			"reservation_center_db.biz_resource_passage_group_resource_record_4",
+			"reservation_center_db.biz_resource_passage_group_resource_record_5",
+			"reservation_center_db.biz_resource_passage_group_schedule_rule",
+			"reservation_center_db.biz_resource_passage_group_schedule_rule_record_1",
+			"reservation_center_db.biz_resource_passage_group_schedule_rule_record_2",
+			"reservation_center_db.biz_resource_passage_group_schedule_rule_record_3"
+		]
+	},
+	"add_invoice": {
+		"comment": "新增住院预交金票据",
+		"insert": [
+			"financial_management_db.biz_invoice_register"
+		]
+	},
+	"query_medicare_card": {
+        "comment": "查询患者就诊卡号",
+		"select": [
+			"basic_support_db.biz_patient_register"
+		]
+	},
+	"outpatient_encounter": {
+		"comment": "新增就诊记录",
+		"insert": [
+			"outpatient_order_db.biz_outpatient_encounter"
+		]
+	},
+	"medical_record_content": {
+		"comment": "新增门诊病历内容",
+		"insert": [
+			"outpatient_order_db.biz_out_medical_record_content_PresentIllness",
+			"outpatient_order_db.biz_out_medical_record_content_ChiefComplaint",
+			"outpatient_order_db.biz_out_medical_record_content_WestMedicine",
+			"outpatient_order_db.biz_out_medical_record_info"
+		]
+	},
+	"outpatient_order": {
+		"comment": "新增门诊医嘱",
+		"insert": [
+			"outpatient_order_db.biz_outpatient_order_medicine",
+			"outpatient_order_db.biz_outpatient_order_treatment",
+			"outpatient_order_db.biz_outpatient_order_notice",
+			"outpatient_order_db.biz_outpatient_order_tests",
+			"outpatient_order_db.biz_outpatient_order_inspect",
+			"outpatient_order_db.biz_outpatient_order_pathology",
+			"outpatient_order_db.biz_outpatient_order_chinese_medicine",
+			"outpatient_order_db.biz_outpatient_order_bill"
+		]
+	},
+	"diagnosis": {
+		"comment": "新增门诊诊断",
+		"insert": [
+			"outpatient_order_db.biz_out_diagnosis"
+		]
+	},
+	"order_set": {
+		"comment": "新增门诊医嘱套餐",
+		"insert": [
+			"basic_support_db.biz_order_set_1",
+			"basic_support_db.biz_order_set_2",
+			"basic_support_db.biz_order_set_3"
+		]
+	},
+	"add_outcharge_detail": {
+		"comment": "门诊患者新增费用",
+		"insert": [
+			"inhospital_register_db.biz_outpatient_charge_details",
+			"outpatient_order_db.biz_outpatient_encounter_1",
+			"outpatient_order_db.biz_outpatient_order",
+			"outpatient_order_db.biz_outpatient_prescription_detail",
+			"outpatient_order_db.biz_outpatient_prescription",
+			"outpatient_order_db`.`biz_out_medical_record_info",
+			"outpatient_order_db`.`biz_out_medical_record_content",
+			"outpatient_order_db`.`biz_out_diagnosis"
+		]
+	},
+	"add_incharge_detail": {
+		"comment": "住院患者新增治疗类费用",
+		"insert": [
+			"inhospital_register_db.biz_patient_charge_details"
+		]
+	},
+	"update_patient_preout": {
+		"comment": "住院患者审核为预出院",
+		"update": [
+			"inhospital_register_db.biz_inhospital_patient_preout",
+			"inhospital_register_db.biz_bed_info_preout",
+			"nurse_station_db.biz_patient_out_hospital_record_preout",
+			"nurse_station_db.biz_bed_patient_relation_record_preout"
+		],
+		"delete": [
+			"nurse_station_db.biz_bed_patient_relation_preout"
+		]
+	},
+	"history_order": {
+		"comment": "新增历史就诊记录和历史医嘱",
+		"insert": [
+			"outpatient_order_db.biz_outpatient_encounter_history",
+			"outpatient_order_db.biz_outpatient_order_history"
+		]
+	},
+	"add_InAndOutdiagnosis": {
+		"comment": "新增入出院诊断",
+		"insert": [
+			"cloudemr.biz_pat_diagnosis_out",
+			"cloudemr.biz_pat_diagnosis_in"
+		]
+	},
+	"surgery_manage": {
+		"comment": "新增手术管理",
+		"insert": [
+			"inhospital_register_db.biz_surgery_manage",
+			"inhospital_register_db.biz_surgery_manage_state",
+			"inhospital_register_db.biz_surgery_anesthesia_state",
+			"inhospital_register_db.biz_surgery_anesthesia",
+			"inhospital_register_db.biz_secondary_surgery_state",
+			"inhospital_register_db.biz_secondary_surgery",
+			"inhospital_register_db.biz_nurse_order_change_print_record_type2(surgery)",
+			"inhospital_register_db.biz_diagnosis_state",
+			"inhospital_register_db.biz_diagnosis"
+		]
+	},
+	"querySettlement": {
+		"comment": "挂号收费日结",
+		"update": [
+			"outpatient_charge_db.biz_outpatient_settle_master"
+		]
+	},
+	"delete_schedule": {
+		"comment": "删除排班",
+		"delete": [
+			"reservation_center_db.biz_tradition_doctor_schedule_rule_0"
+		]
+	},
+		"manul_inspect": {
+		"comment": "手工检查登记",
+		"insert": [
+			"apply.apply1",
+			"apply.apply_inspect_item1",
+			"apply.apply_inspect_item_order_info1",
+			"apply.apply_inspect_item_order_info1_bw"
+		]
+	},
+			"schedule_add": {
+		"comment": "新增检查排班和排班规则",
+		"insert": [
+			"reservation_center_db.biz_inspection_schedule_plan",
+			"reservation_center_db.biz_inspection_schedule_rule1",
+			"reservation_center_db.biz_inspection_schedule_rule2",
+			"reservation_center_db.biz_inspection_schedule_rule3",
+			"reservation_center_db.biz_inspection_schedule_rule4",
+			"reservation_center_db.biz_inspection_schedule_rule5",
+			"reservation_center_db.biz_inspection_schedule_rule6",
+			"reservation_center_db.biz_inspection_schedule_rule7",
+			"reservation_center_db.biz_inspection_schedule_rule_config1",
+			"reservation_center_db.biz_inspection_schedule_rule_config2",
+			"reservation_center_db.biz_inspection_schedule_rule_config3",
+			"reservation_center_db.biz_inspection_schedule_rule_config4",
+			"reservation_center_db.biz_inspection_schedule_rule_config5",
+			"reservation_center_db.biz_inspection_schedule_rule_config6",
+			"reservation_center_db.biz_inspection_schedule_rule_config7",
+			"reservation_center_db.biz_inspection_schedule_rule_config8",
+			"reservation_center_db.biz_inspection_schedule_rule_config9",
+			"reservation_center_db.biz_inspection_schedule_rule_config10",
+			"reservation_center_db.biz_inspection_schedule_rule_config11",
+			"reservation_center_db.biz_inspection_schedule_rule_config12",
+			"reservation_center_db.biz_inspection_schedule_rule_config13",
+			"reservation_center_db.biz_inspection_schedule_rule_config14",
+			"reservation_center_db.biz_inspection_schedule_rule_config15",
+			"reservation_center_db.biz_inspection_schedule_rule_config16",
+			"reservation_center_db.biz_inspection_schedule_rule_config17",
+			"reservation_center_db.biz_inspection_schedule_rule_config18",
+			"reservation_center_db.biz_inspection_schedule_rule_config19",
+			"reservation_center_db.biz_inspection_schedule_rule_config20",
+			"reservation_center_db.biz_inspection_schedule_rule_config21",
+			"reservation_center_db.biz_inspection_schedule_rule_config22",
+			"reservation_center_db.biz_inspection_schedule_rule_config23",
+			"reservation_center_db.biz_inspection_schedule_rule_config24",
+			"reservation_center_db.biz_inspection_schedule_rule_config25",
+			"reservation_center_db.biz_inspection_schedule_rule_config26",
+			"reservation_center_db.biz_inspection_schedule_rule_config27",
+			"reservation_center_db.biz_inspection_schedule_rule_config28",
+			"reservation_center_db.biz_inspection_schedule_rule_config29",
+			"reservation_center_db.biz_inspection_schedule_rule_config30",
+			"reservation_center_db.biz_inspection_schedule_rule_config31",
+			"reservation_center_db.biz_inspection_schedule_rule_config32"
+		]
+	},
+
+	"complete_surgery": {
+		"comment": "完成手术",
+		"update": [
+			"inhospital_register_db.biz_surgery_manage(complete)"
+		]
+	},
+	"register_surgery": {
+		"comment": "手术登记",
+		"update": [
+			"inhospital_register_db.biz_surgery_manage(register)"
+		]
+	},
+	"anaesthesia_consult": {
+		"comment": "新增麻醉会诊",
+		"insert": [
+			"inhospital_register_db.biz_surgery_consultation_apply",
+			"inhospital_register_db.biz_surgery_consultation_apply_log",
+			"inhospital_register_db.biz_surgery_consultation_apply_data"
+		]
+	},
+		"outpatient_add": {
+		"comment": "新增门诊就诊记录",
+		"insert": [
+
+		]
+	},
+	"delete_order_set": {
+		"comment": "删除医嘱套餐",
+		"delete": [
+			"basic_support_db.biz_order_set_1",
+			"basic_support_db.biz_order_set_2",
+			"basic_support_db.biz_order_set_3"
+		]
+	}
+}

@@ -1,0 +1,16 @@
+-   config:
+        name: dubbo接口
+#        variables:
+#            host: ${ENV(dubbo_ip)}
+#            p: ${ENV(dubbo_port)}
+#            dubbo_service: cn.seenew.future.his.service.medication.hsf.service.HSFMedicationService
+#            dubbo_method: queryMedicationRuleByIds
+
+-   test:
+        api: api/dubbo.yml
+        name: 请求dubbo服务 #根据name判断，必须包含dubbo才能进入dubbo接口逻辑
+        validate:
+              - eq: ["code", 200] #支持response任意key断言
+
+
+

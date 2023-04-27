@@ -1,0 +1,253 @@
+-   config:
+        base_url: ${ENV(host)}
+        name: 新增特殊排班
+        variables:
+            k1: ${ENV(out_k1)}
+            k2: ${ENV(deptId)}
+            orgId: ${ENV(orgId)}
+-   test:
+        api: api/token.yml
+        name: 登录获取token
+
+-   test:
+        api: api/setting.yml
+        name: 登录设置
+
+-   test:
+        api: api/user_info.yml
+        name: 切换登录院区部门
+-   test:
+        name: /schedulemanage/TraditionalSpecialSchedulnew
+        request:
+            headers:
+                If-Modified-Since: Mon, 01 Feb 2021 04:03:09 GMT
+                If-None-Match: W/"60177d7d-2b8e"
+            method: GET
+            params:
+                k: 1-99897828604-XN9305
+            url: /schedulemanage/TraditionalSpecialSchedulnew
+        validate: []
+
+
+-   test:
+        name: 15.查询科室-列表查询时
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                keywords: ''
+            method: POST
+            url: /app-schedule-manage/tradition/doctor/rule/listWorkDept
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 12.查询本机构下所有有效医生-列表查询时
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                keywords: ''
+            method: POST
+            url: /app-schedule-manage/tradition/doctor/rule/listDoctorForQuery
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 5.分页查询特殊排班规则
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                deptId: ${ENV(deptId)}
+                doctorId: ''
+                enableState: ''
+                endDate: ${get_date(add_date=7)}
+                pageCount: 20
+                pageNum: 1
+                scheduleCode: ''
+                startDate: ${get_date()}
+                workDeptId: ${ENV(deptId)}
+            method: POST
+            url: /app-schedule-manage/outpatient/special/rule/queryPageSpecialRule
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+
+
+
+-   test:
+        name: 10.查询挂号类别集合
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                keywords: ''
+            method: POST
+            url: /app-schedule-manage/tradition/doctor/rule/listRegisterNumberTypeByParam
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 11.查询工作科室，返回科室集合和排班模式
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                keywords: ''
+            method: POST
+            url: /app-schedule-manage/tradition/doctor/rule/listWorkDeptForQuery
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 1.查询符合条件的排班规则
+        setup_hooks:
+          - ${gmc_run_mysql(add_tomorrow_resource)}
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                endDate: ${get_date(add_date=7)}
+                startDate: ${get_date(add_date=1)}
+                workDeptId: ${ENV(deptId)}
+            method: POST
+            url: /app-schedule-manage/outpatient/special/rule/queryScheduleRule
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            - schedule_id : content.body.0.id
+            - dayofweekValue: content.body.0.dayofweekValue
+-   test:
+        name: 12.查询本机构下所有有效医生-列表查询时
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                keywords: ""
+            method: POST
+            url: /app-schedule-manage/tradition/doctor/rule/listDoctorForQuery
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 2.新增特殊排班规则
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                endDate: ${get_date(add_date=7)}
+                list: [{"dayofweekValue":$dayofweekValue,"enableState":0,"limitCount":5,"limitMaxCount":10,"scheduleRuleId":$schedule_id,"changeDoctorId":10101,"changeDoctorName":"扁鹊","changeDoctorJobNumber":"zhu","changeDoctorFlag":1}]
+                startDate: ${get_date()}
+            method: POST
+            url: /app-schedule-manage/outpatient/special/rule/saveSpecialRue
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+-   test:
+        name: 5.分页查询特殊排班规则
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                deptId: ${ENV(deptId)}
+                enableState: ''
+                endDate: ${get_date(add_date=7)}
+                pageCount: 20
+                pageNum: 1
+                scheduleCode: ''
+                startDate: ${get_date()}
+                workDeptId: ${ENV(deptId)}
+            method: POST
+            url: /app-schedule-manage/outpatient/special/rule/queryPageSpecialRule
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        extract:
+            - resource: content.body.data.0.id
+-   test:
+        name: 4.停启用特殊排班规则
+        request:
+            headers:
+                Authorization: ${get_token($token)}
+                Content-Type: application/json; charset=UTF-8
+                k1: $k1
+                k2: $k2
+            json:
+                enableState: 1
+                id: $resource
+            method: POST
+            url: /app-schedule-manage/outpatient/special/rule/enableSpecialRue
+        validate:
+        -   eq:
+            - content.code
+            - 2000
+        -   eq:
+            - content.message
+            - success
+        teardown_hooks:
+          - ${reload_dict()}
